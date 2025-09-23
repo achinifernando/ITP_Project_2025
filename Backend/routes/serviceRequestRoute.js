@@ -63,7 +63,7 @@ router.get("/my_services",protectClient, async (req, res) => {
 });
 
 // ===== Get Single Service Request =====
-router.get("/:id", async (req, res) => {
+router.get("/service/:id", async (req, res) => {
   try {
     const requestData = await serviceRequest.findById(req.params.id);
     if (!requestData) {

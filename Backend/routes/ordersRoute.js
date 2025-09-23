@@ -88,7 +88,7 @@ router.get("/my-orders",protectClient, async (req, res) => {
 
 
 // ===== Get Single Order =====
-router.get("/:id", async (req, res) => {
+router.get("/order/:id", async (req, res) => {
   try {
     const orderData = await Order.findById(req.params.id)
       .populate("lorryCategory")

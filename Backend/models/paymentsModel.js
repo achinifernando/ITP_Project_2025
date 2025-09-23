@@ -1,13 +1,11 @@
 const mongoose = require("mongoose");
 
 const PaymentSchema = new mongoose.Schema({
-  clientId: { type: mongoose.Schema.Types.ObjectId, ref: "clients", required: true },
-  requestId: {type: mongoose.Schema.Types.ObjectId,ref: "quotationrequest",required: true},
-   quotationId: {type: mongoose.Schema.Types.ObjectId,ref: 'quotation',required: true},
-  amount: {
-    type: Number,
-    required: true
-  },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "clients", required: true },
+
+  orderId: {type: mongoose.Schema.Types.ObjectId,ref: 'order', default: null},
+  serviceRequestId: {type: mongoose.Schema.Types.ObjectId,ref: 'repairmaintenance', default: null},
+  amount: {type: Number,required: true},
   receiptFile: {
     filename: String,
     originalName: String,

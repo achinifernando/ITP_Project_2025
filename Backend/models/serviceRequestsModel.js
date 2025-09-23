@@ -18,6 +18,11 @@ const repairMaintenanceSchema = new mongoose.Schema({
     required: true
   },
   status: { type: String, default: "Pending" },
+  paymentStatus: {
+    type: String,
+    enum: ["pending", "paid", "verified", "rejected"],
+    default: "pending"
+  },
   createdAt: { type: Date, default: Date.now }
 });
 

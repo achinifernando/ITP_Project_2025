@@ -27,7 +27,7 @@ const quotationSchema = new mongoose.Schema({
   lorryModel: {  type: mongoose.Schema.Types.ObjectId,ref: "lorrymodels", },
   items: [
     {
-       _id: { type: mongoose.Schema.Types.ObjectId, ref: "stocks" },
+       _id: { type: mongoose.Schema.Types.ObjectId, ref: "stock" },
       name: { type: String, required: true },
       quantity: { type: Number, required: true, min: 1 },
       price: { type: Number, required: true, default: 0.0 },
@@ -37,11 +37,6 @@ const quotationSchema = new mongoose.Schema({
   remarks: { type: String },
   acceptedAt: { type: Date },
 validUntil :{ type: Date }, 
-paymentStatus: {
-    type: String,
-    enum: ["pending", "paid", "verified", "rejected"],
-    default: "pending"
-  },
   status: {
     type: String,
     enum: ["Quote_Sent", "Accepted", "Rejected"],

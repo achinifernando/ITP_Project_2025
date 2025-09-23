@@ -64,7 +64,8 @@ app.use("/quotationRequest" ,quotationRequestRouter);
 const stocktRouter = require("./routes/stockRouter.js");
 app.use("/stock" ,stocktRouter); 
 
-
+const paymentRouter = require("./routes/paymentRoute.js");
+app.use("/payments" ,paymentRouter); 
 
 const googleAuthRouter = require("./routes/googleAuthRoute.js");
 app.use("/googleAuth", googleAuthRouter);
