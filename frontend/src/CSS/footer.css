@@ -1,0 +1,96 @@
+footer.footer {
+  background: #213448; /* Solid footer background */
+  color: #F7F7F7;
+  font-family: 'Inter', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+  padding: 50px 40px 0 40px;
+}
+
+/* Footer Social Section */
+.footer .footer-social {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 25px 0;
+  border-bottom: 1px solid #547792;
+  flex-wrap: wrap;
+  background: none; 
+}
+
+.footer .footer-social-left {
+  font-size: 18px;
+  font-weight: 600;
+  color: #F7F7F7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Social Links */
+.footer .footer-social-right {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.footer .social-link {
+  color: #F7F7F7;
+  font-size: 16px;
+  text-decoration: none;
+  transition: 0.3s ease;
+}
+
+.footer .social-link:hover {
+  color: #FCC61D;
+}
+
+/* Footer Links Section */
+.footer .footer-links {
+  padding: 40px 0;
+  background: none; }
+
+.footer .footer-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 40px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Remove card look – keep text only */
+.footer .footer-col {
+  background: #213448 ; 
+  padding: 0;
+  
+}
+
+.footer .footer-col h6 {
+  text-transform: uppercase;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #FCC61D;
+}
+
+.footer .footer-col p,
+.footer .footer-col a {
+  margin: 8px 0;
+  font-size: 18px;
+  line-height: 1.8;
+  color: #f0ecec;
+  text-decoration: none;
+}
+
+.footer .footer-col a:hover {
+  color: #FCC61D;
+}
+
+
+
+/* Footer Bottom */
+.footer .footer-bottom {
+  text-align: center;
+  padding: 20px 0;
+  font-size: 14px;
+  color: #94B4C1;
+  border-top: 1px solid #547792;
+}

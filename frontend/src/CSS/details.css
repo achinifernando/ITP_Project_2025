@@ -1,0 +1,576 @@
+/* Import Industrial Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Color Palette Variables */
+:root {
+  --dark-blue: #213448;
+  --blue-gray: #547792;
+  --light-blue-gray: #94B4C1;
+  --accent-yellow: #FCC61D;
+  --light-sage: #ECEFCA;
+  --off-white: #F7F7F7;
+  --pure-white: #FFFFFF;
+  --shadow-light: rgba(33, 52, 72, 0.08);
+  --shadow-medium: rgba(33, 52, 72, 0.15);
+  --shadow-heavy: rgba(33, 52, 72, 0.25);
+}
+
+/* Reset and Base Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: var(--dark-blue);
+  background: var(--off-white);
+  overflow-x: hidden;
+}
+
+/* Industrial Pattern Background */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    radial-gradient(circle at 2px 2px, var(--light-blue-gray) 1px, transparent 0),
+    linear-gradient(45deg, transparent 40%, rgba(148, 180, 193, 0.03) 50%, transparent 60%);
+  background-size: 40px 40px, 120px 120px;
+  pointer-events: none;
+  z-index: -2;
+}
+
+/* Main Container */
+.lorry-details-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* Industrial Page Header */
+.title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: var(--dark-blue);
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.title::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-yellow), var(--blue-gray));
+  border-radius: 2px;
+}
+
+.title::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 2px;
+  background: var(--light-blue-gray);
+  border-radius: 1px;
+}
+
+/* Image Gallery Section */
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 2rem;
+  margin-bottom: 4rem;
+  padding: 2rem;
+  background: var(--pure-white);
+  border-radius: 20px;
+  box-shadow: 
+    0 10px 40px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+  position: relative;
+  overflow: hidden;
+}
+
+.thumbs::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-yellow), var(--blue-gray), var(--accent-yellow));
+}
+
+.thumbnail {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 15px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  border: 3px solid transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.thumbnail::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, rgba(252, 198, 29, 0.1), transparent 50%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.thumbnail:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: var(--accent-yellow);
+  box-shadow: 
+    0 20px 50px var(--shadow-medium),
+    0 0 0 1px var(--accent-yellow);
+}
+
+.thumbnail:hover::before {
+  opacity: 1;
+}
+
+/* Lightbox Modal */
+.lightbox {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(33, 52, 72, 0.95);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  cursor: pointer;
+  animation: lightboxFadeIn 0.3s ease-out;
+}
+
+.lightbox img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+  border-radius: 15px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.3);
+  animation: lightboxImageScale 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+@keyframes lightboxFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes lightboxImageScale {
+  from { transform: scale(0.8) translateY(50px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Features Section - Industrial Accordion */
+section {
+  background: var(--pure-white);
+  border-radius: 20px;
+  padding: 3rem;
+  margin-bottom: 3rem;
+  box-shadow: 
+    0 15px 50px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  position: relative;
+  overflow: hidden;
+}
+
+section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    var(--accent-yellow) 0%, 
+    var(--blue-gray) 25%, 
+    var(--light-blue-gray) 50%, 
+    var(--blue-gray) 75%, 
+    var(--accent-yellow) 100%
+  );
+}
+
+section h3 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--dark-blue);
+  margin-bottom: 2.5rem;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  position: relative;
+}
+
+section h3::after {
+  position: absolute;
+  right: -50px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  opacity: 0.3;
+}
+
+/* Industrial Details/Accordion */
+details {
+  border: 2px solid var(--light-sage);
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  background: var(--off-white);
+}
+
+details:hover {
+  border-color: var(--blue-gray);
+  transform: translateX(5px);
+  box-shadow: 0 8px 25px var(--shadow-light);
+}
+
+details[open] {
+  border-color: var(--accent-yellow);
+  box-shadow: 
+    0 12px 35px var(--shadow-medium),
+    inset 0 1px 0 rgba(252, 198, 29, 0.2);
+}
+
+details summary {
+  background: linear-gradient(135deg, var(--blue-gray), var(--light-blue-gray));
+  color: var(--pure-white);
+  padding: 1.2rem 2rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+details summary::before {
+  margin-right: 12px;
+  font-size: 1.2rem;
+}
+
+details summary::after {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: transform 0.3s ease;
+  font-size: 0.9rem;
+}
+
+details[open] summary {
+  background: linear-gradient(135deg, var(--accent-yellow), #f7b801);
+  color: var(--dark-blue);
+}
+
+details[open] summary::after {
+  transform: translateY(-50%) rotate(180deg);
+}
+
+details p {
+  padding: 2rem;
+  font-size: 1rem;
+  line-height: 1.8;
+  color: var(--dark-blue);
+  background: var(--pure-white);
+  border-top: 1px solid var(--light-sage);
+  position: relative;
+}
+
+details p::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: linear-gradient(180deg, var(--accent-yellow), var(--blue-gray));
+}
+
+/* Service Button - Industrial CTA */
+.service-btn {
+  display: block;
+  width: 100%;
+  max-width: 400px;
+  margin: 3rem auto 2rem;
+  padding: 1.5rem 2rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--dark-blue);
+  background: linear-gradient(135deg, var(--accent-yellow) 0%, #f7b801 100%);
+  border: 3px solid var(--accent-yellow);
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  text-align: center;
+  box-shadow: 
+    0 8px 30px rgba(252, 198, 29, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+.service-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s;
+}
+
+.service-btn::after {
+  content: '🚛';
+  margin-left: 12px;
+  font-size: 1.3rem;
+  transition: transform 0.3s ease;
+}
+
+.service-btn:hover {
+  background: linear-gradient(135deg, var(--dark-blue) 0%, var(--blue-gray) 100%);
+  color: var(--pure-white);
+  transform: translateY(-3px) scale(1.02);
+  border-color: var(--dark-blue);
+  box-shadow: 
+    0 15px 40px rgba(33, 52, 72, 0.4),
+    0 5px 15px rgba(252, 198, 29, 0.2);
+}
+
+.service-btn:hover::before {
+  left: 100%;
+}
+
+.service-btn:hover::after {
+  transform: translateX(5px);
+}
+
+.service-btn:active {
+  transform: translateY(-1px) scale(1);
+}
+
+/* No Images Fallback */
+.thumbs p {
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 1.2rem;
+  color: var(--light-blue-gray);
+  padding: 3rem;
+  background: var(--light-sage);
+  border-radius: 12px;
+  border: 2px dashed var(--blue-gray);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .lorry-details-container {
+    padding: 1.5rem;
+  }
+  
+  .thumbs {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .lorry-details-container {
+    padding: 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .thumbs {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  
+  .thumbnail {
+    height: 200px;
+  }
+  
+  section {
+    padding: 2rem 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  section h3 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+  }
+  
+  section h3::after {
+    display: none;
+  }
+  
+  details summary {
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+  }
+  
+  details p {
+    padding: 1.5rem;
+    font-size: 0.95rem;
+  }
+  
+  .service-btn {
+    margin: 2rem auto;
+    padding: 1.2rem 1.5rem;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .lorry-details-container {
+    padding: 0.5rem;
+  }
+  
+  .title {
+    font-size: 1.6rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+  }
+  
+  .thumbs {
+    padding: 1rem;
+    border-radius: 12px;
+  }
+  
+  .thumbnail {
+    height: 180px;
+    border-radius: 10px;
+  }
+  
+  section {
+    padding: 1.5rem 1rem;
+    border-radius: 12px;
+  }
+  
+  section h3 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  details summary {
+    padding: 0.8rem 1rem;
+    font-size: 0.9rem;
+  }
+  
+  details summary::before {
+    margin-right: 8px;
+  }
+  
+  details summary::after {
+    right: 1rem;
+  }
+  
+  details p {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+  
+  .service-btn {
+    padding: 1rem;
+    font-size: 1rem;
+    margin: 1.5rem auto;
+  }
+  
+  .service-btn::after {
+    font-size: 1.1rem;
+  }
+  
+  .lightbox img {
+    max-width: 95%;
+    max-height: 85%;
+  }
+}
+
+/* Industrial Loading Animation */
+@keyframes industrialPulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(252, 198, 29, 0.4);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 0 20px rgba(252, 198, 29, 0);
+    transform: scale(1.02);
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus States for Accessibility */
+.thumbnail:focus,
+.service-btn:focus,
+details summary:focus {
+  outline: 3px solid var(--accent-yellow);
+  outline-offset: 2px;
+}
+
+/* Print Styles */
+@media print {
+  .lightbox {
+    display: none;
+  }
+  
+  .service-btn {
+    background: var(--light-sage) !important;
+    color: var(--dark-blue) !important;
+    box-shadow: none !important;
+  }
+  
+  section,
+  .thumbs {
+    box-shadow: none !important;
+    border: 1px solid var(--light-blue-gray) !important;
+  }
+}

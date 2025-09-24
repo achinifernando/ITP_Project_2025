@@ -1,0 +1,399 @@
+/* Import font */
+@import url(https://fonts.bunny.net/css?family=abel:400);
+
+
+/* Hero Section */
+.service-hero-section {
+  height: 70vh;
+  background: url('../assets/serviceWP.jpg') no-repeat center center/cover;
+  color: #F7F7F7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Industrial overlay pattern */
+.service-hero-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    linear-gradient(135deg, rgba(33, 52, 72, 0.8) 0%, rgba(84, 119, 146, 0.6) 100%),
+    radial-gradient(circle at 2px 2px, rgba(252, 198, 29, 0.1) 1px, transparent 0);
+  background-size: auto, 25px 25px;
+  z-index: 1;
+}
+
+.service-hero-section > * {
+  position: relative;
+  z-index: 2;
+}
+
+.service-hero-title {
+  font-size: 48px;
+  font-weight: bold;
+  margin-bottom: 15px;
+  color: #F7F7F7;
+  text-shadow: 2px 2px 4px rgba(33, 52, 72, 0.8);
+  animation: slideInDown 1s ease-out;
+}
+
+.service-hero-subtitle {
+  font-size: 28px;
+  color: #ECEFCA;
+  text-shadow: 1px 1px 3px rgba(33, 52, 72, 0.6);
+  animation: slideInUp 1s ease-out 0.3s both;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Carousel Wrapper */
+.carousel-wrapper {
+  overflow: hidden;
+  padding: 40px 20px;
+  background: linear-gradient(135deg, #F7F7F7 0%, #ECEFCA 100%);
+  position: relative;
+}
+
+/* Industrial pattern background for carousel */
+.carousel-wrapper::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(148, 180, 193, 0.03) 1px, transparent 0);
+  background-size: 20px 20px;
+  pointer-events: none;
+}
+
+/* Carousel Container */
+.carousel {
+  --carousel-duration: 25s;
+  --carousel-items: 3;
+  --carousel-timing: linear;
+  --carousel-column-gap: 30px;
+
+  display: flex;
+  gap: var(--carousel-column-gap);
+  width: calc(200% + var(--carousel-column-gap));
+  list-style: none;
+  margin: 0;
+  position: relative;
+  z-index: 1;
+  animation: carousel var(--carousel-duration) var(--carousel-timing) infinite;
+}
+
+@media (min-width: 600px) {
+  .carousel-wrapper {
+    padding: 50px 30px;
+  }
+  .carousel {
+    --carousel-duration: 20s;
+  }
+}
+
+@media (min-width: 1024px) {
+  .carousel-wrapper {
+    padding: 60px 40px;
+  }
+  .carousel {
+    --carousel-duration: 30s;
+  }
+}
+
+/* Carousel Animation */
+.carousel > * {
+  flex: 1 0 calc((50% - var(--carousel-column-gap)) / var(--carousel-items));
+  min-width: 300px;
+  position: relative;
+  z-index: 1;
+}
+
+@keyframes carousel {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(calc(-50% - (var(--carousel-column-gap) / 2)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .carousel > * {
+    animation-play-state: paused;
+  }
+}
+
+/* Carousel Card Style */
+.carousel > article {
+  border-radius: 20px;
+  box-shadow: 0 15px 35px rgba(33, 52, 72, 0.15);
+  background: linear-gradient(135deg, #F7F7F7 0%, rgba(236, 239, 202, 0.8) 100%);
+  padding: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border: 2px solid #ECEFCA;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Card hover effects */
+.carousel > article:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px rgba(33, 52, 72, 0.2);
+  border-color: #FCC61D;
+}
+
+/* Card accent line */
+.carousel > article::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #FCC61D, #547792);
+  transform: scaleX(0);
+  transition: transform 0.3s ease;
+}
+
+.carousel > article:hover::after {
+  transform: scaleX(1);
+}
+
+.carousel > article img {
+  width: 100%;
+  height: 400px;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+  box-shadow: 0 8px 25px rgba(33, 52, 72, 0.1);
+}
+
+.carousel > article:hover img {
+  transform: scale(1.05);
+}
+
+.carousel > article h2 {
+  font-size: 32px;
+  margin: 25px 0 15px 0;
+  color: #213448;
+  font-weight: 700;
+  text-align: center;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.carousel > article h2::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #FCC61D, #547792);
+  border-radius: 2px;
+}
+
+.carousel > article p {
+  font-size: 18px;
+  color: #547792;
+  text-align: justify;
+  padding: 15px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+
+.carousel > article .service-btn {
+  background: linear-gradient(135deg, #FCC61D 0%, #F7B801 100%);
+  border: none;
+  border-radius: 12px;
+  color: #213448;
+  padding: 16px 32px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  margin: 10px 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  position: relative;
+  overflow: hidden;
+  min-width: 150px;
+}
+
+.carousel > article .service-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s;
+}
+
+.carousel > article .service-btn:hover {
+  background: linear-gradient(135deg, #213448 0%, #547792 100%);
+  color: #F7F7F7;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(252, 198, 29, 0.3);
+}
+
+.carousel > article .service-btn:hover::before {
+  left: 100%;
+}
+
+.carousel > article .service-btn:active {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .service-hero-title {
+    font-size: 36px;
+  }
+  
+  .service-hero-subtitle {
+    font-size: 22px;
+  }
+  
+  .carousel-wrapper {
+    padding: 30px 15px;
+  }
+  
+  .carousel {
+    --carousel-items: 1;
+    --carousel-duration: 15s;
+  }
+  
+  .carousel > * {
+    flex: 1 0 calc((50% - var(--carousel-column-gap)) / 1);
+    min-width: 280px;
+  }
+  
+  .carousel > article {
+    padding: 25px;
+  }
+  
+  .carousel > article h2 {
+    font-size: 28px;
+  }
+  
+  .carousel > article p {
+    font-size: 16px;
+    padding: 10px;
+  }
+  
+  .carousel > article img {
+    height: 250px;
+  }
+  
+  .carousel > article .service-btn {
+    font-size: 16px;
+    padding: 14px 28px;
+  }
+}
+
+@media (max-width: 480px) {
+  .service-hero-section {
+    height: 50vh;
+  }
+  
+  .service-hero-title {
+    font-size: 28px;
+  }
+  
+  .service-hero-subtitle {
+    font-size: 18px;
+  }
+  
+  .carousel-wrapper {
+    padding: 20px 10px;
+  }
+  
+  .carousel {
+    --carousel-duration: 12s;
+  }
+  
+  .carousel > * {
+    min-width: 250px;
+  }
+  
+  .carousel > article {
+    padding: 20px;
+    border-radius: 16px;
+  }
+  
+  .carousel > article h2 {
+    font-size: 24px;
+    margin: 20px 0 10px 0;
+  }
+  
+  .carousel > article img {
+    height: 200px;
+    border-radius: 8px;
+  }
+}
+
+/* Loading animation for service cards */
+.carousel > article {
+  animation: cardSlideIn 0.8s ease-out forwards;
+  opacity: 0;
+  transform: translateY(50px);
+}
+
+.carousel > article:nth-child(1) { animation-delay: 0.2s; }
+.carousel > article:nth-child(2) { animation-delay: 0.4s; }
+.carousel > article:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes cardSlideIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Truck icon accent */
+.carousel > article h2::before {
+  content: '🚛';
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  font-size: 16px;
+  opacity: 0.3;
+}

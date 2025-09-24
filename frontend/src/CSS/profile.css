@@ -1,0 +1,632 @@
+/* Industrial Profile Page CSS */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* Color Palette Variables */
+:root {
+  --dark-blue: #213448;
+  --blue-gray: #547792;
+  --light-blue-gray: #94B4C1;
+  --accent-yellow: #FCC61D;
+  --light-sage: #ECEFCA;
+  --off-white: #F7F7F7;
+  --pure-white: #FFFFFF;
+  --shadow-light: rgba(33, 52, 72, 0.08);
+  --shadow-medium: rgba(33, 52, 72, 0.15);
+  --shadow-heavy: rgba(33, 52, 72, 0.25);
+}
+
+/* Main Container - Industrial Design */
+.profile-container {
+  margin: 50px auto;
+  max-width: 2000px;
+  background: var(--pure-white);
+  border-radius: 20px;
+  box-shadow: 
+    0 15px 50px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 40px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Industrial pattern overlay */
+.profile-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 2px 2px, var(--light-blue-gray) 1px, transparent 0),
+    linear-gradient(45deg, transparent 48%, rgba(148, 180, 193, 0.02) 50%, transparent 52%);
+  background-size: 30px 30px, 60px 60px;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.3;
+}
+
+/* Top accent line */
+.profile-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, 
+    var(--accent-yellow) 0%, 
+    var(--blue-gray) 25%, 
+    var(--light-blue-gray) 50%, 
+    var(--blue-gray) 75%, 
+    var(--accent-yellow) 100%
+  );
+  border-radius: 20px 20px 0 0;
+  z-index: 1;
+}
+
+/* Layout */
+.profile-row {
+  display: flex;
+  gap: 40px;
+  position: relative;
+  
+}
+
+/* Profile Main Section */
+.profile-main {
+  max-width: 900px;
+  margin: auto;
+  padding: 30px;
+  background: rgba(247, 247, 247, 0.5);
+  border-radius: 15px;
+  border: 1px solid rgba(84, 119, 146, 0.2);
+  position: relative;
+}
+
+.profile-main::before {
+  position: absolute;
+  top: -10px;
+  right: 20px;
+  font-size: 30px;
+  background: var(--accent-yellow);
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px rgba(252, 198, 29, 0.3);
+}
+
+/* Form Groups - Industrial Style */
+.profile-form-group {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.profile-form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--dark-blue);
+  text-transform: uppercase;
+  font-size: 18px;
+  letter-spacing: 0.5px;
+  text-align: left;
+}
+
+.profile-form-group label::before {
+  content: '';
+  position: absolute;
+  left: -15px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 3px;
+  height: 100%;
+  background: var(--accent-yellow);
+  border-radius: 2px;
+}
+
+.profile-form-group input {
+  width: 100%;
+  padding: 12px 16px;
+  border: 2px solid var(--light-sage);
+  border-radius: 10px;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--dark-blue);
+  background: var(--pure-white);
+  transition: all 0.3s ease;
+  box-shadow: inset 0 2px 4px rgba(33, 52, 72, 0.05);
+}
+
+.profile-form-group input:focus {
+  outline: none;
+  border-color: var(--accent-yellow);
+  background: var(--off-white);
+  box-shadow: 
+    0 0 0 3px rgba(252, 198, 29, 0.1),
+    inset 0 2px 4px rgba(33, 52, 72, 0.05);
+  transform: translateY(-2px);
+}
+
+/* Photo Upload Container - Industrial Design */
+.photo-upload-container {
+  text-align: center;
+  margin-bottom: 30px;
+  position: relative;
+}
+
+.photo-upload-container::before {
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 20px;
+  background: var(--blue-gray);
+  color: var(--pure-white);
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: 0 4px 15px var(--shadow-medium);
+}
+
+.photo-img {
+  width: 160px;
+  height: 160px;
+  margin: auto;
+  border-radius: 50%;
+  box-shadow: 
+    0 8px 25px var(--shadow-medium),
+    inset 0 2px 4px rgba(252, 198, 29, 0.1);
+  object-fit: cover;
+  border: 4px solid var(--accent-yellow);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.photo-img:hover {
+  transform: scale(1.05);
+  box-shadow: 
+    0 12px 35px var(--shadow-heavy),
+    0 0 0 4px rgba(252, 198, 29, 0.2);
+}
+
+.photo-img.preview {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Industrial Button */
+.photo-btn {
+  display: inline-block;
+  margin-top: 20px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, var(--blue-gray), var(--light-blue-gray));
+  color: var(--pure-white);
+  border: 2px solid var(--blue-gray);
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.photo-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: var(--accent-yellow);
+  transition: left 0.4s ease;
+  z-index: -1;
+}
+
+.photo-btn:hover {
+  color: var(--dark-blue);
+  border-color: var(--accent-yellow);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(252, 198, 29, 0.3);
+}
+
+.photo-btn:hover::before {
+  left: 0;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Save Button  */
+.btn-save {
+  width: 100%;
+  padding: 15px;
+  background: linear-gradient(135deg, var(--accent-yellow) 0%, #f7b801 100%);
+  color: var(--dark-blue);
+  border: none;
+  border-radius: 25px;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(252, 198, 29, 0.3);
+}
+
+.btn-save::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.6s;
+}
+
+.btn-save::after {
+  margin-left: 8px;
+  font-size: 14px;
+  transition: transform 0.3s ease;
+}
+
+.btn-save:hover {
+  background: linear-gradient(135deg, var(--dark-blue) 0%, var(--blue-gray) 100%);
+  box-shadow: 0 12px 35px rgba(33, 52, 72, 0.4);
+}
+
+.btn-save:hover::before {
+  left: 100%;
+}
+
+
+
+.form-actions {
+  margin-top: 25px;
+  text-align: left;
+}
+
+/* Tab Block - Industrial Design */
+.tab-block {
+  border: 2px solid var(--light-sage);
+  border-radius: 15px;
+  overflow: hidden;
+  font-family: 'Inter', Arial, sans-serif;
+  margin-top: 40px;
+  flex: 1 1 100%;
+  box-shadow: 
+    0 10px 30px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  position: relative;
+  background: var(--pure-white);
+}
+
+/* Industrial Tab Menu */
+.tab-menu {
+  list-style: none;
+  display: flex;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(135deg, var(--blue-gray), var(--light-blue-gray));
+  border-bottom: 3px solid var(--accent-yellow);
+  position: relative;
+}
+
+.tab-menu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent-yellow);
+}
+
+.tab-menu li {
+  flex: 1;
+  text-align: center;
+  padding: 16px 20px;
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--pure-white);
+  transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  position: relative;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tab-menu li:last-child {
+  border-right: none;
+}
+
+.tab-menu li::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--accent-yellow);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.tab-menu li:hover {
+  background: rgba(252, 198, 29, 0.1);
+  transform: translateY(-2px);
+}
+
+.tab-menu li.active {
+  background: var(--accent-yellow);
+  color: var(--dark-blue);
+  font-weight: 700;
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(252, 198, 29, 0.4);
+}
+
+/* Tab Content - Industrial Style */
+.tab-content {
+  padding: 30px;
+  background: var(--pure-white);
+  min-height: 250px;
+  position: relative;
+  
+}
+
+.tab-content::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20px;
+  right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    var(--light-blue-gray) 25%, 
+    var(--accent-yellow) 50%, 
+    var(--light-blue-gray) 75%, 
+    transparent 100%
+  );
+}
+
+.tab-pane {
+  display: none;
+  animation: tabFadeIn 0.4s ease-out;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+@keyframes tabFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Scroll Wrapper */
+.panel.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch; /* smooth mobile scrolling */
+  margin-top: 20px;
+}
+
+.panel.custom-table {
+  border: none;
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 25px var(--shadow-light),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  margin: 0;
+  width: 100%;
+  background: var(--pure-white);
+  overflow: hidden;
+  position: relative;
+}
+
+.custom-table thead {
+  background: var(--blue-gray);
+  color: var(--pure-white);
+  font-family: 'Inter', Roboto, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  padding: 50px;
+  border-radius: 12px 12px 0 0;
+  position: relative;
+  text-transform: uppercase;
+}
+
+.custom-table thead::before {
+  position: absolute;
+  top: 50%;
+  right: 20px;
+  transform: translateY(-50%);
+  font-size: 20px;
+}
+
+.custom-table thead::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-yellow);
+}
+
+/* Table Cells - Industrial Styling */
+.custom-table td {
+  font-family: 'Inter', Lato, Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  padding: 50px;
+  color: var(--dark-blue);
+  border-bottom: 1px solid var(--light-sage);
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+
+.custom-table td::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--accent-yellow);
+  transition: width 0.3s ease;
+}
+
+.custom-table tr:hover td::before {
+  width: 3px;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width: 1024px) {
+  .profile-container {
+    margin: 30px auto;
+    padding: 30px;
+  }
+  
+  .profile-row {
+    gap: 30px;
+  }
+  
+  .profile-main {
+    padding: 25px;
+  }
+}
+
+@media (max-width: 768px) {
+  .profile-container {
+    margin: 20px;
+    padding: 25px;
+    border-radius: 15px;
+  }
+  
+  .profile-row {
+    flex-direction: column;
+    gap: 25px;
+  }
+  
+  .profile-main {
+    max-width: 100%;
+    padding: 20px;
+  }
+  
+  .photo-img {
+    width: 140px;
+    height: 140px;
+  }
+  
+  .tab-menu li {
+    font-size: 14px;
+    padding: 12px 16px;
+    letter-spacing: 0.3px;
+  }
+  
+  .tab-content {
+    padding: 25px;
+  }
+  
+  .custom-table thead {
+    font-size: 16px;
+    padding: 15px;
+  }
+  
+  .custom-table td {
+    font-size: 15px;
+    padding: 15px 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    margin: 10px;
+    padding: 20px;
+  }
+  
+  .profile-main {
+    padding: 15px;
+  }
+  
+  .photo-img {
+    width: 120px;
+    height: 120px;
+  }
+  
+  .profile-form-group input {
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  
+  .btn-save {
+    padding: 12px;
+    font-size: 15px;
+  }
+  
+  .tab-menu li {
+    font-size: 12px;
+    padding: 10px 12px;
+  }
+  
+  .tab-content {
+    padding: 20px 15px;
+  }
+  
+  .custom-table thead {
+    font-size: 14px;
+    padding: 12px;
+  }
+  
+  .custom-table td {
+    font-size: 13px;
+    padding: 12px 8px;
+  }
+}
+
+/* Loading Animation for Profile */
+@keyframes profilePulse {
+  0%, 100% { 
+    box-shadow: 0 0 0 0 rgba(252, 198, 29, 0.4);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(252, 198, 29, 0);
+  }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+  .tab-pane,
+  .profile-form-group input,
+  .btn-save,
+  .photo-btn {
+    animation: none;
+    transition: none;
+  }
+}
+
+/* Focus States for Accessibility */
+.profile-form-group input:focus,
+.btn-save:focus,
+.photo-btn:focus,
+.tab-menu li:focus {
+  outline: 2px solid var(--accent-yellow);
+  outline-offset: 2px;
+}
