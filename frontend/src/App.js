@@ -1,6 +1,6 @@
 import './App.css';
 import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route,Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route,Navigate ,NavLink} from 'react-router-dom';
 import Header from "./components/Header";
 import LorryTypesPage from "./components/LorryTypesPage";
 import LorryDetails from "./components/LorryDetails"; // Component names should start with uppercase
@@ -19,7 +19,7 @@ import CompanyManagerDashbord from'./components/dashboard/CompanyManagerDashbord
 import ScheduleMeeting from './components/ClientBookingpage';
 import CheckoutPage from './components/CheckoutPage';
 
-// Import sachini's components
+// Import task management components
 import LoginNew from './components/pages/TaskManagerPages/LoginNew';
 import SignUp from './components/pages/TaskManagerPages/SignUp';
 import PrivateRoute from './routes/PrivateRoute';
@@ -42,6 +42,12 @@ import Reports from './components/pages/AttendancePages/Reports';
 import UserProvider, { UserContext } from './context/userContext';
 
 
+// inventory components
+import InventoryPage from './pages/InventoryPage';
+import SuppliersPage from './pages/SuppliersPage';
+import RequestsPage from './pages/RequestsPage';
+import AlertsPage from './pages/AlertsPage';
+import ReportsPage from './pages/ReportsPage';
 
 
 
@@ -142,7 +148,18 @@ function App() {
 <Route path="/" element={<Root />} />
 
 {/* Catch all route - redirect to login */}
-<Route path="*" element={<Navigate to="/login" />} />
+<Route path="*" element={<Navigate to="/Companylogin" />} />
+
+
+
+
+ <Route path="/" element={<InventoryPage />} />
+        <Route path="/suppliers" element={<SuppliersPage />} />
+        <Route path="/requests" element={<RequestsPage />} />
+        <Route path="/alerts" element={<AlertsPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+
 
 </Routes>
 
