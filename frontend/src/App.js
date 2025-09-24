@@ -49,6 +49,18 @@ import RequestsPage from './pages/RequestsPage';
 import AlertsPage from './pages/AlertsPage';
 import ReportsPage from './pages/ReportsPage';
 
+//dispatch management components
+import Sidebar from './components/Sidebar';
+import Header from './components/Header';
+import Reports from './components/Reports';
+import AddDelivery from './components/AddDelivery';
+import AssignedDeliveries from './components/AssignedDeliveries';
+import Dashboard from './components/Dashboard';
+import DriverList from './components/DriverList';
+import VehicleList from './components/VehicleList';
+import DeliveryMap from './components/DeliveryMap';
+import GpsTracking from './components/gpsTracking'; 
+
 
 
 function App() {
@@ -151,6 +163,24 @@ function App() {
 <Route path="*" element={<Navigate to="/Companylogin" />} />
 
 
+<div style={{ display: 'flex' }}>
+        <Sidebar />
+        <div style={{ flex: 1, marginLeft: '200px' }}>
+          <Header />
+          <div style={{ padding: '20px', marginTop: '70px' }}>
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/add-delivery" element={<AddDelivery />} />
+              <Route path="/drivers" element={<DriverList />} />
+              <Route path="/vehicles" element={<VehicleList />} />
+              <Route path="/assignments" element={<AssignedDeliveries />} />
+              <Route path="/map" element={<DeliveryMap />} />
+              <Route path="/gps-tracking" element={<GpsTracking />} />
+              <Route path="/reports" element={<Reports />} />
+            </Routes>
+          </div>
+        </div>
+      </div>
 
 
  <Route path="/" element={<InventoryPage />} />
@@ -159,7 +189,6 @@ function App() {
         <Route path="/alerts" element={<AlertsPage />} />
         <Route path="/reports" element={<ReportsPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
-
 
 </Routes>
 
