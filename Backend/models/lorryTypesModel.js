@@ -26,3 +26,4 @@ const lorrySchema = new mongoose.Schema({
 
 const LorryType = mongoose.model("lorrytypes", lorrySchema);
 module.exports = LorryType;
+

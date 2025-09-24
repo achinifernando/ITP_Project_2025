@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "../CSS/login.css";
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "./AuthLayout";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -108,7 +108,17 @@ export default function Login() {
             <Link to="/signup" className="signup-text">
               Sign Up
             </Link>
+            
           </p>
+
+          <p className="signup-link">
+            Are you a company memeber?{" "}
+            <Link to="/Companysignup" className="signup-text">
+              Sign Up
+            </Link>
+            
+          </p>
+
         </form>
       </div>
     </AuthLayout>

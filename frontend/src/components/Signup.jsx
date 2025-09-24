@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import "../CSS/signup.css";
-import AuthLayout from "../components/AuthLayout";
+import AuthLayout from "./AuthLayout";
 
 export default function Signup() {
   const [formData, setFormData] = useState({

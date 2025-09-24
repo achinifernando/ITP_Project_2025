@@ -1,0 +1,48 @@
+.attendance-form {
+  margin: 20px auto;
+  padding: 22px;
+  width: 360px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.03);
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.attendance-form h2 {
+  margin-bottom: 12px;
+}
+
+.attendance-form input {
+  display: block;
+  width: calc(100% - 24px);
+  margin: 10px auto;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  font-size: 15px;
+}
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.attendance-form button {
+  padding: 10px 12px;
+  background: #0f172a;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  min-width: 140px;
+}
+
+.attendance-form button:hover { opacity: 0.95; }
+
+.muted { color: #555; font-size: 14px; }
+.message { color: #b45309; margin-top: 10px; }
+.success { color: #065f46; }
+

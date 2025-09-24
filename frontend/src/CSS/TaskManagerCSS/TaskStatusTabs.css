@@ -1,0 +1,149 @@
+/* TaskStatusTabs.css */
+.tabs-container {
+  width: 100%;
+  overflow-x: auto;
+  padding: 4px 0;
+  margin-bottom: 1.5rem;
+}
+
+.tabs-scroll {
+  display: inline-flex;
+  gap: 4px;
+  background-color: #f8fafc;
+  border-radius: 10px;
+  padding: 4px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.tab-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  position: relative;
+  min-width: 90px;
+}
+
+.tab-button:hover {
+  background-color: #eef2f7;
+}
+
+.tab-button.active {
+  background-color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.tab-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.tab-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #64748b;
+  text-transform: capitalize;
+  transition: color 0.3s ease;
+}
+
+.tab-button.active .tab-label {
+  color: #3b82f6;
+  font-weight: 600;
+}
+
+.tab-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: #94a3b8;
+  transition: color 0.3s ease;
+}
+
+.tab-button.active .tab-count {
+  color: #1e40af;
+}
+
+.active-indicator {
+  position: absolute;
+  bottom: -4px;
+  width: 20px;
+  height: 3px;
+  background-color: #3b82f6;
+  border-radius: 2px;
+  transition: all 0.3s ease;
+}
+
+/* Status-specific colors */
+.tab-button[data-status="All"].active .tab-label,
+.tab-button[data-status="All"].active .tab-count,
+.tab-button[data-status="All"] .active-indicator {
+  color: #6366f1;
+  background-color: #6366f1;
+}
+
+.tab-button[data-status="Pending"].active .tab-label,
+.tab-button[data-status="Pending"].active .tab-count,
+.tab-button[data-status="Pending"] .active-indicator {
+  color: #f59e0b;
+  background-color: #f59e0b;
+}
+
+.tab-button[data-status="In Progress"].active .tab-label,
+.tab-button[data-status="In Progress"].active .tab-count,
+.tab-button[data-status="In Progress"] .active-indicator {
+  color: #3b82f6;
+  background-color: #3b82f6;
+}
+
+.tab-button[data-status="Completed"].active .tab-label,
+.tab-button[data-status="Completed"].active .tab-count,
+.tab-button[data-status="Completed"] .active-indicator {
+  color: #10b981;
+  background-color: #10b981;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .tabs-scroll {
+    gap: 2px;
+  }
+  
+  .tab-button {
+    padding: 10px 16px;
+    min-width: 80px;
+  }
+  
+  .tab-label {
+    font-size: 12px;
+  }
+  
+  .tab-count {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tabs-container {
+    padding: 2px 0;
+  }
+  
+  .tab-button {
+    padding: 8px 12px;
+    min-width: 70px;
+  }
+  
+  .tab-label {
+    font-size: 11px;
+  }
+  
+  .tab-count {
+    font-size: 14px;
+  }
+}
