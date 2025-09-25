@@ -10,7 +10,7 @@ const {
   getLatestTrackingByDelivery,
   startTrackingDelivery,      // Add this
   stopTrackingDelivery,       // Add this
-} = require("../controllers/trackingController");
+} = require("../../controllers/DispatchControllers/trackingController");
 
 // ✅ FIX 2: Use the functions directly, without "trackingController."
 router.post("/start", startTrackingDelivery);

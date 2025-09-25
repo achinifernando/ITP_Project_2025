@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const Quotation = require("../models/quotationModel");
-const QuotationRequest = require("../models/quotationRequestModel");
+const Quotation = require("../../models/ClientPortalModels/quotationModel");
+const QuotationRequest = require("../../models/ClientPortalModels/quotationRequestModel");
 const nodemailer = require("nodemailer");
-const upload = require('../middleware/fileUploadMiddleware');
-const { protectClient } = require("../middleware/authMiddleware");
-const Payment = require("../models/paymentsModel");
+const upload = require('../../middleware/fileUploadMiddleware');
+const { protectClient } = require("../../middleware/authMiddleware");
+const Payment = require("../../models/ClientPortalModels/paymentsModel");
 
 router.post("/generate-quotation/:requestID", async (req, res) => {
   try {

@@ -1,5 +1,5 @@
 const express = require('express');
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+const { protect, adminOnly } = require("../../middleware/authMiddleware");
 const router = express.Router();
 const {getDashboardData, 
     getUserDashboardData, 
@@ -11,7 +11,7 @@ const {getDashboardData,
     updateTaskStatus, 
     updateTaskChecklist,
     getTaskChecklist
-} = require("../controllers/taskController");
+} = require("../../controllers/TaskControllers/taskController");
 
 //task management routes
 router.get("/taskChecklist/:id", protect, getTaskChecklist); // Get checklist for a selected task

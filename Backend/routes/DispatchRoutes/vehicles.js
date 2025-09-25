@@ -6,7 +6,7 @@ const {
   addVehicle,
   updateVehicle,
   deleteVehicle,
-} = require("../controllers/vehicleController");
+} = require("../../controllers/DispatchControllers/vehicleController");
 
 // Validation rules
 const vehicleValidation = [

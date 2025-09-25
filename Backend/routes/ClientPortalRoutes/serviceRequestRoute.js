@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const serviceRequest = require("../models/serviceRequestsModel");
-const { protectClient } = require("../middleware/authMiddleware");
-const upload = require('../middleware/imageUploadMiddleware');
+const serviceRequest = require("../../models/ClientPortalModels/serviceRequestsModel");
+const { protectClient } = require("../../middleware/authMiddleware");
+const upload = require('../../middleware/imageUploadMiddleware');
 
 
 

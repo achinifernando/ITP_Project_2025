@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Bell, Search } from "react-bootstrap-icons"; // for icons
-import "./repair.css"; // custom CSS file
+import "../../CSS/CompanyCSS/repair.css"; // custom CSS file
 
 const AdminRepairs = () => {
   const [repairs, setRepairs] = useState([]);

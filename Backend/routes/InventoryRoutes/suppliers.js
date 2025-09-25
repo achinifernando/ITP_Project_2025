@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import Joi from 'joi';
-import Supplier from '../models/Supplier.js';
-import { idParam, pagination } from '../validators/common.js';
+import Supplier from '../../models/InventoryModels/Supplier.js';
+import { idParam, pagination } from '../../validators/common.js';
 
 const router = Router();
 

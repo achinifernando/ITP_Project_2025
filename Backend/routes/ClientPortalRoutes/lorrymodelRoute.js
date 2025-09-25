@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const lorryModels = require("../models/lorryModelModel.js");
+const lorryModels = require("../../models/ClientPortalModels/lorryModelModel.js");
 
 
 // Create a new model 

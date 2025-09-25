@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
-const service = require("../models/Service");
+const service = require("../../models/ClientPortalModels/servicesModel");
 
 
 // Multer storage settings

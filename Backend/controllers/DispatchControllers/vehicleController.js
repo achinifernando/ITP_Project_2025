@@ -1,5 +1,5 @@
 const Vehicle = require("../../models/DispatchModels/Vehicle");
-const Delivery = require(".../../models/DispatchModels/Delivery");
+const Delivery = require("../../models/DispatchModels/Delivery");
 
 // Get all vehicles
 const getAllVehicles = async (req, res) => {

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const Payment = require("../models/payment");
+const Payment = require("../../models/ClientPortalModels/paymentsModel");
 
 // GET all payments
 router.get("/", async (req, res) => {

@@ -3,8 +3,8 @@ const app = express();
 const cors = require("cors");
 const router = express.Router();
 const mongoose = require("mongoose");
-const QuotationRequest = require("../models/quotationRequestModel");
-const { protectClient } = require("../middleware/authMiddleware");
+const QuotationRequest = require("../../models/ClientPortalModels/quotationRequestModel");
+const { protectClient } = require("../../middleware/authMiddleware");
 
 app.use(cors());
 app.use(express.json()); // <-- this is required

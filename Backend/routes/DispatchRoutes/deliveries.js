@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const Delivery = require("../models/Delivery");
-const Driver = require("../models/Driver");
-const Vehicle = require("../models/Vehicle");
-const Assignment = require("../models/Assignment");
+const Delivery = require("../../models/DispatchModels/Delivery");
+const Driver = require("../../models/DispatchModels/Driver");
+const Vehicle = require("../../models/DispatchModels/Vehicle");
+const Assignment = require("../../models/DispatchModels/Assignment");
 
 // GET all deliveries
 router.get("/", async (req, res) => {

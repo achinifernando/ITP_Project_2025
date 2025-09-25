@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import Joi from 'joi';
-import Supplier from '../models/Supplier.js';
-import SupplierRequest from '../models/SupplierRequest.js';
-import { idParam, pagination } from '../validators/common.js';
-import { sendEmail } from '../utils/mailer.js';
+import Supplier from '../../models/InventoryModels/Supplier.js';
+import SupplierRequest from '../../models/InventoryModels/SupplierRequest.js';
+import { idParam, pagination } from '../../validators/common.js';
+import { sendEmail } from '../../utils/mailer.js';
 
 const router = Router();
 

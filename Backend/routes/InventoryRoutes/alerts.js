@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import Joi from 'joi';
-import Stock from '../models/Stock.js';
+import Stock from '../../models/InventoryModels/Stock';
 
 const router = Router();
 

@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const stock = require("../models/stock.js");
+const stock = require("../../models/InventoryModels/Stock");
 
 // Create a new category with image
 router.post("/addItem", async (req, res) => {

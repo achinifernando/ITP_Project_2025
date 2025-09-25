@@ -3,8 +3,8 @@ const app = express();
 const cors = require("cors");
 const router = express.Router();
 const mongoose = require("mongoose");
-const Order = require("../models/ordersModel");
-const { protectClient } = require("../middleware/authMiddleware");
+const Order = require("../../models/ClientPortalModels/ordersModel");
+const { protectClient } = require("../../middleware/authMiddleware");
 
 app.use(cors());
 app.use(express.json()); 

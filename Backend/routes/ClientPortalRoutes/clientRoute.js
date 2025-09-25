@@ -1,6 +1,6 @@
 const express = require("express");
-const { upload,clientRegister,clientLogin,getUserProfile,updateUserProfile,getClientById} = require("../controllers/clientAuthController");
-const { protectClient } = require("../middleware/authMiddleware");
+const { upload,clientRegister,clientLogin,getUserProfile,updateUserProfile,getClientById} = require("../../controllers/ClientPortalControllers/clientAuthController");
+const { protectClient } = require("../../middleware/authMiddleware");
 
 const router = express.Router();
 

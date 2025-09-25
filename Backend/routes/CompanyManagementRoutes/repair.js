@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const RepairMaintenance = require("../models/repair.js");
+const RepairMaintenance = require("../../models/ClientPortalModels/serviceRequestsModel");
 
 // GET all repair & maintenance requests
 router.get("/", async (req, res) => {

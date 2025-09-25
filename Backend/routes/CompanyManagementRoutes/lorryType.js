@@ -2,7 +2,7 @@ const router = require("express").Router();
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const LorryType = require("../models/lorryType.js");
+const LorryType = require("../../models/ClientPortalModels/lorryTypesModel");
 
 // Multer storage
 const storage = multer.diskStorage({

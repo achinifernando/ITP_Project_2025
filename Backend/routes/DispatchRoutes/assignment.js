@@ -10,7 +10,7 @@ const {
   startDelivery,
   updateDeliveryStatus,
   deleteAssignment
-} = require("../controllers/assignmentController");
+} = require("../../controllers/DispatchControllers/assignmentController");
 
 // Delivery routes
 router.get("/pending", getPendingDeliveries);

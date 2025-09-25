@@ -1,9 +1,9 @@
 // routes/reports.js
 const express = require("express");
 const router = express.Router();
-const Delivery = require("../models/Delivery");
-const Driver = require("../models/Driver");
-const Vehicle = require("../models/Vehicle");
+const Delivery = require("../../models/DispatchModels/Delivery");
+const Driver = require("../../models/DispatchModels/Driver");
+const Vehicle = require("../../models/DispatchModels/Vehicle");
 
 // Get delivery statistics for reports
 const getDeliveryStats = async (req, res) => {

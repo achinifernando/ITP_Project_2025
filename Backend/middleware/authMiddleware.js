@@ -1,7 +1,6 @@
-// middleware/authMiddleware.js
 const jwt = require("jsonwebtoken");
-const Client = require("../models/clientModel");
-const User = require("../models/User");
+const Client = require("../models/ClientPortalModels/clientModel");
+const User = require("../models/AttendenceTaskModel/User");
 
 const protectClient = async (req, res, next) => {
   let token;
@@ -9,12 +8,12 @@ const protectClient = async (req, res, next) => {
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
     try {
       token = req.headers.authorization.split(" ")[1];
-      const decoded = jwt.verify(token, process.env.JWT_SECRET  || "your_jwt_secret");
+      const decoded = jwt.verify(token, process.env.JWT_SECRET || "your_jwt_secret");
 
       const client = await Client.findById(decoded.id).select("-password");
       if (!client) return res.status(401).json({ message: "Client not found" });
 
-      req.user = client;
+      req.client = client; // Use req.client for clients
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
@@ -24,7 +23,7 @@ const protectClient = async (req, res, next) => {
   }
 };
 
-const protect = async (req, res, next) => {
+const protectUser = async (req, res, next) => {
   try {
     let token;
 
@@ -38,7 +37,7 @@ const protect = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select("-password");
+      req.user = await User.findById(decoded.id).select("-password"); // Use req.user for company users
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
@@ -64,6 +63,4 @@ const hrManagerOrAdmin = (req, res, next) => {
   }
 };
 
-
-module.exports = { protectClient ,protect, adminOnly, hrManagerOrAdmin};
-
+module.exports = { protectClient, protectUser, adminOnly, hrManagerOrAdmin };

@@ -10,7 +10,6 @@ const { Server } = require("socket.io");
 const websocketServer = require("./websocket");
 const morgan = require("morgan");
 
-
 const app = express();
 const PORT = 5000;
 
@@ -35,77 +34,70 @@ mongoose.connect(MONGODB_URL)
 // Make uploads folder public
 app.use("/files", express.static(path.join(__dirname, "uploads")));
 
-//=============== CLIENT PORTAL ROUTES =======================
-app.use("/client", require("./routes/clientRoute.js"));
-app.use("/lorryCategories", require("./routes/lorryCategoryRoute.js"));
-app.use("/lorryType", require("./routes/lorryTypesRoute.js"));
-app.use("/lorryBrands", require("./routes/lorrymodelRoute.js"));
-app.use("/serviceRequest", require("./routes/serviceRequestRoute.js"));
-app.use("/service", require("./routes/servicesRoute.js"));
-app.use("/orders", require("./routes/ordersRoute.js"));
-app.use("/quotations", require("./routes/quotationRoute.js"));
-app.use("/quotationRequest", require("./routes/quotationRequestsRoute.js"));
-app.use("/stock", require("./routes/stockRouter.js"));
-app.use("/payments", require("./routes/paymentRoute.js"));
-app.use("/googleAuth", require("./routes/googleAuthRoute.js"));
+// =============== AUTHENTICATION ROUTES (ADD THESE FIRST) =======================
+app.use("/api/company", require("./routes/AttendenceRoutes/authRoute")); 
+app.use("/api/clients", require("./routes/clientAuthRoutes"));  // Client auth
 
-//=============== DISPATCH ROUTES =======================
-app.use("/deliveries", require("./routes/deliveries"));
-app.use("/drivers", require("./routes/drivers"));
-app.use("/vehicles", require("./routes/vehicles"));
-app.use("/assignments", require("./routes/assignment"));
-app.use("/notifications", require("./routes/notifications"));
-app.use("/tracking", require("./routes/tracking"));
-app.use("/dispatch-reports", require("./routes/reports")); // Renamed to avoid conflict
+// =============== CLIENT PORTAL ROUTES =======================
+app.use("/client", require("./routes/ClientPortalRoutes/clientRoute"));
+app.use("/lorryCategories", require("./routes/ClientPortalRoutes/lorryCategoryRoute"));
+app.use("/lorryType", require("./routes/ClientPortalRoutes/lorryTypesRoute"));
+app.use("/lorryBrands", require("./routes/ClientPortalRoutes/lorrymodelRoute"));
+app.use("/serviceRequest", require("./routes/ClientPortalRoutes/serviceRequestRoute"));
+app.use("/service", require("./routes/ClientPortalRoutes/servicesRoute"));
+app.use("/orders", require("./routes/ClientPortalRoutes/ordersRoute"));
+app.use("/quotations", require("./routes/ClientPortalRoutes/quotationRoute"));
+app.use("/quotationRequest", require("./routes/ClientPortalRoutes/quotationRequestsRoute"));
+app.use("/client-payments", require("./routes/ClientPortalRoutes/paymentRoute")); // Renamed to avoid conflict
+app.use("/googleAuth", require("./routes/ClientPortalRoutes/googleAuthRoute"));
 
-//=============== ATTENDANCE MANAGEMENT & TASK MANAGEMENT ROUTES ===========
-app.use('/api/auth', require("./routes/authRoute"));
-app.use('/api/users', require("./routes/UserRoute"));
-app.use('/api/tasks', require("./routes/taskRoute"));
-app.use('/api/task-reports', require("./routes/reportRoutes")); // Renamed to avoid conflict
-app.use("/api/templates", require("./routes/checklistRoute"));
-app.use("/api/attendance", require("./routes/attendanceRoutes"));
-app.use("/api/leaves", require("./routes/leaveRoute"));
+// =============== DISPATCH ROUTES =======================
+app.use("/deliveries", require("./routes/DispatchRoutes/deliveries"));
+app.use("/drivers", require("./routes/DispatchRoutes/drivers"));
+app.use("/vehicles", require("./routes/DispatchRoutes/vehicles"));
+app.use("/assignments", require("./routes/DispatchRoutes/assignment"));
+app.use("/notifications", require("./routes/DispatchRoutes/notifications"));
+app.use("/tracking", require("./routes/DispatchRoutes/tracking"));
+app.use("/dispatch-reports", require("./routes/DispatchRoutes/reports"));
 
-//=============== INVENTORY ROUTES ===================
-app.use('/api/suppliers', require("./routes/suppliers.js"));
-app.use('/api/stocks', require("./routes/stocks.js"));
-app.use('/api/requests', require("./routes/supplierRequests.js"));
-app.use('/api/alerts', require("./routes/alerts.js"));
-app.use('/api/inventory-reports', require("./routes/reports.js")); // Renamed to avoid conflict
+// =============== ATTENDANCE MANAGEMENT & TASK MANAGEMENT ROUTES ===========
+app.use("/api/auth", require("./routes/AttendenceRoutes/authRoute"));
+app.use("/api/users", require("./routes/AttendenceRoutes/UserRoute"));
+app.use("/api/tasks", require("./routes/TaskManagementRoutes/taskRoute"));
+app.use("/api/task-reports", require("./routes/TaskManagementRoutes/reportRoutes"));
+app.use("/api/templates", require("./routes/TaskManagementRoutes/checklistRoute"));
+app.use("/api/attendance", require("./routes/AttendenceRoutes/attendanceRoutes"));
+app.use("/api/leaves", require("./routes/AttendenceRoutes/leaveRoute"));
 
-//=============== COMPANY ROUTES ===================
-app.use('/admin-categories', require("./routes/Category.js"));
-app.use('/admin-services', require("./routes/Service.js"));
-app.use('/admin-lorry-models', require("./routes/lorryModel.js"));
-app.use('/admin-lorry-types', require("./routes/lorryType.js"));
-app.use('/admin-orders', require("./routes/Order.js"));
-app.use('/admin-payments', require("./routes/payment.js"));
-app.use('/admin-repairs', require("./routes/repair.js"));
-app.use('/admin-attendance', require("./routes/attendance.js"));
-app.use('/admin-payrolls', require("./routes/payroll.js"));
-app.use('/admin-employees', require("./routes/employee.js"));
-app.use('/admin-clients', require("./routes/client.js"));
-app.use('/admin-quotation-requests', require("./routes/QuotationRequest.js"));
-app.use('/admin-quotations', require("./routes/Quotation.js"));
+// =============== INVENTORY ROUTES ===================
+app.use("/api/stocks", require("./routes/InventoryRoutes/stockRouter"));
+app.use("/api/requests", require("./routes/InventoryRoutes/supplierRequests"));
+app.use("/api/alerts", require("./routes/InventoryRoutes/alerts"));
+app.use("/api/inventory-reports", require("./routes/InventoryRoutes/reports"));
+
+// =============== COMPANY ROUTES ===================
+app.use("/admin-categories", require("./routes/CompanyManagementRoutes/Category"));
+app.use("/admin-services", require("./routes/CompanyManagementRoutes/Service"));
+app.use("/admin-lorry-models", require("./routes/CompanyManagementRoutes/lorryModel"));
+app.use("/admin-lorry-types", require("./routes/CompanyManagementRoutes/lorryType"));
+app.use("/admin-orders", require("./routes/CompanyManagementRoutes/order"));
+app.use("/admin-payments", require("./routes/CompanyManagementRoutes/payment"));
+app.use("/admin-repairs", require("./routes/CompanyManagementRoutes/repair"));
+app.use("/admin-attendance", require("./routes/CompanyManagementRoutes/attendance"));
+app.use("/admin-payrolls", require("./routes/CompanyManagementRoutes/payroll"));
 
 
 
+// Basic health check route
+app.get("/", (req, res) => {
+    res.json({ message: "Server is running successfully!" });
+});
 
 
 
 // Start server
 app.listen(PORT, () => {
     console.log(`Server is running on port: ${PORT}`);
-});
-
-// WebSocket setup (if needed)
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: {
-        origin: "*",
-        methods: ["GET", "POST"]
-    }
 });
 
 // Export for testing purposes

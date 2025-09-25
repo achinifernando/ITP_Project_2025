@@ -1,7 +1,7 @@
 const express = require("express");
 const { google } = require("googleapis");
 const dotenv = require("dotenv");
-const Meeting = require("../models/meetingsModel.js");
+const Meeting = require("../../models/ClientPortalModels/meetingsModel");
 const nodemailer = require("nodemailer");
 const path = require("path");
 

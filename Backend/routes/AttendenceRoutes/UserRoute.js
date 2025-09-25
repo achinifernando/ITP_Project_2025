@@ -3,10 +3,10 @@ const express = require("express");
 const router = express.Router();
 
 // Import middleware
-const { protect, adminOnly, hrManagerOrAdmin } = require("../middleware/authMiddleware");
+const { protect, adminOnly, hrManagerOrAdmin } = require("../../middleware/authMiddleware");
 
 // Import controllers
-const { createUser, getUsers, getUsersById, updateUser, deleteUser } = require("../controllers/UserController");
+const { createUser, getUsers, getUsersById, updateUser, deleteUser } = require("../../controllers/AttendenceController/UserController");
 
 // =======================
 // User Management Routes

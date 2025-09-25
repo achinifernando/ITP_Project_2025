@@ -82,9 +82,23 @@ export const verifyOtp = async (req, res) => {
 
     // Handle time-in
     if (action === "time-in") {
-      await Attendance.create({ employeeId, timeIn: new Date() });
+      const now = new Date();
+
+      // Work start time rule (9:00 AM)
+      const workStart = new Date();
+      workStart.setHours(9, 0, 0, 0);
+
+      const status = now > workStart ? "late" : "present";
+
+      await Attendance.create({
+        employeeId,
+        date: now,
+        timeIn: now,
+        status,
+      });
+
       await Otp.deleteMany({ employeeId });
-      return res.json({ message: "Time-In recorded successfully" });
+      return res.json({ message: "Time-In recorded successfully", status });
     }
 
     // Handle time-out
@@ -94,10 +108,14 @@ export const verifyOtp = async (req, res) => {
         await Otp.deleteMany({ employeeId });
         return res.status(400).json({ message: "No open time-in found to time-out" });
       }
-      open.timeOut = new Date();
+
+      const timeOut = new Date();
+      open.timeOut = timeOut;
+      open.workedHours = (timeOut - open.timeIn) / (1000 * 60 * 60); // hours
       await open.save();
+
       await Otp.deleteMany({ employeeId });
-      return res.json({ message: "Time-Out recorded successfully" });
+      return res.json({ message: "Time-Out recorded successfully", workedHours: open.workedHours });
     }
 
     return res.status(400).json({ message: "Unknown action" });
@@ -114,21 +132,23 @@ export const getTodayAttendanceSummary = async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
+
     const totalEmployees = await Employee.countDocuments();
-    const present = await Attendance.countDocuments({ 
+
+    const present = await Attendance.countDocuments({
       date: { $gte: today },
-      status: 'present'
-    });
-    const absent = totalEmployees - present;
-    const late = await Attendance.countDocuments({
-      date: { $gte: today },
-      status: 'late'
+      status: "present",
     });
 
-    res.json({ total: totalEmployees, present, absent, late });
+    const late = await Attendance.countDocuments({
+      date: { $gte: today },
+      status: "late",
+    });
+
+    const absent = totalEmployees - (present + late);
+
+    res.json({ total: totalEmployees, present, late, absent });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 };
-

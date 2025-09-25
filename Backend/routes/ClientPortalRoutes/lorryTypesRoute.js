@@ -1,6 +1,6 @@
 const router = require("express").Router();
-const LorryType = require("../models/lorryTypesModel.js");
-const upload = require('../middleware/imageUploadMiddleware');
+const LorryType = require("../../models/ClientPortalModels/lorryTypesModel.js");
+const upload = require('../../middleware/imageUploadMiddleware');
 
 
 

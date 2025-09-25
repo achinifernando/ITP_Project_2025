@@ -1,7 +1,7 @@
 // controllers/trackingController.js
 const Tracking = require("../../models/DispatchModels/Tracking");
 const gpsTracker = require("../../utils/gpsTracker");
-const websocketServer = require("../websocket");
+const websocketServer = require("../../websocket");
 const { simulateGPSUpdate } = require("../../utils/gpsTracker");
 
 // Start tracking delivery

@@ -1,5 +1,5 @@
 const express = require("express");
-const Attendance = require("../models/attendance");
+const Attendance = require("../../models/AttendenceTaskModel/Attendance");
 const router = express.Router();
 
 // OFFICE TIMINGS (can later move to config/DB)

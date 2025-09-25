@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const Order = require("../models/Order.js");
-const paymentSuccessTemplate = require("../emails/paymentSuccess.js");
-const paymentRejectedTemplate = require("../emails/paymentRejected.js");
-const sendEmail = require("../utils/mailer.js");
+const Order = require("../../models/ClientPortalModels/ordersModel.js");
+const paymentSuccessTemplate = require("../../emails/paymentSuccess.js");
+const paymentRejectedTemplate = require("../../emails/paymentRejected.js");
+const sendEmail = require("../../utils/mailer.js");
 
 // GET all orders
 router.get("/", async (req, res) => {

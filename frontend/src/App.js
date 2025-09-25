@@ -60,21 +60,21 @@ import DeliveryMap from './pages/DispatchPages/DeliveryMap';
 import GpsTracking from './pages/DispatchPages/gpsTracking';
 
 //CompanyManagement componets
-import AddCategory from "./components/addCategory";
-import AllCategories from "./components/allCategories";
-import AllServices from "./components/allServices";
-import AllModels from "./components/allModels";
-import AllLorryTypes from "./components/allLorryType";
-import AdminOrders from "./components/allOrders";
-import AdminPayments from "./components/allPayments";
-import AdminRepairs from "./components/allRepairs";
-import PayrollDashboard from "./components/payrollDashboard";
-import AddService from "./components/addService";
-import AddModel from "./components/addModel";
-import AddLorryType from "./components/addLorryType";
+import AddCategory from "./pages/CompanyManagementPages/addCategory";
+import AllCategories from "./pages/CompanyManagementPages/allCategories";
+import AllServices from "./pages/CompanyManagementPages/allServices";
+import AllModels from "./pages/CompanyManagementPages/allModels";
+import AllLorryTypes from "./pages/CompanyManagementPages/allLorryType";
+import AdminOrders from "./pages/CompanyManagementPages/allOrders";
+import AdminPayments from "./pages/CompanyManagementPages/allPayments";
+import AdminRepairs from "./pages/CompanyManagementPages/allRepairs";
+import PayrollDashboard from "./pages/CompanyManagementPages/payrollDashboard";
+import AddService from "./pages/CompanyManagementPages/addService";
+import AddModel from "./pages/CompanyManagementPages/addModel";
+import AddLorryType from "./pages/CompanyManagementPages/addLorryType";
 
-import DashboardLayout from "./components/dashboard";
-import UpdateCategory from "./components/updateCategory";
+import DashboardLayout from "./pages/CompanyManagementPages/dashboard";
+import UpdateCategory from "./pages/CompanyManagementPages/updateCategory";
 
 
 // Layout components for different sections

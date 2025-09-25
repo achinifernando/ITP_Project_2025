@@ -1,11 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const upload = require("../middleware/fileUploadMiddleware");
-const { protectClient } = require("../middleware/authMiddleware");
+const upload = require("../../middleware/fileUploadMiddleware");
+const { protectClient } = require("../../middleware/authMiddleware");
 
-const Payment = require("../models/paymentsModel");
-const Order = require("../models/ordersModel");
-const ServiceRequest = require("../models/serviceRequestsModel");
+const Payment = require("../../models/ClientPortalModels/paymentsModel");
+const Order = require("../../models/ClientPortalModels/ordersModel");
+const ServiceRequest = require("../../models/ClientPortalModels/serviceRequestsModel");
 
 // Upload payment receipt for an order
 router.post("/:type/:id/payment", protectClient, upload.single("receipt"), async (req, res) => {

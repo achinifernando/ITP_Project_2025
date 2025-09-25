@@ -8,8 +8,7 @@ const generateToken = (userId) => {
 
 const registerUser = async (req, res) => {
   try {
-    const { employeeId, name, email, password, profileImageUrl, role } = req.body;
-    // ✅ Make sure you're destructuring the correct field name
+    const { name, email, password, profileImageUrl, role, employeeId } = req.body;
 
     const userExists = await User.findOne({ 
       $or: [{ email }, { employeeId }] 
@@ -20,18 +19,14 @@ const registerUser = async (req, res) => {
         message: 'User with this email or employee ID already exists' 
       });
     }
-    
-    // Default role is employee
-    let userRole = 'member';
-    if (adminInviteToken && adminInviteToken === process.env.ADMIN_INVITE_TOKEN) {
-      role = 'admin';
-    }
 
+    // Default role is member
+    let userRole = 'member';
+    
     // Only allow admin to create other admins or hr_managers
     if(req.user && req.user.role === 'admin'){
       userRole = role || 'member';
     }
-
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
@@ -39,23 +34,21 @@ const registerUser = async (req, res) => {
     const user = await User.create({
       name,
       email,
+      employeeId,
       password: hashedPassword,
       profileImageUrl,
       role: userRole,
     });
 
-    if (user) {
-      res.status(201).json({
-        _id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-        profileImageUrl: user.profileImageUrl,
-        token: generateToken(user._id),
-      });
-    } else {
-      res.status(400).json({ message: 'Invalid user data' });
-    }
+    res.status(201).json({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      employeeId: user.employeeId,
+      profileImageUrl: user.profileImageUrl,
+      token: generateToken(user._id),
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -70,18 +63,17 @@ const loginUser = async (req, res) => {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    //compare password
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
 
-    //return user data with JWT
     res.json({
       _id: user._id,
       name: user.name,
       email: user.email,
       role: user.role,
+      employeeId: user.employeeId,
       profileImageUrl: user.profileImageUrl,
       token: generateToken(user._id),
     });
@@ -106,11 +98,10 @@ const updateUserProfile = async (req, res) => {
   try {
     const user = await User.findById(req.user.id);
 
-    if (!user) {
+    if (user) {
       user.name = req.body.name || user.name;
       user.email = req.body.email || user.email;
       
-
       if (req.body.password) {
         const salt = await bcrypt.genSalt(10);
         user.password = await bcrypt.hash(req.body.password, salt);

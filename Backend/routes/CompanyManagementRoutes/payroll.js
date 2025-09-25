@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const Attendance = require("../models/attendance");
-const User = require("../models/employee");
-const Payroll = require("../models/payroll");
+const Attendance = require("../../models/AttendenceTaskModel/Attendance");
+const User = require("../../models/AttendenceTaskModel/User");
+const Payroll = require("../../models/CompanyManagerModels/payroll");
 
 // Constants
 const STANDARD_WORK_HOURS = 8;

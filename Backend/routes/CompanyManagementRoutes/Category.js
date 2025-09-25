@@ -1,6 +1,6 @@
 const router = require("express").Router();
 const multer = require("multer");
-let Category = require("../models/Category");
+let Category = require("../../models/ClientPortalModels/lorryCategoriesModel");
 
 // ---------- Multer setup for image uploads ----------
 const storage = multer.diskStorage({

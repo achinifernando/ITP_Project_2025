@@ -6,7 +6,7 @@ const {
   updateDriver, 
   deleteDriver, 
   getDriverById 
-} = require('../controllers/driverController');
+} = require('../../controllers/DispatchControllers/driverController');
 
 // GET all drivers
 router.get('/', getAllDrivers);

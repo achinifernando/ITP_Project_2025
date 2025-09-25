@@ -1,28 +1,20 @@
-const express = require('express');
+const express = require("express");
+const { registerUser, loginUser, getUserProfile, updateUserProfile } = require("../../controllers/AttendenceController/authController");
+const { protectUser, adminOnly } = require("../../middleware/authMiddleware");
+
 const router = express.Router();
-const { protect } = require('../middleware/authMiddleware');
-const {
-  registerUser,
-  loginUser,
-  getUserProfile,
-  updateUserProfile
-} = require('../controllers/authController');
-const upload = require("../middleware/uploadMiddleware"); // use the centralized multer config
 
-// Auth Routes
-router.post('/register', registerUser);
-router.post('/login', loginUser);
-router.get('/profile', protect, getUserProfile);
-router.put('/profile', protect, updateUserProfile);
+// Public routes
+router.post("/register", registerUser);
+router.post("/login", loginUser);
 
-// Upload Image Route
-router.post("/upload-image", upload.single("image"), (req, res) => {
-  if (!req.file) {
-    return res.status(400).json({ message: "No file uploaded" });
-  }
+// Protected routes
+router.get("/profile", protectUser, getUserProfile);
+router.put("/profile", protectUser, updateUserProfile);
 
-  const imageUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-  res.status(200).json({ imageUrl });
+// Admin only routes
+router.get("/admin/users", protectUser, adminOnly, async (req, res) => {
+  // Admin functionality to manage users
 });
 
 module.exports = router;

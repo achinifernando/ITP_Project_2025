@@ -4,7 +4,7 @@ const {
   createNotification, 
   getUserNotifications, 
   markAsRead 
-} = require("../controllers/notificationController");
+} = require("../../controllers/DispatchControllers/notificationController");
 
 // Create (send) a notification
 router.post("/", createNotification);
