@@ -74,6 +74,25 @@ app.use('/api/requests', require("./routes/supplierRequests.js"));
 app.use('/api/alerts', require("./routes/alerts.js"));
 app.use('/api/inventory-reports', require("./routes/reports.js")); // Renamed to avoid conflict
 
+//=============== COMPANY ROUTES ===================
+app.use('/admin-categories', require("./routes/Category.js"));
+app.use('/admin-services', require("./routes/Service.js"));
+app.use('/admin-lorry-models', require("./routes/lorryModel.js"));
+app.use('/admin-lorry-types', require("./routes/lorryType.js"));
+app.use('/admin-orders', require("./routes/Order.js"));
+app.use('/admin-payments', require("./routes/payment.js"));
+app.use('/admin-repairs', require("./routes/repair.js"));
+app.use('/admin-attendance', require("./routes/attendance.js"));
+app.use('/admin-payrolls', require("./routes/payroll.js"));
+app.use('/admin-employees', require("./routes/employee.js"));
+app.use('/admin-clients', require("./routes/client.js"));
+app.use('/admin-quotation-requests', require("./routes/QuotationRequest.js"));
+app.use('/admin-quotations', require("./routes/Quotation.js"));
+
+
+
+
+
 
 // Start server
 app.listen(PORT, () => {

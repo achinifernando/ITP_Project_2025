@@ -1,41 +1,41 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
+//const multer = require("multer");
+//const path = require("path");
 const service = require("../models/servicesModel");
 
 
 // Multer storage settings
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "./uploads");
-  },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
+// const storage = multer.diskStorage({
+//   destination: function (req, file, cb) {
+//     cb(null, "./uploads");
+//   },
+//   filename: function (req, file, cb) {
+//     cb(null, Date.now() + path.extname(file.originalname));
+//   }
+// });
 
-const upload = multer({ storage });
+// const upload = multer({ storage });
 
 // Create a new service with image
-router.post("/add", upload.single("image"), async (req, res) => {
-  try {
-    const { serviceType,description } = req.body;
-    if (!serviceType || !description||!req.file) {
-      return res.status(400).json({ message: "Service,description and image are required" });
-    }
+// router.post("/add", upload.single("image"), async (req, res) => {
+//   try {
+//     const { serviceType,description } = req.body;
+//     if (!serviceType || !description||!req.file) {
+//       return res.status(400).json({ message: "Service,description and image are required" });
+//     }
 
-    const newService = new service({
-      serviceType,description,
-      image: req.file.filename
-    });
+//     const newService = new service({
+//       serviceType,description,
+//       image: req.file.filename
+//     });
 
-    await newService.save();
-    res.status(201).json({ message: "Service added successfully", service: newService });
-  } catch (err) {
-    res.status(500).json({ message: "Error adding service", error: err.message });
-  }
-});
+//     await newService.save();
+//     res.status(201).json({ message: "Service added successfully", service: newService });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error adding service", error: err.message });
+//   }
+// });
 
 // Get all services
 router.get("/getServices", async (req, res) => {
@@ -61,42 +61,42 @@ router.get("/:serviceId", async (req, res) => {
 });
 
 // Update service (with optional image update)
-router.put("/update/:serviceId", upload.single("image"), async (req, res) => {
-  try {
-    const { serviceType,description } = req.body;
-    const updateData = { serviceType,description};
+// router.put("/update/:serviceId", upload.single("image"), async (req, res) => {
+//   try {
+//     const { serviceType,description } = req.body;
+//     const updateData = { serviceType,description};
 
-    if (req.file) {
-      updateData.image = req.file.filename;
-    }
+//     if (req.file) {
+//       updateData.image = req.file.filename;
+//     }
 
-    const updatedService = await service.findByIdAndUpdate(
-      req.params.serviceId,
-      updateData,
-      { new: true }
-    );
+//     const updatedService = await service.findByIdAndUpdate(
+//       req.params.serviceId,
+//       updateData,
+//       { new: true }
+//     );
 
-    if (!updatedService) {
-      return res.status(404).json({ message: "Service not found" });
-    }
+//     if (!updatedService) {
+//       return res.status(404).json({ message: "Service not found" });
+//     }
 
-    res.status(200).json({ message: "Services updated successfully", service: updatedService });
-  } catch (err) {
-    res.status(500).json({ message: "Error updating service", error: err.message });
-  }
-});
+//     res.status(200).json({ message: "Services updated successfully", service: updatedService });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error updating service", error: err.message });
+//   }
+// });
 
 // Delete service
-router.delete("/delete/:serviceId", async (req, res) => {
-  try {
-    const deletedService= await service.findByIdAndDelete(req.params.serviceId);
-    if (!deletedService) {
-      return res.status(404).json({ message: "Service not found" });
-    }
-    res.status(200).json({ message: "Service deleted successfully" });
-  } catch (err) {
-    res.status(500).json({ message: "Error deleting service", error: err.message });
-  }
-});
+// router.delete("/delete/:serviceId", async (req, res) => {
+//   try {
+//     const deletedService= await service.findByIdAndDelete(req.params.serviceId);
+//     if (!deletedService) {
+//       return res.status(404).json({ message: "Service not found" });
+//     }
+//     res.status(200).json({ message: "Service deleted successfully" });
+//   } catch (err) {
+//     res.status(500).json({ message: "Error deleting service", error: err.message });
+//   }
+// });
 
 module.exports = router;

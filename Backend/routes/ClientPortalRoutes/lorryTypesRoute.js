@@ -5,40 +5,40 @@ const upload = require('../middleware/imageUploadMiddleware');
 
 
 // Create new lorry type (categoryId passed)
-router.post("/add", upload.array("image", 10), async (req, res) => {
-  try {
-    const {
-      category, // category ID from frontend
-      typeName, frontEnd, subFrame, rearFrame, bumper, door, roof, floor, wallConstuction
-    } = req.body;
+// router.post("/add", upload.array("image", 10), async (req, res) => {
+//   try {
+//     const {
+//       category, // category ID from frontend
+//       typeName, frontEnd, subFrame, rearFrame, bumper, door, roof, floor, wallConstuction
+//     } = req.body;
 
-    if (!category || !typeName || !req.files?.length) {
-      return res.status(400).json({ message: "Category, typeName and at least one image are required" });
-    }
+//     if (!category || !typeName || !req.files?.length) {
+//       return res.status(400).json({ message: "Category, typeName and at least one image are required" });
+//     }
 
-    const imageFiles = req.files.map(file => file.filename);
+//     const imageFiles = req.files.map(file => file.filename);
 
-    const newType = new LorryType({
-      category,
-      typeName,
-      frontEnd,
-      subFrame,
-      rearFrame,
-      bumper,
-      door,
-      roof,
-      floor,
-      wallConstuction,
-      images: imageFiles
-    });
+//     const newType = new LorryType({
+//       category,
+//       typeName,
+//       frontEnd,
+//       subFrame,
+//       rearFrame,
+//       bumper,
+//       door,
+//       roof,
+//       floor,
+//       wallConstuction,
+//       images: imageFiles
+//     });
 
-    await newType.save();
-    res.status(201).json({ message: "Type added successfully", type: newType });
+//     await newType.save();
+//     res.status(201).json({ message: "Type added successfully", type: newType });
 
-  } catch (err) {
-    res.status(500).json({ message: "Error adding type", error: err.message });
-  }
-});
+//   } catch (err) {
+//     res.status(500).json({ message: "Error adding type", error: err.message });
+//   }
+// });
 
 // Get all types for a category ID
 router.get("/category/:categoryId", async (req, res) => {

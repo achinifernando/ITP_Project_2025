@@ -1,0 +1,24 @@
+/* Reduce padding inside table cells */
+.table td,
+.table th {
+  padding: 0.4rem 0.6rem !important;
+  vertical-align: middle;
+}
+
+/* Status colors */
+.status-pending {
+  background: #fff3cd;
+  color: #856404;
+}
+.status-inprogress {
+  background: #cce5ff;
+  color: #004085;
+}
+.status-completed {
+  background: #d4edda;
+  color: #155724;
+}
+.status-cancelled {
+  background: #f8d7da;
+  color: #721c24;
+}

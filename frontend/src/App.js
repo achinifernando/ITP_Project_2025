@@ -59,6 +59,24 @@ import VehicleList from './pages/DispatchPages/VehicleList';
 import DeliveryMap from './pages/DispatchPages/DeliveryMap';
 import GpsTracking from './pages/DispatchPages/gpsTracking';
 
+//CompanyManagement componets
+import AddCategory from "./components/addCategory";
+import AllCategories from "./components/allCategories";
+import AllServices from "./components/allServices";
+import AllModels from "./components/allModels";
+import AllLorryTypes from "./components/allLorryType";
+import AdminOrders from "./components/allOrders";
+import AdminPayments from "./components/allPayments";
+import AdminRepairs from "./components/allRepairs";
+import PayrollDashboard from "./components/payrollDashboard";
+import AddService from "./components/addService";
+import AddModel from "./components/addModel";
+import AddLorryType from "./components/addLorryType";
+
+import DashboardLayout from "./components/dashboard";
+import UpdateCategory from "./components/updateCategory";
+
+
 // Layout components for different sections
 const DispatchLayout = ({ children }) => (
   <div style={{ display: 'flex' }}>
@@ -195,6 +213,24 @@ function App() {
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
+
+          {/* Company Management Routes */}
+          <Route path="/company-manager-dashboard" element={<DashboardLayout />}/>
+            {/* Nested routes inside Dashboard */}
+            <Route path="categories" element={<AllCategories />} />
+            <Route path="addCategory" element={<AddCategory />} />
+            <Route path="update/:id" element={<UpdateCategory />} />
+            <Route path="services" element={<AllServices />} />
+            <Route path="service/add" element={<AddService />} />
+            <Route path="/models" element={<AllModels />} />
+            <Route path="types" element={<AllLorryTypes />} />
+            <Route path="type/add" element={<AddLorryType />} />
+            <Route path="orders" element={<AdminOrders />} />
+            <Route path="payments" element={<AdminPayments />} />
+            <Route path="/repairs" element={<AdminRepairs />} />
+            <Route path="payroll" element={<PayrollDashboard/>}/>
+            <Route path="model/add" element={<AddModel/>}/>
+
         </Routes>
         <Footer />
       </div>
