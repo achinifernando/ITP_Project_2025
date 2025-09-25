@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import "../../CSS/TaskManagerCSS/UserCard.css";
+import "../../CSS/AttendanceCSS/UserCard.css";
 
 const UserCard = ({ userInfo }) => {
     const {

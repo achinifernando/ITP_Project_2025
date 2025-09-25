@@ -2,7 +2,7 @@
 @import url(https://fonts.bunny.net/css?family=abel:400);
 
 /* Navbar Container */
-.navbar {
+.main-navbar {
   position: sticky;
   top: 0;
   z-index: 1000;
@@ -21,7 +21,7 @@
 }
 
 /* Industrial pattern overlay */
-.navbar::before {
+.main-navbar::before {
   content: '';
   position: absolute;
   top: 0;
@@ -36,7 +36,7 @@
 }
 
 /* Navbar on scroll effect */
-.navbar.scrolled {
+.main-navbar.scrolled {
   background: rgba(33, 52, 72, 0.9);
   backdrop-filter: blur(30px);
   box-shadow: 
@@ -62,7 +62,7 @@
 
 
 /* Navigation Links */
-.navbar-links {
+.main-navbar-links {
   display: flex;
   gap: 35px;
   align-items: center;
@@ -249,11 +249,11 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .navbar {
+  .main-navbar {
     padding: 12px 25px;
   }
   
-  .navbar-links {
+  .main-navbar-links {
     gap: 25px;
   }
   
@@ -268,12 +268,12 @@
 }
 
 @media (max-width: 768px) {
-  .navbar {
+  .main-navbar {
     flex-wrap: wrap;
     padding: 15px 20px;
   }
   
-  .navbar-links {
+  .main-navbar-links {
     order: 4;
     width: 100%;
     justify-content: center;
@@ -302,7 +302,7 @@
 }
 
 @media (max-width: 640px) {
-  .navbar-links {
+  .main-navbar-links {
     flex-direction: column;
     gap: 10px;
   }
@@ -333,7 +333,7 @@
 }
 
 @media (max-width: 480px) {
-  .navbar {
+  .main-navbar {
     padding: 12px 15px;
   }
   
@@ -341,7 +341,7 @@
     height: 40px;
   }
   
-  .navbar-links {
+  .main-navbar-links {
     flex-wrap: wrap;
     gap: 8px;
   }
@@ -374,7 +374,7 @@
 }
 
 /* Navbar animation on page load */
-.navbar {
+.main-navbar {
   animation: navbarSlideDown 0.8s ease-out;
 }
 
@@ -391,7 +391,7 @@
 
 /* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
-  .navbar,
+  .main-navbar,
   .nav-link,
   .btn-login,
   .btn-search,

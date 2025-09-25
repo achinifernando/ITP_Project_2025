@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { UserContext } from "../../context/userContext";
+import { UserContext } from "../../components/context/userContext";
 import { useNavigate } from "react-router-dom";
 import { SIDE_MENU_HR_DATA } from "../../utils/data";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";

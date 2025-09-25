@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import logoImg from "../assets/Nimal-Eng-logo.jpeg"
-import "../CSS/header.css"
+import "../CSS/ClientPortalCSS/header.css"
 
 
 function Header() {
@@ -24,12 +24,12 @@ function Header() {
  
 
   return (
-    <nav className="navbar">
+    <nav className="main-navbar">
       <div className="logo">
         <img src={logoImg} alt="logo" />
       </div>
 
-      <div className="navbar-links">
+      <div className="main-navbar-links">
         <Link to="/home" className="nav-link">HOME</Link>
         <Link to="/products" className="nav-link">PRODUCTS</Link>
         <Link to="/services" className="nav-link">SERVICES</Link>

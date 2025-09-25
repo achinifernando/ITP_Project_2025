@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import "../CSS/home.css";
+import "../CSS/ClientPortalCSS/home.css";
 import homeImg from "../assets/homeImg2.jpg";
 import { Link } from "react-router-dom";
 

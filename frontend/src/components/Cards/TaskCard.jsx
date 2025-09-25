@@ -1,5 +1,5 @@
 import React from "react";
-import "../../CSS/TaskManagerCSS/TaskCard.css";
+//import "../../CSS/TaskManagerCSS/TaskCard.css";
 
 const TaskCard = ({ 
   task, 

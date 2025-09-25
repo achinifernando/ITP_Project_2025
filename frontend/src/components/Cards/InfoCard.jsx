@@ -1,6 +1,6 @@
 import React from "react";
 //import "../../styles/TaskManagerCSS/InfoCard.css";
-import "../../CSS/TaskManagerCSS/Dashboard.css";
+import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
 
 const InfoCard = ({ icon, label, value }) => {
   return (

@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { UserContext } from "../../context/userContext";
+import { UserContext } from "../../components/context/userContext";
 import { Navigate } from "react-router-dom";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
 import NavBar from "../layouts/attendanceNavbar";
