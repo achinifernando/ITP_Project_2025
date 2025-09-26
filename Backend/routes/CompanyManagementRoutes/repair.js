@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const RepairMaintenance = require("../../models/ClientPortalModels/serviceRequestsModel");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 // GET all repair & maintenance requests
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const repairs = await RepairMaintenance.find(); 
     res.status(200).json(repairs);
@@ -14,7 +15,7 @@ router.get("/", async (req, res) => {
 });
 
 // UPDATE repair status
-router.put("/:id/status", async (req, res) => {
+router.put("/:id/status", protectUser, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: "status is required" });

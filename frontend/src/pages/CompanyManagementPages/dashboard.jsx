@@ -17,7 +17,7 @@ export default function DashboardLayout() {
             </Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link text-white" to="/services">
+            <Link className="nav-link text-white" to="/admin-services">
               Services
             </Link>
           </li>
@@ -32,13 +32,13 @@ export default function DashboardLayout() {
             </Link>
           </li>
           <li className="nav-item">
-            <Link className="nav-link text-white" to="payments">
+            <Link className="nav-link text-white" to="/payments">
               Payments
             </Link>
           </li>
 
           <li className="nav-item">
-            <Link className="nav-link text-white" to="payroll">
+            <Link className="nav-link text-white" to="/payroll">
               Payroll
             </Link>
           </li>

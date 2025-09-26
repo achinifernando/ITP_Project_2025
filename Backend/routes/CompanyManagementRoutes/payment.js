@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const Payment = require("../../models/ClientPortalModels/paymentsModel");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 // GET all payments
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const payments = await Payment.find()
       .populate("clientId", "name email phone") // client details
@@ -19,7 +20,7 @@ router.get("/", async (req, res) => {
 });
 
 // UPDATE payment status
-router.put("/:id/status", async (req, res) => {
+router.put("/:id/status", protectUser, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: "status is required" });

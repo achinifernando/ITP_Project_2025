@@ -7,6 +7,7 @@ const {
   updateVehicle,
   deleteVehicle,
 } = require("../../controllers/DispatchControllers/vehicleController");
+const { protectUser, dispatchManager } = require("../../middleware/authMiddleware");
 
 // Validation rules
 const vehicleValidation = [
@@ -16,9 +17,9 @@ const vehicleValidation = [
 ];
 
 // Routes
-router.get("/", getAllVehicles);
-router.post("/", vehicleValidation, addVehicle);
-router.put("/:id", updateVehicle);
-router.delete("/:id", deleteVehicle);
+router.get("/",protectUser, getAllVehicles);
+router.post("/",protectUser, vehicleValidation, addVehicle);
+router.put("/:id",protectUser, updateVehicle);
+router.delete("/:id",protectUser, deleteVehicle);
 
 module.exports = router;

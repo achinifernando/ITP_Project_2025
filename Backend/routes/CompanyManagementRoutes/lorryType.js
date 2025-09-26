@@ -3,6 +3,7 @@ const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
 const LorryType = require("../../models/ClientPortalModels/lorryTypesModel");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 // Multer storage
 const storage = multer.diskStorage({
@@ -17,7 +18,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Create new lorry type
-router.post("/add", upload.array("image", 10), async (req, res) => {
+router.post("/add", protectUser, upload.array("image", 10), async (req, res) => {
   try {
     const {
       category,
@@ -53,7 +54,7 @@ router.post("/add", upload.array("image", 10), async (req, res) => {
 });
 
 // Get all types for a category ID
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const types = await LorryType.find().populate("category"); // optional populate
     res.json(types);
@@ -64,7 +65,7 @@ router.get("/", async (req, res) => {
 
 
 // Get single type by ID
-router.get("/:lorryId", async (req, res) => {
+router.get("/:lorryId", protectUser, async (req, res) => {
   try {
     const type = await LorryType.findById(req.params.lorryId);
     if (!type) return res.status(404).json({ message: "Type not found" });
@@ -75,7 +76,7 @@ router.get("/:lorryId", async (req, res) => {
 });
 
 // Update type
-router.put("/update/:typeId", upload.array("images", 10), async (req, res) => {
+router.put("/update/:typeId", protectUser, upload.array("images", 10), async (req, res) => {
   try {
     const type = await LorryType.findById(req.params.typeId);
     if (!type) return res.status(404).json({ message: "Type not found" });
@@ -110,7 +111,7 @@ router.put("/update/:typeId", upload.array("images", 10), async (req, res) => {
 });
 
 // Delete type and its images
-router.delete("/delete/:typeId", async (req, res) => {
+router.delete("/delete/:typeId", protectUser, async (req, res) => {
   try {
     const type = await LorryType.findById(req.params.typeId);
     if (!type) return res.status(404).json({ message: "Type not found" });

@@ -1,4 +1,4 @@
-* {
+/* * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -12,10 +12,10 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
-        }
+        } */
 
         /* Glassmorphic signup form */
-        .signup-form {
+        /* .signup-form {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
@@ -41,20 +41,20 @@
             text-align: center;
             margin-bottom: 1.8rem;
             font-size: 1rem;
-        }
+        }*/
 
         /* Form labels */
-        .signup-form .form-label {
+       /* .signup-form .form-label {
             font-size: 0.9rem;
             font-weight: 500;
             color: rgba(255, 255, 255, 0.9);
             margin-bottom: 6px;
             display: block;
             margin-top: 1rem;
-        }
+        } */
 
         /* Inputs styling */
-        .signup-form input {
+        /* .signup-form input {
             padding: 12px 16px;
             border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -84,19 +84,19 @@
             text-align: center;
             margin-bottom: 1.8rem;
             font-size: 1rem;
-        }
+        } */
 
         /* Profile Photo Selector Container */
-        .profile-photo-selector {
+        /* .profile-photo-selector {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 12px;
             margin-bottom: 1rem;
-        }
+        } */
 
         /* Placeholder user icon */
-        .placeholder {
+        /* .placeholder {
             width: 96px;
             height: 96px;
             border-radius: 50%;
@@ -132,10 +132,10 @@
             height: 30px;
             border-radius: 50% 50% 0 0;
             background: rgba(255, 255, 255, 0.8);
-        }
+        } */
 
         /* Preview image */
-        .profile-preview {
+        /* .profile-preview {
             width: 96px;
             height: 96px;
             border-radius: 50%;
@@ -146,10 +146,10 @@
         .preview-wrapper {
             position: relative;
             display: inline-block;
-        }
+        } */
 
         /* Remove (X) button */
-        .remove-btn {
+        /* .remove-btn {
             position: absolute;
             top: 0;
             right: 0;
@@ -194,10 +194,10 @@
         }
         .icon-x::after {
             transform: rotate(-45deg);
-        }
+        } */
 
         /* Upload button */
-        .upload-btn {
+        /* .upload-btn {
             display: flex;
             align-items: center;
             gap: 6px;
@@ -215,10 +215,10 @@
         .upload-btn:hover {
             background-color: rgba(255, 255, 255, 0.3);
             transform: translateY(-2px);
-        }
+        } */
 
         /* Upload icon */
-        .icon-upload {
+        /* .icon-upload {
             position: relative;
             width: 18px;
             height: 18px;
@@ -253,10 +253,10 @@
             width: 14px;
             height: 2px;
             background: white;
-        }
+        } */
 
         /* Submit button */
-        .signup-form button[type="submit"] {
+        /* .signup-form button[type="submit"] {
             padding: 14px;
             background-color: rgba(255, 255, 255, 0.25);
             color: white;
@@ -275,11 +275,11 @@
         .signup-form button[type="submit"]:hover {
             background-color: rgba(255, 255, 255, 0.4);
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15); 
+        }*/
 
         /* Error message */
-        .error-message {
+        /* .error-message {
             color: #ff6b6b;
             text-align: center;
             margin-top: 1rem;
@@ -296,4 +296,4 @@
             font-style: italic;
             margin-bottom: 20px;
             font-size: 0.9rem;
-            }
+            } */

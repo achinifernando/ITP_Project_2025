@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AddLorryType() {
   const [typeName, setTypeName] = useState("");
@@ -36,7 +36,7 @@ export default function AddLorryType() {
     }
 
     try {
-      await axios.post("http://localhost:5000/admin-lorryType/add", formData, {
+      await axiosInstance.post("http://localhost:5000/admin-lorry-types/add", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Lorry type added successfully");

@@ -1,6 +1,6 @@
 // src/components/AllServices.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AllServices() {
   const [services, setServices] = useState([]);
@@ -10,16 +10,16 @@ export default function AllServices() {
   }, []);
 
   const fetchServices = () => {
-    axios
-      .get("http://localhost:5000/admin-service/")
+    axiosInstance
+      .get("http://localhost:5000/admin-services/")
       .then((res) => setServices(res.data))
       .catch((err) => alert(err.message));
   };
 
   const deleteService = (id) => {
     if (window.confirm("Are you sure you want to delete this service?")) {
-      axios
-        .delete(`http://localhost:5000/admin-service/delete/${id}`)
+      axiosInstance
+        .delete(`http://localhost:5000/admin-services/delete/${id}`)
         .then(() => {
           alert("Service deleted");
           fetchServices();
@@ -29,11 +29,11 @@ export default function AllServices() {
   };
 
   const updateService = (id) => {
-    window.location.href = `/admin-service/update/${id}`;
+    window.location.href = `/admin-services/update/${id}`;
   };
 
   const addService = () => {
-    window.location.href = "/admin-service/add"; // 👈 navigate to AddService.js
+    window.location.href = "/admin-services/add"; // 👈 navigate to AddService.js
   };
 
   return (
@@ -53,7 +53,7 @@ export default function AllServices() {
             <div className="card">
               {srv.image && (
                 <img
-                  src={`http://localhost:5000/uploads/${srv.image}`}
+                  src={`http://localhost:5000/files/${srv.image}`}
                   className="card-img-top"
                   alt={srv.serviceType}
                   style={{ height: "200px", objectFit: "cover" }}

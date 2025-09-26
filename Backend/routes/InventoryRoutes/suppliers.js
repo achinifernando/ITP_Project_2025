@@ -2,6 +2,7 @@ import { Router } from 'express';
 import Joi from 'joi';
 import Supplier from '../../models/InventoryModels/Supplier.js';
 import { idParam, pagination } from '../../validators/common.js';
+const { protectUser, inventoryManager } = require("../../middleware/authMiddleware");
 
 const router = Router();
 
@@ -21,7 +22,7 @@ const supplierBody = Joi.object({
   status: Joi.string().valid('active', 'inactive', 'pending').default('active')
 });
 
-router.get('/', async (req, res) => {
+router.get('/',protectUser, async (req, res) => {
   const { value: q } = pagination.validate(req.query);
   const docs = await Supplier.find()
     .skip((q.page - 1) * q.limit)
@@ -30,14 +31,14 @@ router.get('/', async (req, res) => {
   res.json(docs);
 });
 
-router.post('/', async (req, res) => {
+router.post('/',protectUser, async (req, res) => {
   const { value, error } = supplierBody.validate(req.body);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
   const created = await Supplier.create(value);
   res.status(201).json(created);
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id',protectUser, async (req, res) => {
   const { error } = idParam.validate(req.params);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
   const doc = await Supplier.findById(req.params.id);
@@ -45,7 +46,7 @@ router.get('/:id', async (req, res) => {
   res.json(doc);
 });
 
-router.put('/:id', async (req, res) => {
+router.put('/:id',protectUser, async (req, res) => {
   const { error: idErr } = idParam.validate(req.params);
   if (idErr) throw Object.assign(new Error(idErr.message), { status: 400 });
   const { value, error } = supplierBody.validate(req.body);
@@ -58,7 +59,7 @@ router.put('/:id', async (req, res) => {
   res.json(updated);
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',protectUser, async (req, res) => {
   const { error } = idParam.validate(req.params);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
   const del = await Supplier.findByIdAndDelete(req.params.id);

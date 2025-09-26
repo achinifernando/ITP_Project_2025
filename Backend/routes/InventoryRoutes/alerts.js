@@ -1,6 +1,7 @@
 const express = require("express");
 const Joi = require("joi");
 const Stock = require("../../models/InventoryModels/Stock");
+const { protectUser, inventoryManager } = require("../../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -8,7 +9,7 @@ const router = express.Router();
  * GET /api/alerts/low-stock
  * returns items where quantity <= threshold
  */
-router.get("/low-stock", async (_req, res) => {
+router.get("/low-stock",protectUser, async (_req, res) => {
   const items = await Stock.find({
     $expr: { $lte: ["$quantity", "$threshold"] },
   }).sort({ itemName: 1 });
@@ -20,7 +21,7 @@ router.get("/low-stock", async (_req, res) => {
  * - nearExpiry: expiryDate within `days` from now (and not expired yet)
  * - expired: expiryDate < now
  */
-router.get("/expiry", async (req, res) => {
+router.get("/expiry",protectUser, async (req, res) => {
   const { value, error } = Joi.object({
     days: Joi.number().min(1).default(30),
   }).validate(req.query);

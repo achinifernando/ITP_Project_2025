@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { api } from "../../utils/apiPaths";
-import Modal from '../../components/Modal';
+import { api } from '../lib/api';
+import { SupplierDTO, SupplierUpsert, clean } from '../types/dto';
+import Modal from '../components/Modal';
 import {
   Users,
   Building2,
@@ -14,17 +15,17 @@ import {
 } from 'lucide-react';
 
 /* ---------------- Tiny Toasts (success / error messages) ---------------- */
+type Toast = { id: string; title: string; desc?: string; tone?: 'ok' | 'err' };
 function useToasts() {
-  const [toasts, setToasts] = useState([]);
-  const push = (t) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const push = (t: Omit<Toast, 'id'>) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), 2800);
   };
   return { toasts, push };
 }
-
-function ToastStack({ toasts }) {
+function ToastStack({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-4 right-4 z-[60] space-y-2">
       {toasts.map((t) => {
@@ -56,10 +57,10 @@ function ToastStack({ toasts }) {
 /* ----------------------------------------------------------------------- */
 
 export default function SuppliersPage() {
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<SupplierDTO[]>([]);
   const [open, setOpen] = useState(false);
-  const [edit, setEdit] = useState(null);
-  const [form, setForm] = useState({
+  const [edit, setEdit] = useState<SupplierDTO | null>(null);
+  const [form, setForm] = useState<SupplierUpsert>({
     name: '',
     email: '',
     phone: '',
@@ -67,25 +68,29 @@ export default function SuppliersPage() {
     status: 'active',
   });
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string>('');
   const [q, setQ] = useState('');
 
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    name?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    status?: string;
+  }>({});
 
   const { toasts, push } = useToasts();
 
   async function load() {
     setError('');
     try {
-      const data = await api.get('/api/suppliers');
-      setList(data);
-    } catch (e) {
+      setList(await api.get<SupplierDTO[]>('/api/suppliers'));
+    } catch (e: any) {
       setList([]);
       setError(e?.message || 'Failed to load suppliers');
       push({ title: 'Failed to load suppliers', desc: e?.message ?? 'Network error', tone: 'err' });
     }
   }
-  
   useEffect(() => { load(); }, []);
 
   function openCreate() {
@@ -94,25 +99,19 @@ export default function SuppliersPage() {
     setFieldErrors({});
     setOpen(true);
   }
-  
-  function openEdit(row) {
+  function openEdit(row: SupplierDTO) {
     setEdit(row);
     setForm({
-      name: row.name, 
-      email: row.email, 
-      phone: row.phone, 
-      company: row.company, 
-      status: row.status,
-      address: row.address, 
-      products: row.products || []
+      name: row.name, email: row.email, phone: row.phone, company: row.company, status: row.status,
+      address: row.address, products: row.products || []
     });
     setFieldErrors({});
     setOpen(true);
   }
 
   // ---------- Validations ----------
-  function validate() {
-    const errs = {};
+  function validate(): boolean {
+    const errs: typeof fieldErrors = {};
     if (!form.name?.trim()) errs.name = 'Name is required.';
 
     if (form.email?.trim()) {
@@ -125,7 +124,7 @@ export default function SuppliersPage() {
       if (digits.replace(/\D/g, '').length < 7) errs.phone = 'Enter a valid phone number.';
     }
 
-    if (!form.status || !['active', 'inactive', 'pending'].includes(form.status)) {
+    if (!form.status || !['active', 'inactive', 'pending'].includes(form.status as any)) {
       errs.status = 'Select a valid status.';
     }
 
@@ -141,52 +140,39 @@ export default function SuppliersPage() {
     if (!validate()) return;
     try {
       setSaving(true);
-      const payload = cleanFormData(form);
+      const payload = clean(form);
       if (edit) {
-        const updated = await api.put(`/api/suppliers/${edit._id}`, payload);
+        const updated = await api.put<SupplierDTO>(`/api/suppliers/${edit._id}`, payload);
         setList(prev => prev.map(x => x._id === edit._id ? updated : x));
         push({ title: 'Supplier updated', desc: `"${updated.name}" saved successfully.` });
       } else {
-        const created = await api.post('/api/suppliers', payload);
+        const created = await api.post<SupplierDTO>('/api/suppliers', payload);
         setList(prev => [created, ...prev]);
         push({ title: 'Supplier added', desc: `"${created.name}" created successfully.` });
       }
       setOpen(false);
-    } catch (e) {
+    } catch (e: any) {
       push({ title: 'Save failed', desc: e?.message ?? 'Request error', tone: 'err' });
     } finally {
       setSaving(false);
     }
   }
 
-  async function remove(id) {
-    if (window.confirm(`Are you sure you want to delete?`)) {
+  async function remove(id: string) {
+    if (!confirm('Delete this supplier?')) return;
     try {
       await api.delete(`/api/suppliers/${id}`);
       setList(prev => prev.filter(x => x._id !== id));
       push({ title: 'Supplier deleted' });
-    } catch (e) {
+    } catch (e: any) {
       push({ title: 'Delete failed', desc: e?.message ?? 'Request error', tone: 'err' });
     }
-  }
-  }
-
-  // Helper function to clean form data
-  function cleanFormData(formData) {
-    const cleaned = { ...formData };
-    // Remove null/undefined/empty values
-    Object.keys(cleaned).forEach(key => {
-      if (cleaned[key] === null || cleaned[key] === undefined || cleaned[key] === '') {
-        delete cleaned[key];
-      }
-    });
-    return cleaned;
   }
 
   // ---------- Analysis ----------
   const analysis = useMemo(() => {
     const total = list.length;
-    const byStatus = { active: 0, inactive: 0, pending: 0 };
+    const byStatus = { active: 0, inactive: 0, pending: 0 } as Record<string, number>;
     let missingEmail = 0;
     let missingPhone = 0;
     for (const s of list) {
@@ -386,11 +372,11 @@ export default function SuppliersPage() {
               <input
                 type="text"
                 inputMode="numeric"
-                maxLength={10}
+                maxLength={10} // ✅ prevents typing more than 10 chars
                 className={`border rounded-lg px-3 py-2 ${fieldErrors.phone ? 'border-rose-300' : ''}`}
                 value={form.phone || ''}
                 onChange={e => {
-                  const value = e.target.value.replace(/\D/g, "");
+                  const value = e.target.value.replace(/\D/g, ""); // ✅ remove non-digits
                   setForm(f => ({ ...f, phone: value }));
 
                   // validation
@@ -411,7 +397,7 @@ export default function SuppliersPage() {
               <select
                 className={`border rounded-lg px-3 py-2 ${fieldErrors.status ? 'border-rose-300' : ''}`}
                 value={form.status || 'active'}
-                onChange={e => setForm(f => ({...f, status: e.target.value}))}
+                onChange={e => setForm(f => ({...f, status: e.target.value as any}))}
               >
                 <option value="active">active</option>
                 <option value="inactive">inactive</option>

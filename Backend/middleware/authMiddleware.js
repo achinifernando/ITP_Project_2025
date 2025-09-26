@@ -62,5 +62,25 @@ const hrManagerOrAdmin = (req, res, next) => {
     res.status(403).json({ message: "Access denied. HR Manager or Admin only." });
   }
 };
-
-module.exports = { protectClient, protectUser, adminOnly, hrManagerOrAdmin };
+const companyManager = (req, res, next) => {
+  if (req.user && (req.user.role === "company_manager")) {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Company Manager only." });
+  }
+};
+const inventoryManager = (req, res, next) => {
+  if (req.user && ( req.user.role === "inventory_manager")) {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Inventory Manager or Admin only." });
+  }
+};
+const dispatchManager = (req, res, next) => {
+  if (req.user && ( req.user.role === "dispatch_manager")) {
+    next();
+  } else {
+    res.status(403).json({ message: "Access denied. Dispatch Manager or Admin only." });
+  }
+};
+module.exports = { protectClient, protectUser, adminOnly, hrManagerOrAdmin,companyManager,inventoryManager,dispatchManager };

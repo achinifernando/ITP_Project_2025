@@ -4,6 +4,7 @@ const Supplier = require("../../models/InventoryModels/Supplier");
 const SupplierRequest = require("../../models/InventoryModels/SupplierRequest");
 const { idParam, pagination } = require("../../validators/common");
 const { sendEmail } = require("../../utils/mailer");
+const { protectUser, inventoryManager } = require("../../middleware/authMiddleware");
 
 const router = express.Router();
 
@@ -25,7 +26,7 @@ const requestBody = Joi.object({
   sendEmail: Joi.boolean().default(false),
 });
 
-router.get("/", async (req, res) => {
+router.get("/",protectUser, async (req, res) => {
   const { value: q } = pagination.validate(req.query);
   const docs = await SupplierRequest.find()
     .populate("supplier", "name email company status")
@@ -35,7 +36,7 @@ router.get("/", async (req, res) => {
   res.json(docs);
 });
 
-router.post("/", async (req, res) => {
+router.post("/",protectUser, async (req, res) => {
   const { value, error } = requestBody.validate(req.body);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
 
@@ -78,7 +79,7 @@ router.post("/", async (req, res) => {
   res.status(201).json(doc);
 });
 
-router.get("/:id", async (req, res) => {
+router.get("/:id",protectUser, async (req, res) => {
   const { error } = idParam.validate(req.params);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
   const doc = await SupplierRequest.findById(req.params.id).populate(
@@ -90,7 +91,7 @@ router.get("/:id", async (req, res) => {
   res.json(doc);
 });
 
-router.patch("/:id/status", async (req, res) => {
+router.patch("/:id/status",protectUser, async (req, res) => {
   const { error } = idParam.validate(req.params);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
   const body = Joi.object({
@@ -111,7 +112,7 @@ router.patch("/:id/status", async (req, res) => {
   res.json(doc);
 });
 
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",protectUser, async (req, res) => {
   const { error } = idParam.validate(req.params);
   if (error) throw Object.assign(new Error(error.message), { status: 400 });
   const del = await SupplierRequest.findByIdAndDelete(req.params.id);

@@ -1,6 +1,6 @@
 // src/components/AddService.js
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AddService() {
   const [serviceType, setServiceType] = useState("");
@@ -16,7 +16,7 @@ export default function AddService() {
     if (image) formData.append("image", image);
 
     try {
-      await axios.post("http://localhost:5000/admin-service/add", formData, {
+      await axiosInstance.post("http://localhost:5000/admin-services/add", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("Service added successfully");

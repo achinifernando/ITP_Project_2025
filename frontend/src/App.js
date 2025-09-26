@@ -1,63 +1,69 @@
-import './App.css';
-import React, { useContext } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate, NavLink } from 'react-router-dom';
+import "./App.css";
+import React, { useContext } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  NavLink,
+} from "react-router-dom";
 import Header from "./components/Header";
 import LorryTypesPage from "./pages/ClientPortalPages/LorryTypesPage";
 import LorryDetails from "./pages/ClientPortalPages/LorryDetails";
 import RequestForm from "./pages/ClientPortalPages/ServiceRequestForm";
-import LorryCategoryCards from './pages/ClientPortalPages/LorryCategories';
-import Footer from './components/Footer';
-import Services from './pages/ClientPortalPages/Services';
-import OrderForm from './pages/ClientPortalPages/OrderForm';
-import Signup from './pages/ClientPortalPages/Signup';
-import Login from './pages/ClientPortalPages/Login';
-import ProfilePage from './pages/ClientPortalPages/ProfilePage';
-import UpdateProfileForm from './pages/ClientPortalPages/UpdateProfileForm';
-import HomePage from './components/HomePage';
-import QuotationForm from './pages/CompanyManagementPages/QuotationGenerator';
-import CompanyManagerDashbord from './pages/CompanyManagementPages/CompanyManagerDashbord';
-import ScheduleMeeting from './pages/ClientPortalPages/ClientBookingpage';
-import CheckoutPage from './pages/ClientPortalPages/CheckoutPage';
+import LorryCategoryCards from "./pages/ClientPortalPages/LorryCategories";
+import Footer from "./components/Footer";
+import Services from "./pages/ClientPortalPages/Services";
+import OrderForm from "./pages/ClientPortalPages/OrderForm";
+import Signup from "./pages/ClientPortalPages/Signup";
+import Login from "./pages/ClientPortalPages/Login";
+import ProfilePage from "./pages/ClientPortalPages/ProfilePage";
+import UpdateProfileForm from "./pages/ClientPortalPages/UpdateProfileForm";
+import HomePage from "./components/HomePage";
+import QuotationForm from "./pages/CompanyManagementPages/QuotationGenerator";
+import CompanyManagerDashbord from "./pages/CompanyManagementPages/CompanyManagerDashbord";
+import ScheduleMeeting from "./pages/ClientPortalPages/ClientBookingpage";
+import CheckoutPage from "./pages/ClientPortalPages/CheckoutPage";
 
 // Task management components
-import LoginNew from './pages/TaskManagerPages/LoginNew';
-import SignUp from './pages/TaskManagerPages/SignUp';
-import PrivateRoute from './routes/PrivateRoute';
-import TaskManagerDashboard from './pages/TaskManagerPages/TaskManagerDashboard';
-import ManageTasks from './pages/TaskManagerPages/ManageTasks';
-import CreateTask from './pages/TaskManagerPages/CreateTasks';
-import ManageUsers from './pages/TaskManagerPages/ManageUsers';
-import UserDashboard from './pages/TaskManagerPages/UserDashboard';
-import MyTasks from './pages/TaskManagerPages/MyTasks';
-import ViewTaskDetails from './pages/TaskManagerPages/ViewTaskDetails';
+import LoginNew from "./pages/TaskManagerPages/LoginNew";
+import SignUp from "./pages/TaskManagerPages/SignUp";
+import PrivateRoute from "./routes/PrivateRoute";
+import TaskManagerDashboard from "./pages/TaskManagerPages/TaskManagerDashboard";
+import ManageTasks from "./pages/TaskManagerPages/ManageTasks";
+import CreateTask from "./pages/TaskManagerPages/CreateTasks";
+import ManageUsers from "./pages/TaskManagerPages/ManageUsers";
+import UserDashboard from "./pages/TaskManagerPages/UserDashboard";
+import MyTasks from "./pages/TaskManagerPages/MyTasks";
+import ViewTaskDetails from "./pages/TaskManagerPages/ViewTaskDetails";
 
 // Attendance Components
-import AttendanceDashboard from './pages/AttendancePages/AttendanceDashboard';
-import Employees from './pages/AttendancePages/Employees';
-import Leaves from './pages/AttendancePages/Leaves';
-import Salary from './pages/AttendancePages/Salary';
-import Attendance from './pages/AttendancePages/Attendance';
-import AttendanceReports from './pages/AttendancePages/AttendanceReports'; // Renamed
-import { UserContext } from './components/context/userContext';
+import AttendanceDashboard from "./pages/AttendancePages/AttendanceDashboard";
+import Employees from "./pages/AttendancePages/Employees";
+import Leaves from "./pages/AttendancePages/Leaves";
+import Salary from "./pages/AttendancePages/Salary";
+import Attendance from "./pages/AttendancePages/Attendance";
+import AttendanceReports from "./pages/AttendancePages/AttendanceReports"; // Renamed
+import { UserContext } from "./components/context/userContext";
 
 // Inventory components
-import InventoryPage from './pages/InventoryPages/InventoryPage';
-import SuppliersPage from './pages/InventoryPages/SuppliersPage';
-import RequestsPage from './pages/InventoryPages/RequestsPage';
-import AlertsPage from './pages/InventoryPages/AlertsPage';
-import ReportsPage from './pages/InventoryPages/ReportsPage';
+import InventoryPage from "./pages/InventoryPages/InventoryPage";
+import SuppliersPage from "./pages/InventoryPages/SuppliersPage";
+import RequestsPage from "./pages/InventoryPages/RequestsPage";
+import AlertsPage from "./pages/InventoryPages/AlertsPage";
+import ReportsPage from "./pages/InventoryPages/ReportsPage";
 
 // Dispatch management components - RENAMED IMPORTS
-import DispatchSidebar from './pages/DispatchPages/DispatchSidebar';
-import DispatchHeader from './pages/DispatchPages/DispatchHeader'; // Assuming this is a different Header
-import DispatchReports from './pages/DispatchPages/DispatchReports'; // Renamed
-import AddDelivery from './pages/DispatchPages/AddDelivery';
-import AssignedDeliveries from './pages/DispatchPages/AssignedDeliveries';
-import DispatchDashboard from './pages/DispatchPages/Dashboard';
-import DriverList from './pages/DispatchPages/DriverList';
-import VehicleList from './pages/DispatchPages/VehicleList';
-import DeliveryMap from './pages/DispatchPages/DeliveryMap';
-import GpsTracking from './pages/DispatchPages/gpsTracking';
+import DispatchSidebar from "./pages/DispatchPages/DispatchSidebar";
+import DispatchHeader from "./pages/DispatchPages/DispatchHeader"; // Assuming this is a different Header
+import DispatchReports from "./pages/DispatchPages/DispatchReports"; // Renamed
+import AddDelivery from "./pages/DispatchPages/AddDelivery";
+import AssignedDeliveries from "./pages/DispatchPages/AssignedDeliveries";
+import DispatchDashboard from "./pages/DispatchPages/Dashboard";
+import DriverList from "./pages/DispatchPages/DriverList";
+import VehicleList from "./pages/DispatchPages/VehicleList";
+import DeliveryMap from "./pages/DispatchPages/DeliveryMap";
+import GpsTracking from "./pages/DispatchPages/gpsTracking";
 
 //CompanyManagement componets
 import AddCategory from "./pages/CompanyManagementPages/addCategory";
@@ -76,15 +82,15 @@ import AddLorryType from "./pages/CompanyManagementPages/addLorryType";
 import DashboardLayout from "./pages/CompanyManagementPages/dashboard";
 import UpdateCategory from "./pages/CompanyManagementPages/updateCategory";
 
-
 // Layout components for different sections
-const DispatchLayout = ({ children }) => (
-  <div style={{ display: 'flex' }}>
+import { Outlet } from "react-router-dom";
+const DispatchLayout = () => (
+  <div style={{ display: "flex" }}>
     <DispatchSidebar />
-    <div style={{ flex: 1, marginLeft: '200px' }}>
+    <div style={{ flex: 1, marginLeft: "200px" }}>
       <DispatchHeader />
-      <div style={{ padding: '20px', marginTop: '70px' }}>
-        {children}
+      <div style={{ padding: "15px", marginTop: "70px" }}>
+        <Outlet />
       </div>
     </div>
   </div>
@@ -95,18 +101,20 @@ const InventoryLayout = ({ children }) => (
     <nav className="bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-6">
         {[
-          ['/inventory', 'Inventory'],
-          ['/suppliers', 'Suppliers'],
-          ['/requests', 'Requests'],
-          ['/alerts', 'Alerts'],
-          ['/inventory-reports', 'Reports'], // Changed path to avoid conflict
+          ["/inventory", "Inventory"],
+          ["/suppliers", "Suppliers"],
+          ["/requests", "Requests"],
+          ["/alerts", "Alerts"],
+          ["/inventory-reports", "Reports"], // Changed path to avoid conflict
         ].map(([to, label]) => (
           <NavLink
             key={to}
             to={to}
-            end={to === '/inventory'}
+            end={to === "/inventory"}
             className={({ isActive }) =>
-              `text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`
+              `text-sm font-medium ${
+                isActive ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
+              }`
             }
           >
             {label}
@@ -122,37 +130,198 @@ function App() {
   return (
     <Router>
       <div className="App">
-        <Header />
         <Routes>
           {/* Default Home Page */}
-          <Route path="/" element={<HomePage />} />
-          <Route path="/home" element={<HomePage />} />
+          <Route
+            path="/"
+            element={
+              <>
+                <Header />
+                <HomePage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/home"
+            element={
+              <>
+                <Header />
+                <HomePage />
+                <Footer />
+              </>
+            }
+          />
 
           {/* Authentication Routes */}
-          <Route path='/signup' element={<Signup />} />
-          <Route path='/login' element={<Login />} />
+          <Route
+            path="/signup"
+            element={
+              <>
+                <Header />
+                <Signup />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              <>
+                <Header />
+                <Login />
+                <Footer />
+              </>
+            }
+          />
 
           {/* Profile Routes */}
-          <Route path='/profilePage' element={<ProfilePage />} />
-          <Route path='/updateProfileForm/:clientId' element={<UpdateProfileForm />} />
+          <Route
+            path="/profilePage"
+            element={
+              <>
+                <Header />
+                <ProfilePage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/updateProfileForm/:clientId"
+            element={
+              <>
+                <Header />
+                <UpdateProfileForm />
+                <Footer />
+              </>
+            }
+          />
 
           {/* Product Routes */}
-          <Route path="/products" element={<LorryCategoryCards />} />
-          <Route path="/LorryTypesPage/:categoryId" element={<LorryTypesPage />} />
-          <Route path="/LorryDetails/:lorryId" element={<LorryDetails />} />
+          <Route
+            path="/products"
+            element={
+              <>
+                <Header />
+                <LorryCategoryCards />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/LorryTypesPage/:categoryId"
+            element={
+              <>
+                <Header />
+                <LorryTypesPage />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/LorryDetails/:lorryId"
+            element={
+              <>
+                <Header />
+                <LorryDetails />
+                <Footer />
+              </>
+            }
+          />
 
           {/* Service Routes */}
-          <Route path='/requestform' element={<RequestForm />} />
-          <Route path='/services' element={<Services />} />
-          <Route path='/orderform' element={<OrderForm />} />
-          <Route path='/quotationgeneratorform/:requestID' element={<QuotationForm />} />
-          <Route path='/companyManagerDashbord' element={<CompanyManagerDashbord />} />
-          <Route path='/schedule-meeting' element={<ScheduleMeeting />} />
-          <Route path='/checkoutPage/:type/:id' element={<CheckoutPage />} />
+          <Route
+            path="/requestform"
+            element={
+              <>
+                <Header />
+                <RequestForm />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/services"
+            element={
+              <>
+                <Header />
+                <Services />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/orderform"
+            element={
+              <>
+                <Header />
+                <OrderForm />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/quotationgeneratorform/:requestID"
+            element={
+              <>
+                <Header />
+                <QuotationForm />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/companyManagerDashbord"
+            element={
+              <>
+                <Header />
+                <CompanyManagerDashbord />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/schedule-meeting"
+            element={
+              <>
+                <Header />
+                <ScheduleMeeting />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/checkoutPage/:type/:id"
+            element={
+              <>
+                <Header />
+                <CheckoutPage />
+                <Footer />
+              </>
+            }
+          />
 
           {/* Task Management Public Routes */}
-          <Route path="/Companylogin" element={<LoginNew />} />
-          <Route path="/Companysignup" element={<SignUp />} />
+          <Route
+            path="/Companylogin"
+            element={
+              <>
+                <Header />
+                <LoginNew />
+                <Footer />
+              </>
+            }
+          />
+          <Route
+            path="/Companysignup"
+            element={
+              <>
+                <Header />
+                <SignUp />
+                <Footer />
+              </>
+            }
+          />
 
           {/* Task Management Admin Routes */}
           <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
@@ -171,7 +340,10 @@ function App() {
 
           {/* HR Manager Routes - Attendance System */}
           <Route element={<PrivateRoute allowedRoles={["hr_manager"]} />}>
-            <Route path="/attendance/dashboard" element={<AttendanceDashboard />} />
+            <Route
+              path="/attendance/dashboard"
+              element={<AttendanceDashboard />}
+            />
             <Route path="/attendance/employees" element={<Employees />} />
             <Route path="/attendance/leaves" element={<Leaves />} />
             <Route path="/attendance/salary" element={<Salary />} />
@@ -179,34 +351,35 @@ function App() {
             <Route path="/attendance/reports" element={<AttendanceReports />} />
           </Route>
 
-          {/* Dispatch Management Routes */}
-          <Route path="/dispatch/*" element={
-            <DispatchLayout>
-              <Routes>
-                <Route path="/" element={<DispatchDashboard />} />
-                <Route path="/add-delivery" element={<AddDelivery />} />
-                <Route path="/drivers" element={<DriverList />} />
-                <Route path="/vehicles" element={<VehicleList />} />
-                <Route path="/assignments" element={<AssignedDeliveries />} />
-                <Route path="/map" element={<DeliveryMap />} />
-                <Route path="/gps-tracking" element={<GpsTracking />} />
-                <Route path="/reports" element={<DispatchReports />} />
-              </Routes>
-            </DispatchLayout>
-          } />
+          {/* Dispatch Management Routes with Layout */}
+          <Route element={<PrivateRoute allowedRoles={["dispatch_manager"]} />}>
+            <Route element={<DispatchLayout />}>
+              <Route
+                path="/dispatchDashboard"
+                element={<DispatchDashboard />}
+              />
+              <Route path="/add-delivery" element={<AddDelivery />} />
+              <Route path="/drivers" element={<DriverList />} />
+              <Route path="/vehicles" element={<VehicleList />} />
+              <Route path="/assignments" element={<AssignedDeliveries />} />
+              <Route path="/map" element={<DeliveryMap />} />
+              <Route path="/gps-tracking" element={<GpsTracking />} />
+              <Route path="/reports" element={<DispatchReports />} />
+            </Route>
+          </Route>
 
           {/* Inventory Management Routes */}
-          <Route path="/inventory/*" element={
-            <InventoryLayout>
-              <Routes>
-                <Route path="/" element={<InventoryPage />} />
-                <Route path="/suppliers" element={<SuppliersPage />} />
-                <Route path="/requests" element={<RequestsPage />} />
-                <Route path="/alerts" element={<AlertsPage />} />
-                <Route path="/reports" element={<ReportsPage />} />
-              </Routes>
-            </InventoryLayout>
-          } />
+          <Route
+            element={<PrivateRoute allowedRoles={["inventory_manager"]} />}
+          >
+            
+            <Route path="/inventory" element={<InventoryPage />} />
+            <Route path="/suppliers" element={<SuppliersPage />} />
+            <Route path="/requests" element={<RequestsPage />} />
+            <Route path="/alerts" element={<AlertsPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
+            
+          </Route>
 
           {/* Root redirect based on user role */}
           <Route path="/root-redirect" element={<Root />} />
@@ -215,24 +388,27 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
 
           {/* Company Management Routes */}
-          <Route path="/company-manager-dashboard" element={<DashboardLayout />}/>
+          <Route element={<PrivateRoute allowedRoles={["company_manager"]} />}>
+            <Route
+              path="/company-manager-dashboard"
+              element={<DashboardLayout />}
+            />
             {/* Nested routes inside Dashboard */}
             <Route path="categories" element={<AllCategories />} />
             <Route path="addCategory" element={<AddCategory />} />
             <Route path="update/:id" element={<UpdateCategory />} />
-            <Route path="services" element={<AllServices />} />
-            <Route path="service/add" element={<AddService />} />
+            <Route path="admin-services" element={<AllServices />} />
+            <Route path="admin-services/add" element={<AddService />} />
             <Route path="/models" element={<AllModels />} />
             <Route path="types" element={<AllLorryTypes />} />
             <Route path="type/add" element={<AddLorryType />} />
             <Route path="orders" element={<AdminOrders />} />
-            <Route path="payments" element={<AdminPayments />} />
+            <Route path="/payments" element={<AdminPayments />} />
             <Route path="/repairs" element={<AdminRepairs />} />
-            <Route path="payroll" element={<PayrollDashboard/>}/>
-            <Route path="model/add" element={<AddModel/>}/>
-
+            <Route path="payroll" element={<PayrollDashboard />} />
+            <Route path="model/add" element={<AddModel />} />
+          </Route>
         </Routes>
-        <Footer />
       </div>
     </Router>
   );
@@ -250,7 +426,7 @@ const Root = () => {
   }
 
   // Redirect based on user role
-  switch(user.role) {
+  switch (user.role) {
     case "admin":
       return <Navigate to="/admin/dashboard" />;
     case "hr_manager":

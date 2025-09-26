@@ -3,6 +3,7 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 const service = require("../../models/ClientPortalModels/servicesModel");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 
 // Multer storage settings
@@ -18,7 +19,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Create a new service with image
-router.post("/add", upload.single("image"), async (req, res) => {
+router.post("/add", protectUser, upload.single("image"), async (req, res) => {
   try {
     const { serviceType,description } = req.body;
     if (!serviceType || !description||!req.file) {
@@ -38,7 +39,7 @@ router.post("/add", upload.single("image"), async (req, res) => {
 });
 
 // Get all services
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const services = await service.find();
     res.status(200).json(services);
@@ -48,7 +49,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get single service by ID
-router.get("/:serviceId", async (req, res) => {
+router.get("/:serviceId", protectUser, async (req, res) => {
   try {
     const service = await service.findById(req.params.serviceId);
     if (!service) {
@@ -61,7 +62,7 @@ router.get("/:serviceId", async (req, res) => {
 });
 
 // Update service (with optional image update)
-router.put("/update/:serviceId", upload.single("image"), async (req, res) => {
+router.put("/update/:serviceId", protectUser, upload.single("image"), async (req, res) => {
   try {
     const { serviceType,description } = req.body;
     const updateData = { serviceType,description};
@@ -87,7 +88,7 @@ router.put("/update/:serviceId", upload.single("image"), async (req, res) => {
 });
 
 // Delete service
-router.delete("/delete/:serviceId", async (req, res) => {
+router.delete("/delete/:serviceId", protectUser, async (req, res) => {
   try {
     const deletedService= await service.findByIdAndDelete(req.params.serviceId);
     if (!deletedService) {

@@ -95,6 +95,8 @@ const registerUser = async (req, res) => {
     if (req.user && req.user.role === "admin") {
       userRole = role || "member";
     }
+  
+    
 
     // Hash password
     const salt = await bcrypt.genSalt(10);

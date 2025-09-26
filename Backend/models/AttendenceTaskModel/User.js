@@ -14,7 +14,7 @@ const userSchema = new mongoose.Schema({
   profileImageUrl: { type: String, default: null },
   role: { 
     type: String, 
-    enum: ["admin", "hr_manager", "member"], 
+    enum: ["admin", "hr_manager", "member","company_manager","inventory_manager","dispatch_manager"], 
     default: "member" 
   }
 }, { timestamps: true });

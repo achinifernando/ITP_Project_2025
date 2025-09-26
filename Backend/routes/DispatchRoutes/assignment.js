@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { protectUser, dispatchManager } = require("../../middleware/authMiddleware");
 const { 
   getPendingDeliveries, 
   getAllDeliveries,
@@ -13,18 +14,18 @@ const {
 } = require("../../controllers/DispatchControllers/assignmentController");
 
 // Delivery routes
-router.get("/pending", getPendingDeliveries);
-router.get("/deliveries", getAllDeliveries);
+router.get("/pending",protectUser, getPendingDeliveries);
+router.get("/deliveries",protectUser, getAllDeliveries);
 
 // Assignment routes (NEW)
-router.get("/", getAllAssignments);
-router.get("/status/:status", getAssignmentsByStatus);
-router.get("/:id", getAssignmentById);
-router.delete("/:id", deleteAssignment);
+router.get("/",protectUser, getAllAssignments);
+router.get("/status/:status",protectUser, getAssignmentsByStatus);
+router.get("/:id",protectUser, getAssignmentById);
+router.delete("/:id",protectUser, deleteAssignment);
 
 // Assignment action routes
-router.post("/assign/:id", assignDelivery);
-router.post("/start/:id", startDelivery);
-router.put("/status/:id", updateDeliveryStatus);
+router.post("/assign/:id",protectUser, assignDelivery);
+router.post("/start/:id",protectUser, startDelivery);
+router.put("/status/:id",protectUser, updateDeliveryStatus);
 
 module.exports = router;

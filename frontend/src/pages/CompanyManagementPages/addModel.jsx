@@ -1,6 +1,6 @@
 // src/components/AddModel.js
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AddModel() {
   const [model, setModel] = useState("");
@@ -9,7 +9,7 @@ export default function AddModel() {
     e.preventDefault();
 
     try {
-      await axios.post("http://localhost:5000/admin-lorrryModel/add", { model });
+      await axiosInstance.post("http://localhost:5000/admin-lorry-models/add", { model });
       alert("Model added successfully");
       window.location.href = "/models"; // redirect to AllModels
     } catch (err) {

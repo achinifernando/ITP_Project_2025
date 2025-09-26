@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import "../../CSS/DispatchCSS/VehicleList.css";
 
 const BACKEND_URL = "http://localhost:5000/vehicles";
@@ -19,7 +19,7 @@ export default function VehicleList() {
   const fetchVehicles = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await axios.get(BACKEND_URL);
+      const res = await axiosInstance.get(BACKEND_URL);
       setVehicles(res.data);
     } catch (err) {
       console.error(err);
@@ -46,20 +46,15 @@ export default function VehicleList() {
     try {
       if (editingVehicle) {
         // Update existing vehicle
-        const res = await axios.put(
+        const res = await axiosInstance.put(
           `${BACKEND_URL}/${editingVehicle._id}`,
-          editingVehicle,
-          {
-            headers: { "Content-Type": "application/json" },
-          }
+          editingVehicle
         );
         alert(res.data.message);
         setEditingVehicle(null);
       } else {
         // Add new vehicle
-        const res = await axios.post(BACKEND_URL, newVehicle, {
-          headers: { "Content-Type": "application/json" },
-        });
+        const res = await axiosInstance.post(BACKEND_URL, newVehicle);
         alert(res.data.message);
         setNewVehicle({ vehicleNumber: "", type: "Truck", capacity: "" });
       }
@@ -81,22 +76,27 @@ export default function VehicleList() {
     const isConfirmed = window.confirm(
       `Are you sure you want to delete vehicle ${vehicle.vehicleNumber}?`
     );
-    
+
     if (!isConfirmed) {
       return; // User clicked Cancel
     }
 
     try {
-      const res = await axios.delete(`${BACKEND_URL}/${vehicle._id}`);
+      const res = await axiosInstance.delete(`${BACKEND_URL}/${vehicle._id}`);
       alert(res.data.message);
       fetchVehicles();
     } catch (err) {
       console.error(err);
-      const errorMessage = err.response?.data?.message || "Failed to delete vehicle.";
-      
-      if (err.response?.data?.message?.includes("in use") || 
-          err.response?.data?.error?.includes("in use")) {
-        alert(`Cannot delete vehicle: ${vehicle.vehicleNumber} is currently assigned to an active delivery.`);
+      const errorMessage =
+        err.response?.data?.message || "Failed to delete vehicle.";
+
+      if (
+        err.response?.data?.message?.includes("in use") ||
+        err.response?.data?.error?.includes("in use")
+      ) {
+        alert(
+          `Cannot delete vehicle: ${vehicle.vehicleNumber} is currently assigned to an active delivery.`
+        );
       } else {
         alert(errorMessage);
       }
@@ -130,7 +130,11 @@ export default function VehicleList() {
               <input
                 type="text"
                 name="vehicleNumber"
-                value={editingVehicle ? editingVehicle.vehicleNumber : newVehicle.vehicleNumber}
+                value={
+                  editingVehicle
+                    ? editingVehicle.vehicleNumber
+                    : newVehicle.vehicleNumber
+                }
                 onChange={handleChange}
                 required
               />
@@ -152,7 +156,9 @@ export default function VehicleList() {
               <input
                 type="number"
                 name="capacity"
-                value={editingVehicle ? editingVehicle.capacity : newVehicle.capacity}
+                value={
+                  editingVehicle ? editingVehicle.capacity : newVehicle.capacity
+                }
                 onChange={handleChange}
                 required
               />
@@ -189,7 +195,11 @@ export default function VehicleList() {
                 <td>{v.type}</td>
                 <td>{v.capacity} kg</td>
                 <td>
-                  <span className={`availability-badge ${v.isAvailable ? "available" : "not-available"}`}>
+                  <span
+                    className={`availability-badge ${
+                      v.isAvailable ? "available" : "not-available"
+                    }`}
+                  >
                     {v.isAvailable ? "Yes" : "No"}
                   </span>
                 </td>
@@ -198,7 +208,10 @@ export default function VehicleList() {
                     <button className="edit-btn" onClick={() => handleEdit(v)}>
                       Edit
                     </button>
-                    <button className="delete-btn" onClick={() => handleDelete(v)}>
+                    <button
+                      className="delete-btn"
+                      onClick={() => handleDelete(v)}
+                    >
                       Delete
                     </button>
                   </div>

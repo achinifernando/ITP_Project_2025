@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import AssignmentPopup from "./AssignmentPopup";
 import "../../CSS/DispatchCSS/AssignedDeliveries.css";
 
@@ -21,14 +21,18 @@ export default function AssignedDeliveries() {
     try {
       setLoading(true);
       setError("");
-      
-      const deliveriesRes = await axios.get(`${BACKEND_URL}/deliveries`);
+
+      const deliveriesRes = await axiosInstance.get(
+        `${BACKEND_URL}/deliveries`
+      );
       setDeliveries(deliveriesRes.data);
-      
+
       setLoading(false);
     } catch (err) {
       console.error("FETCH ERROR:", err.response || err);
-      setError("Error fetching data. Please check if the backend server is running.");
+      setError(
+        "Error fetching data. Please check if the backend server is running."
+      );
       setLoading(false);
     }
   };
@@ -50,16 +54,18 @@ export default function AssignedDeliveries() {
   };
 
   const handleAssignmentComplete = (updatedDelivery) => {
-    setDeliveries(prev => 
-      prev.map(d => d._id === updatedDelivery._id ? updatedDelivery : d)
+    setDeliveries((prev) =>
+      prev.map((d) => (d._id === updatedDelivery._id ? updatedDelivery : d))
     );
   };
 
   const startDelivery = async (deliveryId) => {
     try {
-      const response = await axios.post(`${BACKEND_URL}/assignments/start/${deliveryId}`);
-      setDeliveries(prev => 
-        prev.map(d => d._id === deliveryId ? response.data.delivery : d)
+      const response = await axiosInstance.post(
+        `${BACKEND_URL}/assignments/start/${deliveryId}`
+      );
+      setDeliveries((prev) =>
+        prev.map((d) => (d._id === deliveryId ? response.data.delivery : d))
       );
       alert("Delivery started!");
     } catch (err) {
@@ -70,11 +76,14 @@ export default function AssignedDeliveries() {
 
   const completeDelivery = async (deliveryId) => {
     try {
-      const response = await axios.put(`${BACKEND_URL}/assignments/status/${deliveryId}`, {
-        status: "Completed"
-      });
-      setDeliveries(prev => 
-        prev.map(d => d._id === deliveryId ? response.data.delivery : d)
+      const response = await axiosInstance.put(
+        `${BACKEND_URL}/assignments/status/${deliveryId}`,
+        {
+          status: "Completed",
+        }
+      );
+      setDeliveries((prev) =>
+        prev.map((d) => (d._id === deliveryId ? response.data.delivery : d))
       );
       alert("Delivery marked as completed!");
     } catch (err) {
@@ -90,11 +99,11 @@ export default function AssignedDeliveries() {
     }
 
     try {
-      await axios.delete(`${BACKEND_URL}/deliveries/${deliveryId}`);
-      
+      await axiosInstance.delete(`${BACKEND_URL}/deliveries/${deliveryId}`);
+
       // Remove from local state
-      setDeliveries(prev => prev.filter(d => d._id !== deliveryId));
-      
+      setDeliveries((prev) => prev.filter((d) => d._id !== deliveryId));
+
       alert("Delivery deleted successfully!");
     } catch (err) {
       console.error("DELETE DELIVERY ERROR:", err.response || err);
@@ -104,36 +113,49 @@ export default function AssignedDeliveries() {
 
   // FIXED: Remove assignment function (keeps delivery but removes assignment)
   const removeAssignment = async (deliveryId) => {
-    if (!window.confirm("Are you sure you want to remove assignment from this delivery?")) {
+    if (
+      !window.confirm(
+        "Are you sure you want to remove assignment from this delivery?"
+      )
+    ) {
       return;
     }
 
     try {
-      const delivery = deliveries.find(d => d._id === deliveryId);
-      
+      const delivery = deliveries.find((d) => d._id === deliveryId);
+
       if (delivery.driver) {
-        await axios.patch(`${BACKEND_URL}/drivers/${delivery.driver._id || delivery.driver}`, {
-          isAvailable: true
-        });
+        await axiosInstance.patch(
+          `${BACKEND_URL}/drivers/${delivery.driver._id || delivery.driver}`,
+          {
+            isAvailable: true,
+          }
+        );
       }
-      
+
       if (delivery.vehicle) {
-        await axios.patch(`${BACKEND_URL}/vehicles/${delivery.vehicle._id || delivery.vehicle}`, {
-          isAvailable: true
-        });
+        await axiosInstance.patch(
+          `${BACKEND_URL}/vehicles/${delivery.vehicle._id || delivery.vehicle}`,
+          {
+            isAvailable: true,
+          }
+        );
       }
 
-      const response = await axios.put(`${BACKEND_URL}/deliveries/${deliveryId}`, {
-        driver: null,
-        vehicle: null,
-        status: "Pending",
-        assignedAt: null
-      });
-
-      setDeliveries(prev => 
-        prev.map(d => d._id === deliveryId ? response.data : d)
+      const response = await axiosInstance.put(
+        `${BACKEND_URL}/deliveries/${deliveryId}`,
+        {
+          driver: null,
+          vehicle: null,
+          status: "Pending",
+          assignedAt: null,
+        }
       );
-      
+
+      setDeliveries((prev) =>
+        prev.map((d) => (d._id === deliveryId ? response.data : d))
+      );
+
       alert("Assignment removed successfully!");
     } catch (err) {
       console.error("REMOVE ASSIGNMENT ERROR:", err.response || err);
@@ -142,13 +164,15 @@ export default function AssignedDeliveries() {
   };
 
   const getAddress = (delivery) => {
-    return delivery.address || delivery.deliveryAddress || "Address not available";
+    return (
+      delivery.address || delivery.deliveryAddress || "Address not available"
+    );
   };
 
   const getActionButton = (delivery) => {
     if (!delivery.driver && !delivery.vehicle) {
       return (
-        <button 
+        <button
           onClick={() => openAssignmentPopup(delivery)}
           className="btn-assign"
         >
@@ -157,7 +181,7 @@ export default function AssignedDeliveries() {
       );
     } else if (delivery.status === "Assigned") {
       return (
-        <button 
+        <button
           onClick={() => startDelivery(delivery._id)}
           className="btn-start"
         >
@@ -166,7 +190,7 @@ export default function AssignedDeliveries() {
       );
     } else if (delivery.status === "Ongoing") {
       return (
-        <button 
+        <button
           onClick={() => completeDelivery(delivery._id)}
           className="btn-complete"
         >
@@ -176,7 +200,7 @@ export default function AssignedDeliveries() {
     } else if (delivery.status === "Completed") {
       return <span className="status-completed">Completed</span>;
     }
-    
+
     return null;
   };
 
@@ -186,16 +210,16 @@ export default function AssignedDeliveries() {
   return (
     <div className="assigned-deliveries-container">
       <h2>Delivery Assignments</h2>
-      
+
       {showPopup && (selectedDelivery || editingDelivery) && (
-        <AssignmentPopup 
+        <AssignmentPopup
           delivery={selectedDelivery || editingDelivery}
           onClose={closePopup}
           onAssign={handleAssignmentComplete}
           isEdit={!!editingDelivery}
         />
       )}
-      
+
       <table className="deliveries-table">
         <thead>
           <tr>
@@ -211,36 +235,51 @@ export default function AssignedDeliveries() {
           </tr>
         </thead>
         <tbody>
-          {deliveries.map(delivery => (
-            <tr key={delivery._id} className={!delivery.driver || !delivery.vehicle ? "unassigned-row" : ""}>
+          {deliveries.map((delivery) => (
+            <tr
+              key={delivery._id}
+              className={
+                !delivery.driver || !delivery.vehicle ? "unassigned-row" : ""
+              }
+            >
               <td>#{delivery.orderId}</td>
               <td>{delivery.customerName}</td>
               <td>{getAddress(delivery)}</td>
               <td className={!delivery.driver ? "not-assigned" : ""}>
                 {delivery.driver ? (
-                  typeof delivery.driver === 'object' ? delivery.driver.name : "Driver assigned"
+                  typeof delivery.driver === "object" ? (
+                    delivery.driver.name
+                  ) : (
+                    "Driver assigned"
+                  )
                 ) : (
                   <span className="not-assigned-text">Not assigned</span>
                 )}
               </td>
               <td className={!delivery.vehicle ? "not-assigned" : ""}>
                 {delivery.vehicle ? (
-                  typeof delivery.vehicle === 'object' ? delivery.vehicle.vehicleNumber : "Vehicle assigned"
+                  typeof delivery.vehicle === "object" ? (
+                    delivery.vehicle.vehicleNumber
+                  ) : (
+                    "Vehicle assigned"
+                  )
                 ) : (
                   <span className="not-assigned-text">Not assigned</span>
                 )}
               </td>
               <td>
-                <span className={`status status-${delivery.status?.toLowerCase() || 'pending'}`}>
+                <span
+                  className={`status status-${
+                    delivery.status?.toLowerCase() || "pending"
+                  }`}
+                >
                   {delivery.status || "Pending"}
                 </span>
               </td>
+              <td>{getActionButton(delivery)}</td>
               <td>
-                {getActionButton(delivery)}
-              </td>
-              <td>
-                {(delivery.driver && delivery.vehicle) && (
-                  <button 
+                {delivery.driver && delivery.vehicle && (
+                  <button
                     onClick={() => openEditPopup(delivery)}
                     className="btn-edit"
                     title="Edit assignment"
@@ -252,8 +291,8 @@ export default function AssignedDeliveries() {
               <td>
                 {/* FIXED: Separate buttons for removing assignment and deleting delivery */}
                 <div className="action-buttons">
-                  {(delivery.driver && delivery.vehicle) && (
-                    <button 
+                  {delivery.driver && delivery.vehicle && (
+                    <button
                       onClick={() => removeAssignment(delivery._id)}
                       className="btn-remove"
                       title="Remove assignment"
@@ -261,7 +300,7 @@ export default function AssignedDeliveries() {
                       Remove Assign
                     </button>
                   )}
-                  <button 
+                  <button
                     onClick={() => deleteDelivery(delivery._id)}
                     className="btn-delete"
                     title="Delete delivery"

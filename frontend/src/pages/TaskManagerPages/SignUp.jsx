@@ -128,6 +128,14 @@ const Signup = () => {
 
         if (role === "admin") {
           navigate("/admin/dashboard");
+        } else if (role === "hr_manager") {
+          navigate("/attendance/dashboard");
+        } else if (role === "company_manager") {
+          navigate("/company-manager-dashboard");
+        } else if (role === "inventory_manager") {
+          navigate("/inventoryDashboard");
+        } else if (role === "dispatch_manager") {
+          navigate("/dispatchDashboard");
         } else {
           navigate("/user/dashboard");
         }
@@ -232,18 +240,6 @@ const Signup = () => {
               setPassword(e.target.value);
               if (error) setError("");
             }}
-          />
-
-          <label className="form-label" htmlFor="adminInviteToken">
-            Admin Invite Token (Optional)
-          </label>
-          <input
-            id="adminInviteToken"
-            name="adminInviteToken"
-            type="text"
-            placeholder="6 Digit Code"
-            value={adminInviteToken}
-            onChange={(e) => setAdminInviteToken(e.target.value)}
           />
 
           {error && <p className="error-message">{error}</p>}

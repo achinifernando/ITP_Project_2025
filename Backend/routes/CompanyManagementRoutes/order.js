@@ -4,9 +4,10 @@ const Order = require("../../models/ClientPortalModels/ordersModel.js");
 const paymentSuccessTemplate = require("../../emails/paymentSuccess.js");
 const paymentRejectedTemplate = require("../../emails/paymentRejected.js");
 const sendEmail = require("../../utils/mailer.js");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 // GET all orders
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const orders = await Order.find()
       .populate("lorryCategory")
@@ -20,7 +21,7 @@ router.get("/", async (req, res) => {
 });
 
 // UPDATE payment status
-router.put("/:id/payment-status", async (req, res) => {
+router.put("/:id/payment-status", protectUser, async (req, res) => {
   try {
     const { paymentStatus } = req.body;
     if (!paymentStatus) return res.status(400).json({ error: "paymentStatus is required" });
@@ -52,7 +53,7 @@ router.put("/:id/payment-status", async (req, res) => {
 });
 
 // UPDATE order status
-router.put("/:id/status", async (req, res) => {
+router.put("/:id/status", protectUser, async (req, res) => {
   try {
     const { status } = req.body;
     if (!status) return res.status(400).json({ error: "status is required" });
@@ -80,7 +81,7 @@ router.put("/:id/status", async (req, res) => {
 });
 
 // MARK ongoing order as completed
-router.put("/:id/complete", async (req, res) => {
+router.put("/:id/complete", protectUser, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });
@@ -105,7 +106,7 @@ router.put("/:id/complete", async (req, res) => {
 });
 
 // SEND email notification
-router.post("/:id/send-email", async (req, res) => {
+router.post("/:id/send-email", protectUser, async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ error: "Order not found" });

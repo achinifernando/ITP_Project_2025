@@ -3,6 +3,7 @@ const router = express.Router();
 const Attendance = require("../../models/AttendenceTaskModel/Attendance");
 const User = require("../../models/AttendenceTaskModel/User");
 const Payroll = require("../../models/CompanyManagerModels/payroll");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 // Constants
 const STANDARD_WORK_HOURS = 8;
@@ -20,7 +21,7 @@ function getWorkingDays(year, month) {
 }
 
 // Bulk Payroll Generation
-router.post("/generate-all", async (req, res) => {
+router.post("/generate-all", protectUser, async (req, res) => {
   try {
     const { month, year, deductions = 0, bonuses = 0 } = req.body; 
     const users = await User.find({ role: { $in: ["office_worker", "member"] } });
@@ -89,7 +90,7 @@ router.post("/generate-all", async (req, res) => {
 });
 
 // Get all payrolls
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const payrolls = await Payroll.find()
       .populate("employeeId", "name email role")

@@ -1,5 +1,7 @@
+// src/pages/AlertsPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { api } from "../../utils/apiPaths";
+import { api } from "../lib/api";
+import { StockDTO } from "../types/dto";
 import {
   AlertTriangle,
   Clock,
@@ -9,10 +11,15 @@ import {
   Info,
 } from "lucide-react";
 
+/* ----------------------- Types ----------------------- */
+type LowRes = { count: number; items: StockDTO[] };
+type ExpRes = { nearDays: number; nearExpiry: StockDTO[]; expired: StockDTO[] };
+
 /* ----------------------- Tiny Toasts ----------------------- */
+type Toast = { id: string; title: string; desc?: string };
 function useToasts() {
-  const [toasts, setToasts] = useState([]);
-  const push = (t) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const push = (t: Omit<Toast, "id">) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => {
@@ -21,8 +28,7 @@ function useToasts() {
   };
   return { toasts, push };
 }
-
-function ToastStack({ toasts }) {
+function ToastStack({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-4 right-4 z-[60] space-y-2">
       {toasts.map((t) => (
@@ -48,15 +54,21 @@ function ToastStack({ toasts }) {
 }
 
 /* ----------------------- Helpers ----------------------- */
-function fmtDate(d) {
+function fmtDate(d?: string | null) {
   if (!d) return "";
   const dt = new Date(d);
   if (isNaN(dt.getTime())) return "";
   return dt.toLocaleDateString();
 }
 
-function StatBadge({ color, children }) {
-  const map = {
+function StatBadge({
+  color,
+  children,
+}: {
+  color: "amber" | "rose" | "sky" | "emerald";
+  children: React.ReactNode;
+}) {
+  const map: Record<string, string> = {
     amber: "bg-amber-50 text-amber-700 border-amber-200",
     rose: "bg-rose-50 text-rose-700 border-rose-200",
     sky: "bg-sky-50 text-sky-700 border-sky-200",
@@ -73,8 +85,8 @@ function StatBadge({ color, children }) {
 
 /* ----------------------- Page ----------------------- */
 export default function AlertsPage() {
-  const [low, setLow] = useState(null);
-  const [exp, setExp] = useState(null);
+  const [low, setLow] = useState<LowRes | null>(null);
+  const [exp, setExp] = useState<ExpRes | null>(null);
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(false);
   const { toasts, push } = useToasts();
@@ -87,8 +99,8 @@ export default function AlertsPage() {
     try {
       setLoading(true);
       const [l, e] = await Promise.all([
-        api.get("/api/alerts/low-stock"),
-        api.get(`/api/alerts/expiry?days=${days}`),
+        api.get<LowRes>("/api/alerts/low-stock"),
+        api.get<ExpRes>(`/api/alerts/expiry?days=${days}`),
       ]);
       setLow(l);
       setExp(e);
@@ -98,7 +110,7 @@ export default function AlertsPage() {
           desc: `Window: ${e.nearDays} day(s) • ${l.count} low, ${e.nearExpiry.length} near, ${e.expired.length} expired`,
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       push({
         title: "Failed to load alerts",
         desc: err?.message ?? "Network error",
@@ -110,6 +122,7 @@ export default function AlertsPage() {
 
   useEffect(() => {
     load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [days]);
 
   // Sorted views for nicer UX
@@ -144,8 +157,18 @@ export default function AlertsPage() {
     [expiredItems]
   );
 
-  const Box = ({ title, icon, tone, rows }) => {
-    const accents = {
+  const Box = ({
+    title,
+    icon,
+    tone,
+    rows,
+  }: {
+    title: string;
+    icon: React.ReactNode;
+    tone: "sky" | "amber" | "rose";
+    rows: StockDTO[];
+  }) => {
+    const accents: Record<string, string> = {
       sky: "border-sky-100 hover:shadow-sky-100/40",
       amber: "border-amber-100 hover:shadow-amber-100/40",
       rose: "border-rose-100 hover:shadow-rose-100/40",
@@ -328,4 +351,9 @@ export default function AlertsPage() {
       <ToastStack toasts={toasts} />
     </div>
   );
+}
+
+/* Tailwind keyframes for the toast pop-in */
+declare global {
+  interface CSSStyleDeclaration {}
 }

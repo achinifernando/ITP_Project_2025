@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AllCategories() {
   const [categories, setCategories] = useState([]);
@@ -9,8 +9,8 @@ export default function AllCategories() {
   }, []);
 
   const fetchCategories = () => {
-    axios
-      .get("http://localhost:5000/admin-category/")
+    axiosInstance
+      .get("http://localhost:5000/admin-categories/")
       .then((res) => setCategories(res.data))
       .catch((err) => alert(err.message));
   };
@@ -18,8 +18,8 @@ export default function AllCategories() {
   // Delete category
   const deleteCategory = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
-      axios
-        .delete(`http://localhost:5000/admin-category/delete/${id}`)
+      axiosInstance
+        .delete(`http://localhost:5000/admin-categories/delete/${id}`)
         .then(() => {
           alert("Category deleted");
           fetchCategories(); // refresh list
@@ -55,7 +55,7 @@ export default function AllCategories() {
             <div className="card">
               {cat.image && (
                 <img
-                  src={`http://localhost:8070/uploads/${cat.image}`}
+                  src={`http://localhost:5000/files/${cat.image}`}
                   className="card-img-top"
                   alt={cat.category}
                   style={{ height: "200px", objectFit: "cover" }}

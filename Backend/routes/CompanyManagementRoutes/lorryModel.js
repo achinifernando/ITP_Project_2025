@@ -1,10 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const lorryModels = require("../../models/ClientPortalModels/lorryModelModel");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 
 // Create a new model 
-router.post("/add", async (req, res) => {
+router.post("/add", protectUser, async (req, res) => {
   try {
     const { model } = req.body;
     if (!model ) {
@@ -23,7 +24,7 @@ router.post("/add", async (req, res) => {
 });
 
 // Get all categories
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const models = await lorryModels.find();
     res.status(200).json(models);
@@ -33,7 +34,7 @@ router.get("/", async (req, res) => {
 });
 
 // Get single category by ID
-router.get("/:typeId", async (req, res) => {
+router.get("/:typeId", protectUser, async (req, res) => {
   try {
     const model = await lorryModels.findById(req.params.typeId);
     if (!model) {
@@ -47,7 +48,7 @@ router.get("/:typeId", async (req, res) => {
 
 
 // Update category (with optional image update)
-router.put("/update/:typeId", async (req, res) => {
+router.put("/update/:typeId", protectUser, async (req, res) => {
   try {
     const { model } = req.body;
     const updateData = { model};
@@ -73,7 +74,7 @@ router.put("/update/:typeId", async (req, res) => {
 });
 
 // Delete category
-router.delete("/delete/:typeId", async (req, res) => {
+router.delete("/delete/:typeId", protectUser, async (req, res) => {
   try {
     const deletedModel = await lorryModels.findByIdAndDelete(req.params.typeId);
     if (!deletedModel) {

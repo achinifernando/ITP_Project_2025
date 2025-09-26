@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const stock = require("../../models/InventoryModels/Stock");
+const { protectUser, inventoryManager } = require("../../middleware/authMiddleware");
 
 // Create a new category with image
-router.post("/addItem", async (req, res) => {
+router.post("/addItem",protectUser, async (req, res) => {
   try {
     const { itemName,category,quantity,unit,threshold,supplierId,expiryDate } = req.body;
     if (!itemName ||!category ||!quantity ||!unit ||!threshold ||!supplierId ||!supplierId || !expiryDate ) {
@@ -24,7 +25,7 @@ router.post("/addItem", async (req, res) => {
 
 
 // Get all items (place this FIRST)
-router.get("/items", async (req, res) => {
+router.get("/items",protectUser, async (req, res) => {
   try {
     const items = await stock.find();
     res.status(200).json(items);
@@ -34,7 +35,7 @@ router.get("/items", async (req, res) => {
 });
 
 // Get category by ID (must come after /items)
-router.get("/:Itemid", async (req, res) => {
+router.get("/:Itemid",protectUser, async (req, res) => {
   try {
     const item = await stock.findById(req.params.id);
     if (!item) return res.status(404).json({ message: "Category not found" });

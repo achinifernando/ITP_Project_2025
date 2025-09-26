@@ -58,7 +58,7 @@ app.use("/vehicles", require("./routes/DispatchRoutes/vehicles"));
 app.use("/assignments", require("./routes/DispatchRoutes/assignment"));
 app.use("/notifications", require("./routes/DispatchRoutes/notifications"));
 app.use("/tracking", require("./routes/DispatchRoutes/tracking"));
-app.use("/dispatch-reports", require("./routes/DispatchRoutes/reports"));
+app.use("/dispatch-reports", require("./routes/DispatchRoutes/dispatchreports"));
 
 // =============== ATTENDANCE MANAGEMENT & TASK MANAGEMENT ROUTES ===========
 app.use("/api/auth", require("./routes/AttendenceRoutes/authRoute"));
@@ -87,11 +87,78 @@ app.use("/admin-attendance", require("./routes/CompanyManagementRoutes/attendanc
 app.use("/admin-payrolls", require("./routes/CompanyManagementRoutes/payroll"));
 
 
-
-// Basic health check route
-app.get("/", (req, res) => {
-    res.json({ message: "Server is running successfully!" });
+// Health check endpoint
+app.get("/health", (req, res) => {
+  res.json({ 
+    status: "OK", 
+    message: "Server is running",
+    timestamp: new Date().toISOString()
+  });
 });
+
+// WebSocket status endpoint
+app.get("/websocket-status", (req, res) => {
+  const stats = websocketServer.getActiveConnections();
+  res.json({
+    status: "WebSocket server is running",
+    ...stats
+  });
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error("Error:", err);
+  res.status(500).json({ message: "Internal server error" });
+});
+
+// 404 handler - MUST be the last route
+app.use((req, res) => {
+  res.status(404).json({ message: "Route not found" });
+});
+
+// Create HTTP server
+const server = http.createServer(app);
+
+// Initialize WebSocket server
+websocketServer.setupWebSocket(server);
+
+// Socket.IO setup
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
+
+// Socket.IO events
+io.on("connection", (socket) => {
+  console.log("Socket.IO client connected:", socket.id);
+
+  // Client joins a room for their userId
+  socket.on("joinRoom", (userId) => {
+    socket.join(userId);
+    console.log(`Socket ${socket.id} joined room: ${userId}`);
+  });
+
+  // Handle delivery tracking subscription
+  socket.on("subscribeToDelivery", (deliveryId) => {
+    socket.join(`delivery:${deliveryId}`);
+    console.log(`Socket ${socket.id} subscribed to delivery: ${deliveryId}`);
+  });
+
+  // Handle delivery tracking unsubscription
+  socket.on("unsubscribeFromDelivery", (deliveryId) => {
+    socket.leave(`delivery:${deliveryId}`);
+    console.log(`Socket ${socket.id} unsubscribed from delivery: ${deliveryId}`);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket.IO client disconnected:", socket.id);
+  });
+});
+
+// Make io accessible to controllers
+app.set("io", io);
 
 
 

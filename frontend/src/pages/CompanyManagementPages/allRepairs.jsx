@@ -7,7 +7,7 @@ const AdminRepairs = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/admin-repair/")
+    fetch("http://localhost:5000/admin-repairs/")
       .then((res) => res.json())
       .then((data) => setRepairs(data))
       .catch((err) => console.error(err))
@@ -16,7 +16,7 @@ const AdminRepairs = () => {
 
   const updateStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/admin-repair/${id}/status`, {
+      const res = await fetch(`http://localhost:5000/admin-repairs/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),

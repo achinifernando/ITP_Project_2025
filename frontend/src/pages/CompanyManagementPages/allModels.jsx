@@ -1,6 +1,6 @@
 // src/components/AllModels.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AllModels() {
   const [models, setModels] = useState([]);
@@ -10,15 +10,15 @@ export default function AllModels() {
   }, []);
 
   const fetchModels = () => {
-    axios
-      .get("http://localhost:5000/admin-lorryModel/") 
+    axiosInstance
+      .get("http://localhost:5000/admin-lorry-models/") 
       .then((res) => setModels(res.data))
       .catch((err) => alert(err.message));
   };
 
   const deleteModel = (id) => {
     if (window.confirm("Are you sure you want to delete this model?")) {
-      axios
+      axiosInstance
         .delete(`http://localhost:5000/admin-models/delete/${id}`)
         .then(() => {
           alert("Model deleted");

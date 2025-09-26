@@ -1,5 +1,6 @@
 const express = require("express");
 const Attendance = require("../../models/AttendenceTaskModel/Attendance");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 const router = express.Router();
 
 // OFFICE TIMINGS (can later move to config/DB)
@@ -7,7 +8,7 @@ const OFFICE_START_HOUR = 9;   // 9 AM
 const STANDARD_WORK_HOURS = 8; // 8 hours per day
 
 // 1. Mark attendance (Time In)
-router.post("/time-in", async (req, res) => {
+router.post("/time-in", protectUser, async (req, res) => {
   try {
     const { employeeId } = req.body;
 
@@ -45,7 +46,7 @@ router.post("/time-in", async (req, res) => {
 });
 
 // 2. Mark Time Out
-router.post("/time-out", async (req, res) => {
+router.post("/time-out", protectUser, async (req, res) => {
   try {
     const { employeeId } = req.body;
 
@@ -83,7 +84,7 @@ router.post("/time-out", async (req, res) => {
 });
 
 // 3. Get all attendance for a user
-router.get("/user/:employeeId", async (req, res) => {
+router.get("/user/:employeeId", protectUser, async (req, res) => {
   try {
     const records = await Attendance.find({ employeeId: req.params.employeeId })
       .sort({ date: -1 });
@@ -94,7 +95,7 @@ router.get("/user/:employeeId", async (req, res) => {
 });
 
 // 4. Get attendance for all users (for HR/Admin)
-router.get("/", async (req, res) => {
+router.get("/", protectUser, async (req, res) => {
   try {
     const records = await Attendance.find()
       .populate("employeeId", "name email role")

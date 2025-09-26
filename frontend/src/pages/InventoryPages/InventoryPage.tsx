@@ -12,21 +12,22 @@ import {
   CalendarDays,
   Boxes,
 } from 'lucide-react';
-import { api } from "../../utils/apiPaths";
-import Modal from '../../components/Modal';
+import { api } from '../lib/api';
+import { StockDTO, StockUpsert, clean } from '../types/dto';
+import Modal from '../components/Modal';
 
 /* ---------------- Tiny Toasts (success / error messages) ---------------- */
+type Toast = { id: string; title: string; desc?: string; tone?: 'ok' | 'err' };
 function useToasts() {
-  const [toasts, setToasts] = useState([]);
-  const push = (t) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const push = (t: Omit<Toast, 'id'>) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), 2800);
   };
   return { toasts, push };
 }
-
-function ToastStack({ toasts }) {
+function ToastStack({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-4 right-4 z-[60] space-y-2">
       {toasts.map((t) => {
@@ -58,11 +59,17 @@ function ToastStack({ toasts }) {
 /* ----------------------------------------------------------------------- */
 
 /* -------------------------- Simple SVG Charts -------------------------- */
+type BarDatum = { label: string; value: number };
 function BarChart({
   data,
   title,
   maxBars = 8,
   height = 220,
+}: {
+  data: BarDatum[];
+  title?: string;
+  maxBars?: number;
+  height?: number;
 }) {
   const bars = data.slice(0, maxBars);
   const max = Math.max(1, ...bars.map((b) => b.value));
@@ -113,17 +120,22 @@ function BarChart({
   );
 }
 
+type PieSlice = { label: string; value: number; color: string };
 function PieChart({
   data,
   size = 220,
   title,
+}: {
+  data: PieSlice[];
+  size?: number;
+  title?: string;
 }) {
   const total = Math.max(1, data.reduce((a, b) => a + b.value, 0));
   const r = size / 2;
   const ir = r * 0.64; // inner radius for donut
   let angle = -Math.PI / 2;
 
-  function arcPath(cx, cy, r1, r2, start, end) {
+  function arcPath(cx: number, cy: number, r1: number, r2: number, start: number, end: number) {
     const large = end - start > Math.PI ? 1 : 0;
     const x1o = cx + r1 * Math.cos(start);
     const y1o = cy + r1 * Math.sin(start);
@@ -185,12 +197,12 @@ function PieChart({
 /* ----------------------------------------------------------------------- */
 
 export default function InventoryPage() {
-  const [list, setList] = useState([]);
+  const [list, setList] = useState<StockDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const [edit, setEdit] = useState(null);
-  const [form, setForm] = useState({
+  const [edit, setEdit] = useState<StockDTO | null>(null);
+  const [form, setForm] = useState<StockUpsert>({
     itemName: '',
     quantity: 0,
     threshold: 0,
@@ -198,25 +210,28 @@ export default function InventoryPage() {
     category: '',
   });
   const [saving, setSaving] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    itemName?: string;
+    unit?: string;
+    quantity?: string;
+    threshold?: string;
+  }>({});
+
+  const { toasts, push } = useToasts();
 
   // ----- Unit dropdown options -----
   const UNIT_OPTIONS = ['pieces', 'kg', 'g', 'liters', 'packs'];
 
-  const { toasts, push } = useToasts();
-
   async function load() {
     setLoading(true);
     try {
-      const data = await api.get('/api/stocks');
-      setList(data);
-    } catch (e) {
+      setList(await api.get<StockDTO[]>('/api/stocks'));
+    } catch (e: any) {
       push({ title: 'Failed to load inventory', desc: e?.message ?? 'Network error', tone: 'err' });
     } finally {
       setLoading(false);
     }
   }
-
   useEffect(() => {
     load();
   }, []);
@@ -227,8 +242,7 @@ export default function InventoryPage() {
     setFieldErrors({});
     setModalOpen(true);
   }
-
-  function openEdit(row) {
+  function openEdit(row: StockDTO) {
     setEdit(row);
     setForm({
       itemName: row.itemName,
@@ -242,8 +256,8 @@ export default function InventoryPage() {
     setModalOpen(true);
   }
 
-  function validate() {
-    const errs = {};
+  function validate(): boolean {
+    const errs: typeof fieldErrors = {};
     if (!form.itemName?.trim()) errs.itemName = 'Item name is required.';
     if (!form.unit?.trim()) errs.unit = 'Unit is required.';
     if (form.quantity == null || Number.isNaN(form.quantity)) errs.quantity = 'Quantity is required.';
@@ -260,40 +274,40 @@ export default function InventoryPage() {
     if (!validate()) return;
     try {
       setSaving(true);
-      const payload = cleanFormData(form);
+      const payload = clean(form);
       if (edit) {
-        const updated = await api.put(`/api/stocks/${edit._id}`, payload);
+        const updated = await api.put<StockDTO>(`/api/stocks/${edit._id}`, payload);
         setList((prev) => prev.map((x) => (x._id === edit._id ? updated : x)));
         push({ title: 'Item updated', desc: `"${updated.itemName}" saved successfully.` });
       } else {
-        const created = await api.post('/api/stocks', payload);
+        const created = await api.post<StockDTO>('/api/stocks', payload);
         setList((prev) => [created, ...prev]);
         push({ title: 'Item added', desc: `"${created.itemName}" created successfully.` });
       }
       setModalOpen(false);
-    } catch (e) {
+    } catch (e: any) {
       push({ title: 'Save failed', desc: e?.message ?? 'Request error', tone: 'err' });
     } finally {
       setSaving(false);
     }
   }
 
-  async function remove(id) {
-    if (window.confirm(`Are you sure you want to delete?`)) {
+  async function remove(id: string) {
+    if (!confirm('Delete this item?')) return;
     try {
       await api.delete(`/api/stocks/${id}`);
       setList((prev) => prev.filter((x) => x._id !== id));
       push({ title: 'Item deleted' });
-    } catch (e) {
+    } catch (e: any) {
       push({ title: 'Delete failed', desc: e?.message ?? 'Request error', tone: 'err' });
     }
   }
-  }
-  async function changeQty(id, delta) {
+
+  async function changeQty(id: string, delta: number) {
     try {
-      const updated = await api.patch(`/api/stocks/${id}/quantity`, { delta });
+      const updated = await api.patch<StockDTO>(`/api/stocks/${id}/quantity`, { delta });
       setList((prev) => prev.map((x) => (x._id === id ? updated : x)));
-    } catch (e) {
+    } catch (e: any) {
       push({ title: 'Quantity update failed', desc: e?.message ?? 'Request error', tone: 'err' });
     }
   }
@@ -315,7 +329,7 @@ export default function InventoryPage() {
     let low = 0;
     let expired = 0;
     let near = 0;
-    const categories = new Set();
+    const categories = new Set<string>();
 
     for (const r of list) {
       if (r.category) categories.add(r.category);
@@ -335,9 +349,9 @@ export default function InventoryPage() {
     };
   }, [list]);
 
-  // ---------- Chart data ----------
-  const barData = useMemo(() => {
-    const byCat = new Map();
+  // ---------- Chart data (do not alter above logic) ----------
+  const barData: BarDatum[] = useMemo(() => {
+    const byCat = new Map<string, number>();
     for (const r of list) {
       const key = r.category || 'Uncategorized';
       byCat.set(key, (byCat.get(key) ?? 0) + (Number(r.quantity) || 0));
@@ -347,7 +361,7 @@ export default function InventoryPage() {
       .sort((a, b) => b.value - a.value);
   }, [list]);
 
-  const pieData = useMemo(() => {
+  const pieData: PieSlice[] = useMemo(() => {
     const now = new Date();
     const nearCutoff = new Date();
     nearCutoff.setDate(now.getDate() + ANALYSIS_DAYS);
@@ -359,13 +373,14 @@ export default function InventoryPage() {
 
     for (const r of list) {
       const hasExpiry = !!r.expiryDate;
-      const d = hasExpiry ? new Date(r.expiryDate) : null;
+      const d = hasExpiry ? new Date(r.expiryDate!) : null;
 
       if (d && d < now) {
         expired++;
       } else if (d && d >= now && d <= nearCutoff) {
         near++;
       } else if (r.quantity <= r.threshold) {
+        // treat "low" only if not already counted as expiry states
         low++;
       } else {
         healthy++;
@@ -378,18 +393,6 @@ export default function InventoryPage() {
       { label: 'Expired', value: expired, color: '#ef4444' },
     ];
   }, [list]);
-
-  // Helper function to clean form data
-  function cleanFormData(formData) {
-    const cleaned = { ...formData };
-    // Remove null/undefined/empty values
-    Object.keys(cleaned).forEach(key => {
-      if (cleaned[key] === null || cleaned[key] === undefined || cleaned[key] === '') {
-        delete cleaned[key];
-      }
-    });
-    return cleaned;
-  }
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-sky-50 via-white to-sky-50">

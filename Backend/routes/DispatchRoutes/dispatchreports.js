@@ -4,6 +4,7 @@ const router = express.Router();
 const Delivery = require("../../models/DispatchModels/Delivery");
 const Driver = require("../../models/DispatchModels/Driver");
 const Vehicle = require("../../models/DispatchModels/Vehicle");
+const { protectUser, dispatchManager } = require("../../middleware/authMiddleware");
 
 // Get delivery statistics for reports
 const getDeliveryStats = async (req, res) => {
@@ -104,8 +105,8 @@ const getVehicleUtilization = async (req, res) => {
 };
 
 // Routes
-router.get("/stats", getDeliveryStats);
-router.get("/drivers", getDriverPerformance);
-router.get("/vehicles", getVehicleUtilization);
+router.get("/stats",protectUser, getDeliveryStats);
+router.get("/drivers",protectUser, getDriverPerformance);
+router.get("/vehicles",protectUser, getVehicleUtilization);
 
 module.exports = router;

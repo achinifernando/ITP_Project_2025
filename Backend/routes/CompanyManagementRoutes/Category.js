@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const multer = require("multer");
 let Category = require("../../models/ClientPortalModels/lorryCategoriesModel");
+const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
 // ---------- Multer setup for image uploads ----------
 const storage = multer.diskStorage({
@@ -15,7 +16,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage: storage });
 
 // ---------- Add a new category ----------
-router.post("/add", upload.single("image"), (req, res) => {
+router.post("/add", protectUser, upload.single("image"), (req, res) => {
   const category = req.body.category;
   const description = req.body.description;
   const image = req.file ? req.file.filename : null; // store filename in DB
@@ -36,7 +37,7 @@ router.post("/add", upload.single("image"), (req, res) => {
 });
 
 // ---------- Get all categories ----------
-router.get("/", (req, res) => {
+router.get("/", protectUser, (req, res) => {
   Category.find()
     .then((categories) => res.json(categories))
     .catch((err) => {
@@ -46,7 +47,7 @@ router.get("/", (req, res) => {
 });
 
 // ---------- Update a category ----------
-router.put("/update/:id", upload.single("image"), async (req, res) => {
+router.put("/update/:id", protectUser, upload.single("image"), async (req, res) => {
   let categoryId = req.params.id;
   const { category, description } = req.body;
   const image = req.file ? req.file.filename : undefined; // optional update
@@ -64,7 +65,7 @@ router.put("/update/:id", upload.single("image"), async (req, res) => {
 });
 
 // ---------- Delete a category ----------
-router.delete("/delete/:id", async (req, res) => {
+router.delete("/delete/:id", protectUser, async (req, res) => {
   let categoryId = req.params.id;
   try {
     await Category.findByIdAndDelete(categoryId);
@@ -76,7 +77,7 @@ router.delete("/delete/:id", async (req, res) => {
 });
 
 // ---------- Get a category by ID ----------
-router.get("/get/:id", async (req, res) => {
+router.get("/get/:id", protectUser, async (req, res) => {
   let categoryId = req.params.id;
   try {
     const category = await Category.findById(categoryId);

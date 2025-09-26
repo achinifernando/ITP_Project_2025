@@ -5,7 +5,7 @@ const AdminPayments = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/admin-payment/")
+    fetch("http://localhost:5000/admin-payments/")
       .then((res) => res.json())
       .then((data) => setPayments(Array.isArray(data) ? data : []))
       .catch(console.error)
@@ -14,7 +14,7 @@ const AdminPayments = () => {
 
   const updatePaymentStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/admin-payment/${id}/status`, {
+      const res = await fetch(`http://localhost:5000/admin-payments/${id}/status`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
@@ -59,7 +59,7 @@ const AdminPayments = () => {
               <td className="p-2">
                 {payment.receiptFile?.filePath ? (
                   <a
-                    href={`http://localhost:5000${payment.receiptFile.filePath}`}
+                    href={`http://localhost:5000/${payment.receiptFile.filePath}`}
                     target="_blank"
                     rel="noreferrer"
                   >

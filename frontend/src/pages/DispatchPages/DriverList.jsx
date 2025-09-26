@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import "../../CSS/DispatchCSS/DriverList.css";
 
 const BACKEND_URL = "http://localhost:5000/drivers";
@@ -19,10 +19,13 @@ export default function DriverList() {
   const fetchDrivers = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(BACKEND_URL);
+      const res = await axiosInstance.get(BACKEND_URL);
       setDrivers(res.data);
     } catch (err) {
-      console.error("Error fetching drivers:", err.response?.data || err.message);
+      console.error(
+        "Error fetching drivers:",
+        err.response?.data || err.message
+      );
       alert("Failed to fetch drivers.");
     } finally {
       setLoading(false);
@@ -51,14 +54,18 @@ export default function DriverList() {
       let res;
       if (editingDriver) {
         // Update existing driver
-        res = await axios.put(`${BACKEND_URL}/${editingDriver._id}`, editingDriver, {
-          headers: { "Content-Type": "application/json" },
-        });
+        res = await axiosInstance.put(
+          `${BACKEND_URL}/${editingDriver._id}`,
+          editingDriver,
+          {
+            headers: { "Content-Type": "application/json" },
+          }
+        );
         alert(res.data.message);
         setEditingDriver(null);
       } else {
         // Add new driver
-        res = await axios.post(BACKEND_URL, newDriver, {
+        res = await axiosInstance.post(BACKEND_URL, newDriver, {
           headers: { "Content-Type": "application/json" },
         });
         alert(res.data.message);
@@ -83,11 +90,14 @@ export default function DriverList() {
 
     setLoading(true);
     try {
-      const res = await axios.delete(`${BACKEND_URL}/${id}`);
+      const res = await axiosInstance.delete(`${BACKEND_URL}/${id}`);
       alert(res.data.message);
       fetchDrivers(); // Refresh table
     } catch (err) {
-      console.error("Error deleting driver:", err.response?.data || err.message);
+      console.error(
+        "Error deleting driver:",
+        err.response?.data || err.message
+      );
       alert(err.response?.data?.message || "Failed to delete driver.");
     } finally {
       setLoading(false);
@@ -96,7 +106,7 @@ export default function DriverList() {
 
   // Start editing a driver
   const handleEdit = (driver) => {
-    setEditingDriver({...driver});
+    setEditingDriver({ ...driver });
     setShowForm(true);
   };
 
@@ -159,7 +169,11 @@ export default function DriverList() {
                 type="text"
                 name="licenseNumber"
                 className="form-control"
-                value={editingDriver ? editingDriver.licenseNumber : newDriver.licenseNumber}
+                value={
+                  editingDriver
+                    ? editingDriver.licenseNumber
+                    : newDriver.licenseNumber
+                }
                 onChange={handleChange}
                 required
                 disabled={loading}
@@ -171,7 +185,11 @@ export default function DriverList() {
                 className={editingDriver ? "btn btn-update" : "btn btn-primary"}
                 disabled={loading}
               >
-                {loading ? "Processing..." : (editingDriver ? "Update Driver" : "Add Driver")}
+                {loading
+                  ? "Processing..."
+                  : editingDriver
+                  ? "Update Driver"
+                  : "Add Driver"}
               </button>
               {editingDriver && (
                 <button
@@ -211,7 +229,11 @@ export default function DriverList() {
                 <td>{d.name}</td>
                 <td>{d.phone}</td>
                 <td>{d.licenseNumber}</td>
-                <td className={d.isAvailable ? "status-available" : "status-unavailable"}>
+                <td
+                  className={
+                    d.isAvailable ? "status-available" : "status-unavailable"
+                  }
+                >
                   {d.isAvailable ? "Yes" : "No"}
                 </td>
                 <td>
@@ -237,7 +259,9 @@ export default function DriverList() {
           ) : (
             <tr>
               <td colSpan="5" className="no-drivers">
-                {loading ? "Loading drivers..." : "No drivers found. Add a driver to get started."}
+                {loading
+                  ? "Loading drivers..."
+                  : "No drivers found. Add a driver to get started."}
               </td>
             </tr>
           )}

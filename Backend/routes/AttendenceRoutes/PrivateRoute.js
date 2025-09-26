@@ -22,6 +22,12 @@ const PrivateRoute = ({ allowedRoles, children }) => {
         return <Navigate to="/attendance/dashboard" />;
       case 'member':
         return <Navigate to="/user/dashboard" />;
+        case 'company_manager':
+        return <Navigate to="/company-manager-dashboard" />;
+        case 'inventory_manager':
+        return <Navigate to="/inventoryDashboard" />;
+        case 'dispatch_manager':
+        return <Navigate to="/dispatchDashboard" />;
       default:
         return <Navigate to="/login" />;
     }

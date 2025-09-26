@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
@@ -20,7 +20,7 @@ const PayrollDashboard = () => {
     setLoading(true);
     try {
       const { month, year } = getMonthYear(selectedDate);
-      const res = await axios.post("http://localhost:5000/admin-payroll/generate-all", {
+      const res = await axiosInstance.post("http://localhost:5000/admin-payroll/generate-all", {
         month,
         year,
       });
@@ -36,7 +36,7 @@ const PayrollDashboard = () => {
   const fetchPayrolls = async () => {
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5000/admin-payroll");
+      const res = await axiosInstance.get("http://localhost:5000/admin-payroll");
       setPayrolls(res.data);
     } catch (err) {
       console.error(err);

@@ -4,9 +4,10 @@ const Delivery = require("../../models/DispatchModels/Delivery");
 const Driver = require("../../models/DispatchModels/Driver");
 const Vehicle = require("../../models/DispatchModels/Vehicle");
 const Assignment = require("../../models/DispatchModels/Assignment");
+const { protectUser, dispatchManager } = require("../../middleware/authMiddleware");
 
 // GET all deliveries
-router.get("/", async (req, res) => {
+router.get("/",protectUser, async (req, res) => {
   try {
     const deliveries = await Delivery.find()
       .populate("driver")
@@ -18,7 +19,7 @@ router.get("/", async (req, res) => {
 });
 
 // GET single delivery
-router.get("/:id", async (req, res) => {
+router.get("/:id",protectUser, async (req, res) => {
   try {
     const delivery = await Delivery.findById(req.params.id)
       .populate("driver")
@@ -31,7 +32,7 @@ router.get("/:id", async (req, res) => {
 });
 
 // CREATE delivery
-router.post("/", async (req, res) => {
+router.post("/",protectUser, async (req, res) => {
   try {
     const delivery = new Delivery(req.body);
     await delivery.save();
@@ -42,7 +43,7 @@ router.post("/", async (req, res) => {
 });
 
 // UPDATE delivery
-router.put("/:id", async (req, res) => {
+router.put("/:id",protectUser, async (req, res) => {
   try {
     const delivery = await Delivery.findByIdAndUpdate(
       req.params.id,
@@ -58,7 +59,7 @@ router.put("/:id", async (req, res) => {
 });
 
 // DELETE delivery - ADD THIS ROUTE
-router.delete("/:id", async (req, res) => {
+router.delete("/:id",protectUser, async (req, res) => {
   try {
     const delivery = await Delivery.findById(req.params.id);
     if (!delivery) {

@@ -1,5 +1,6 @@
+// src/pages/ReportsPage.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import { api } from "../../utils/apiPaths";
+import { api } from "../lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import {
@@ -12,10 +13,19 @@ import {
   Layers3,
 } from "lucide-react";
 
+/* ----------------------- Types ----------------------- */
+type Summary = {
+  totalItems: number;
+  totalsByUnit: Record<string, number>;
+  lowStock: number;
+  withExpiry: number;
+};
+
 /* ----------------------- Tiny Toasts ----------------------- */
+type Toast = { id: string; title: string; desc?: string };
 function useToasts() {
-  const [toasts, setToasts] = useState([]);
-  const push = (t) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const push = (t: Omit<Toast, "id">) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => {
@@ -24,8 +34,7 @@ function useToasts() {
   };
   return { toasts, push };
 }
-
-function ToastStack({ toasts }) {
+function ToastStack({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-4 right-4 z-[60] space-y-2">
       {toasts.map((t) => (
@@ -51,13 +60,13 @@ function ToastStack({ toasts }) {
 }
 
 /* ----------------------- Helpers ----------------------- */
-async function toDataUrl(url) {
+async function toDataUrl(url: string): Promise<string> {
   try {
     const res = await fetch(url, { cache: "no-cache" });
     const blob = await res.blob();
-    return await new Promise((resolve, reject) => {
+    return await new Promise<string>((resolve, reject) => {
       const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
+      reader.onloadend = () => resolve(reader.result as string);
       reader.onerror = reject;
       reader.readAsDataURL(blob);
     });
@@ -68,7 +77,7 @@ async function toDataUrl(url) {
 
 /* ----------------------- Page ----------------------- */
 export default function ReportsPage() {
-  const [sum, setSum] = useState(null);
+  const [sum, setSum] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(true);
   const [downloading, setDownloading] = useState(false);
   const { toasts, push } = useToasts();
@@ -77,7 +86,7 @@ export default function ReportsPage() {
     (async () => {
       try {
         setLoading(true);
-        const data = await api.get("/api/inventory-reports/stock-summary");
+        const data = await api.get<Summary>("/api/reports/stock-summary");
         setSum(data);
       } finally {
         setLoading(false);
@@ -101,7 +110,7 @@ export default function ReportsPage() {
       const doc = new jsPDF({ orientation: "landscape", unit: "pt" });
       const pageWidth = doc.internal.pageSize.getWidth();
 
-      const logo = await toDataUrl("/fav.jpg");
+      const logo = await toDataUrl("/fav.jpg"); // optional logo if present in public/
       if (logo) doc.addImage(logo, "JPEG", 40, 24, 40, 40);
 
       let y = 36;
@@ -146,8 +155,8 @@ export default function ReportsPage() {
         alternateRowStyles: { fillColor: "#f1f5f9" },
         margin: { left: 40, right: 40 },
         tableWidth: 360,
-      });
-      const afterSummaryY = doc.lastAutoTable.finalY;
+      } as any);
+      const afterSummaryY = (doc as any).lastAutoTable.finalY;
 
       // Totals by unit table
       autoTable(doc, {
@@ -162,7 +171,7 @@ export default function ReportsPage() {
         alternateRowStyles: { fillColor: "#eef2ff" },
         margin: { left: 40, right: 40 },
         tableWidth: pageWidth - 80,
-      });
+      } as any);
 
       const ts = new Date().toISOString().slice(0, 10);
       doc.save(`inventory_stock_summary_${ts}.pdf`);
@@ -171,7 +180,7 @@ export default function ReportsPage() {
         title: "Report downloaded",
         desc: "The Inventory Stock Summary PDF has been saved.",
       });
-    } catch (e) {
+    } catch (e: any) {
       alert(e?.message ?? "Failed to generate report");
     } finally {
       setDownloading(false);
@@ -381,7 +390,9 @@ export default function ReportsPage() {
             {/* Bottom CTA */}
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <button
-                onClick={generatePdf}
+                onClick={() => {
+                  generatePdf();
+                }}
                 disabled={!sum || downloading}
                 className="group inline-flex items-center gap-2 px-4 py-2 rounded-lg
                   bg-gradient-to-r from-sky-600 to-indigo-600 text-white border border-indigo-500
@@ -403,4 +414,11 @@ export default function ReportsPage() {
       <ToastStack toasts={toasts} />
     </div>
   );
+}
+
+/* Tailwind keyframes for the toast pop-in */
+declare global {
+  interface CSSStyleDeclaration {
+    // silence TS complaints for arbitrary animation names
+  }
 }

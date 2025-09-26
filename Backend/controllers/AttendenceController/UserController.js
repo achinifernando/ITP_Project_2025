@@ -53,7 +53,10 @@ const getUsersById = async (req, res) => {
     // Check if user is accessing their own data or is admin/hr_manager
     if (req.user._id.toString() !== req.params.id && 
         req.user.role !== "admin" && 
-        req.user.role !== "hr_manager") {
+        req.user.role !== "hr_manager" &&
+      req.user.role !== "company_manager"&&
+    req.user.role !== "inventory_manager"&&
+  req.user.role !== "dispatch_manager") {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -98,7 +101,10 @@ const updateUser = async (req, res) => {
     // Check if user is updating their own data or is admin/hr_manager
     if (req.user._id.toString() !== req.params.id && 
         req.user.role !== "admin" && 
-        req.user.role !== "hr_manager") {
+        req.user.role !== "hr_manager" &&
+      req.user.role !== "company_manager"&&
+    req.user.role !== "inventory_manager"&&
+  req.user.role !== "dispatch_manager") {
       return res.status(403).json({ message: "Access denied" });
     }
 
@@ -114,7 +120,7 @@ const updateUser = async (req, res) => {
     user.email = email || user.email;
     
     // Only admin/hr_manager can change role
-    if (role && (req.user.role === "admin" || req.user.role === "hr_manager")) {
+    if (role && (req.user.role === "admin" || req.user.role === "hr_manager" || req.user.role === "inventory_manager"|| req.user.role === "company_manager"|| req.user.role === "dispatch_manager" )) {
       user.role = role;
     }
     

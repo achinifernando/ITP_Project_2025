@@ -1,6 +1,6 @@
 // src/components/AssignmentPopup.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 //import "../index.css";
 
 const BACKEND_URL = "http://localhost:5000";
@@ -20,12 +20,12 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
         setLoading(true);
 
         // ✅ Correct endpoints
-        const driversRes = await axios.get(`${BACKEND_URL}/drivers`);
-        const availableDrivers = driversRes.data.filter(d => d.isAvailable);
+        const driversRes = await axiosInstance.get(`${BACKEND_URL}/drivers`);
+        const availableDrivers = driversRes.data.filter((d) => d.isAvailable);
         setDrivers(availableDrivers);
 
-        const vehiclesRes = await axios.get(`${BACKEND_URL}/vehicles`);
-        const availableVehicles = vehiclesRes.data.filter(v => v.isAvailable);
+        const vehiclesRes = await axiosInstance.get(`${BACKEND_URL}/vehicles`);
+        const availableVehicles = vehiclesRes.data.filter((v) => v.isAvailable);
         setVehicles(availableVehicles);
 
         setLoading(false);
@@ -49,7 +49,7 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
 
     try {
       // ✅ Correct endpoint
-      const response = await axios.post(
+      const response = await axiosInstance.post(
         `${BACKEND_URL}/assignments/assign/${delivery._id}`,
         {
           driverId: selectedDriver,
@@ -122,8 +122,13 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
           </div>
 
           <div className="popup-buttons">
-            <button type="button" onClick={onClose}>Cancel</button>
-            <button type="submit" disabled={!selectedDriver || !selectedVehicle}>
+            <button type="button" onClick={onClose}>
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={!selectedDriver || !selectedVehicle}
+            >
               Assign Delivery
             </button>
           </div>

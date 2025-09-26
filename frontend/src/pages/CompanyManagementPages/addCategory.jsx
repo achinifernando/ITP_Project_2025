@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AddCategory() {
 
@@ -16,7 +16,7 @@ export default function AddCategory() {
   formData.append("description", description);
   formData.append("image", image);
 
-  axios.post("http://localhost:5000/admin-category/add", formData, {
+  axiosInstance.post("http://localhost:5000/admin-categories/add", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

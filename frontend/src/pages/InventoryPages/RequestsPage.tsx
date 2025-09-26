@@ -1,7 +1,8 @@
-// src/pages/RequestsPage.js
+// src/pages/RequestsPage.tsx
 import React, { useEffect, useMemo, useState } from 'react';
-import { api } from "../../utils/apiPaths";
-import Modal from '../../components/Modal';
+import { api } from '../lib/api';
+import { SupplierDTO, SupplierRequestDTO, StockDTO } from '../types/dto';
+import Modal from '../components/Modal';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import {
@@ -17,18 +18,20 @@ import {
   MessageCircle,
 } from 'lucide-react';
 
+type ItemInput = { name: string; category?: string; quantity: number; unit?: string };
+
 /* ---------------- Tiny Toasts (success / error messages) ---------------- */
+type Toast = { id: string; title: string; desc?: string };
 function useToasts() {
-  const [toasts, setToasts] = useState([]);
-  const push = (t) => {
+  const [toasts, setToasts] = useState<Toast[]>([]);
+  const push = (t: Omit<Toast, 'id'>) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), 2800);
   };
   return { toasts, push };
 }
-
-function ToastStack({ toasts }) {
+function ToastStack({ toasts }: { toasts: Toast[] }) {
   return (
     <div className="fixed bottom-4 right-4 z-[60] space-y-2">
       {toasts.map((t) => (
@@ -46,21 +49,25 @@ function ToastStack({ toasts }) {
 /* ----------------------------------------------------------------------- */
 
 export default function RequestsPage() {
-  const [suppliers, setSuppliers] = useState([]);
-  const [stocks, setStocks] = useState([]);
-  const [list, setList] = useState([]);
+  const [suppliers, setSuppliers] = useState<SupplierDTO[]>([]);
+  const [stocks, setStocks] = useState<StockDTO[]>([]);
+  const [list, setList] = useState<SupplierRequestDTO[]>([]);
   const [open, setOpen] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<string>('');
 
   // ---- form state
-  const [supplierId, setSupplierId] = useState('');
-  const [items, setItems] = useState([{ name: '', category: '', quantity: 1, unit: 'pieces' }]);
+  const [supplierId, setSupplierId] = useState<string>('');
+  const [items, setItems] = useState<ItemInput[]>([{ name: '', category: '', quantity: 1, unit: 'pieces' }]);
   const [notes, setNotes] = useState('');
   const [sendEmail, setSendEmail] = useState(true);
   const [saving, setSaving] = useState(false);
 
   // ---- validation state
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState<{
+    supplierId?: string;
+    items?: Array<{ name?: string; quantity?: string; unit?: string; category?: string }>;
+    notes?: string;
+  }>({});
 
   const { toasts, push } = useToasts();
 
@@ -68,14 +75,14 @@ export default function RequestsPage() {
     setError('');
     try {
       const [ss, rr, st] = await Promise.all([
-        api.get('/api/suppliers'),
-        api.get('/api/requests'),
-        api.get('/api/stocks'),
+        api.get<SupplierDTO[]>('/api/suppliers'),
+        api.get<SupplierRequestDTO[]>('/api/requests'),
+        api.get<StockDTO[]>('/api/stocks'),
       ]);
       setSuppliers(ss || []);
       setList((rr || []).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()));
       setStocks(st || []);
-    } catch (e) {
+    } catch (e: any) {
       setSuppliers([]); setList([]); setStocks([]);
       setError(e?.message || 'Failed to load requests');
     }
@@ -91,14 +98,14 @@ export default function RequestsPage() {
   }
 
   // ---------- Validations ----------
-  function validate() {
-    const errs = {};
+  function validate(): boolean {
+    const errs: typeof fieldErrors = {};
     if (!supplierId) {
       errs.supplierId = 'Please select a supplier.';
     }
 
     const itemErrs = items.map((it) => {
-      const e = {};
+      const e: { name?: string; quantity?: string; unit?: string; category?: string } = {};
       if (!it.name?.trim()) e.name = 'Item is required.';
       if (it.quantity == null || Number.isNaN(it.quantity)) e.quantity = 'Quantity is required.';
       else if (it.quantity <= 0) e.quantity = 'Quantity must be greater than 0.';
@@ -143,7 +150,7 @@ export default function RequestsPage() {
     if (!validate()) return;
     try {
       setSaving(true);
-      const created = await api.post('/api/requests', {
+      const created = await api.post<SupplierRequestDTO>('/api/requests', {
         supplier: supplierId,
         items,
         notes: notes || undefined,
@@ -159,7 +166,7 @@ export default function RequestsPage() {
       push({ title: 'Request submitted successfully', desc: 'Your supplier request has been created.' });
 
       // Optional: if user checked "send email", we keep backend behavior; user can also use quick actions on the row (Email / WhatsApp)
-    } catch (e) {
+    } catch (e: any) {
       push({ title: 'Failed to submit request', desc: e?.message ?? 'Network error' });
     } finally {
       setSaving(false);
@@ -167,9 +174,9 @@ export default function RequestsPage() {
   }
 
   // ---------- Helpers ----------
-  function prettySupplier(s) {
+  function prettySupplier(s: SupplierRequestDTO['supplier']): { name: string; company?: string; email?: string; phone?: string } {
     if (s && typeof s === 'object') {
-      const anyS = s;
+      const anyS = s as any;
       return {
         name: anyS.name ?? 'Unnamed',
         company: anyS.company ?? '',
@@ -180,7 +187,7 @@ export default function RequestsPage() {
     return { name: '-', company: '', email: '', phone: '' };
   }
 
-  function statusBadge(status) {
+  function statusBadge(status?: string) {
     const st = (status || 'draft').toUpperCase();
     const tone =
       st === 'APPROVED' ? 'text-emerald-700 bg-emerald-50 border-emerald-200' :
@@ -200,14 +207,14 @@ export default function RequestsPage() {
     );
   }
 
-  /* --------- "Efficient" Email + WhatsApp compose helpers (per row) --------- */
-  function itemsAsLines(r) {
+  /* --------- “Efficient” Email + WhatsApp compose helpers (per row) --------- */
+  function itemsAsLines(r: SupplierRequestDTO) {
     return (r.items ?? [])
       .map(i => `• ${i.name}${i.category ? ` [${i.category}]` : ''} ×${i.quantity}${i.unit ? ` ${i.unit}` : ''}`)
       .join('%0A'); // line breaks for URL
   }
 
-  function buildEmailLink(r) {
+  function buildEmailLink(r: SupplierRequestDTO) {
     const ps = prettySupplier(r.supplier);
     const subject = encodeURIComponent(`Supply Request from Golden Grain Mill`);
     const greeting = ps.name && ps.name !== '-' ? `Dear ${ps.name},%0A%0A` : '';
@@ -221,7 +228,7 @@ export default function RequestsPage() {
     return `mailto:${to}?subject=${subject}&body=${bodyPlain}`;
   }
 
-  function normalizePhoneRaw(p) {
+  function normalizePhoneRaw(p?: string) {
     if (!p) return '';
     const digits = (p + '').replace(/[^\d+]/g, '');
     // if starts with 0 and length 10 (LK local), convert to +94
@@ -229,7 +236,7 @@ export default function RequestsPage() {
     return digits;
   }
 
-  function buildWhatsAppLink(r) {
+  function buildWhatsAppLink(r: SupplierRequestDTO) {
     const ps = prettySupplier(r.supplier);
     const phone = normalizePhoneRaw(ps.phone);
     const text =
@@ -243,7 +250,7 @@ export default function RequestsPage() {
 
   // ---------- Report Generation ----------
   const statusCounts = useMemo(() => {
-    const map = new Map();
+    const map = new Map<string, number>();
     for (const r of list) {
       const key = (r.status || 'DRAFT').toUpperCase();
       map.set(key, (map.get(key) ?? 0) + 1);
@@ -251,13 +258,13 @@ export default function RequestsPage() {
     return map;
   }, [list]);
 
-  async function toDataUrl(url) {
+  async function toDataUrl(url: string): Promise<string> {
     try {
       const res = await fetch(url, { cache: 'no-cache' });
       const blob = await res.blob();
-      return await new Promise((resolve, reject) => {
+      return await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
-        reader.onloadend = () => resolve(reader.result);
+        reader.onloadend = () => resolve(reader.result as string);
         reader.onerror = reject;
         reader.readAsDataURL(blob);
       });
@@ -268,7 +275,7 @@ export default function RequestsPage() {
 
   async function generateReport() {
     try {
-      const fresh = await api.get('/api/requests');
+      const fresh = await api.get<SupplierRequestDTO[]>('/api/requests');
       const rows = (fresh || []).sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
 
       const doc = new jsPDF({ orientation: 'landscape', unit: 'pt' });
@@ -297,7 +304,7 @@ export default function RequestsPage() {
 
       const startY = Math.max(y, 92);
 
-      const counts = new Map();
+      const counts = new Map<string, number>();
       rows.forEach(r => {
         const k = (r.status || 'DRAFT').toUpperCase();
         counts.set(k, (counts.get(k) ?? 0) + 1);
@@ -317,9 +324,9 @@ export default function RequestsPage() {
         alternateRowStyles: { fillColor: '#f1f5f9' },
         margin: { left: 40, right: 40 },
         tableWidth: 360,
-      });
+      } as any);
 
-      const bySupplier = new Map();
+      const bySupplier = new Map<string, number>();
       rows.forEach(r => {
         const ps = prettySupplier(r.supplier);
         const key = `${ps.name}${ps.company ? ` — ${ps.company}` : ''}`;
@@ -328,7 +335,7 @@ export default function RequestsPage() {
       const topSup = Array.from(bySupplier.entries()).sort((a, b) => b[1] - a[1]).slice(0, 10);
 
       autoTable(doc, {
-        startY: doc.lastAutoTable.finalY + 14,
+        startY: (doc as any).lastAutoTable.finalY + 14,
         theme: 'grid',
         head: [['Top Suppliers', 'Requests']],
         body: topSup.length ? topSup.map(([s, c]) => [s, String(c)]) : [['—', '0']],
@@ -337,7 +344,7 @@ export default function RequestsPage() {
         alternateRowStyles: { fillColor: '#eef2ff' },
         margin: { left: 40, right: 40 },
         tableWidth: 360,
-      });
+      } as any);
 
       doc.addPage('a4', 'landscape');
       autoTable(doc, {
@@ -372,11 +379,11 @@ export default function RequestsPage() {
         headStyles: { fillColor: '#111827', textColor: '#ffffff' },
         alternateRowStyles: { fillColor: '#f3f4f6' },
         margin: { left: 40, right: 40 },
-      });
+      } as any);
 
       const ts = new Date().toISOString().slice(0, 10);
       doc.save(`supplier_requests_report_${ts}.pdf`);
-    } catch (e) {
+    } catch (e: any) {
       alert(e?.message ?? 'Failed to generate report');
     }
   }
@@ -530,7 +537,7 @@ export default function RequestsPage() {
                 required
               >
                 <option value="">Select supplier…</option>
-                {suppliers.filter((s) => !!s && !!s._id)
+                {suppliers.filter((s): s is SupplierDTO => !!s && !!(s as any)._id)
                   .map(s => (
                     <option key={s._id} value={s._id}>
                       {(s.name ?? 'Unnamed')}{s.company ? ` — ${s.company}` : ''}

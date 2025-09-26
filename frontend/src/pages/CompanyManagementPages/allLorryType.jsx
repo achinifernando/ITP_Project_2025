@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function AllLorryTypes() {
   const [types, setTypes] = useState([]);
@@ -9,8 +9,8 @@ export default function AllLorryTypes() {
   }, []);
 
   const fetchTypes = () => {
-    axios
-      .get("http://localhost:5000/admin-lorryType")
+    axiosInstance
+      .get("http://localhost:5000/admin-lorry-types")
       .then((res) => setTypes(res.data))
       .catch((err) => console.error(err));
   };
@@ -18,7 +18,7 @@ export default function AllLorryTypes() {
   const deleteType = async (id) => {
     if (window.confirm("Are you sure you want to delete this lorry type?")) {
       try {
-        await axios.delete(`http://localhost:5000/admin-lorryType/delete/${id}`);
+        await axiosInstance.delete(`http://localhost:5000/admin-lorry-types/delete/${id}`);
         alert("Lorry type deleted");
         fetchTypes(); // refresh
       } catch (err) {
@@ -52,7 +52,7 @@ export default function AllLorryTypes() {
             <div className="card h-100">
               {type.images?.length > 0 && (
                 <img
-                  src={`http://localhost:5000/uploads/${type.images[0]}`}
+                  src={`http://localhost:5000/files/${type.images[0]}`}
                   className="card-img-top"
                   alt={type.typeName}
                   style={{ height: "180px", objectFit: "cover" }}
