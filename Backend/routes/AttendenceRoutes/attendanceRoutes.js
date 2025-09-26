@@ -1,16 +1,18 @@
-// import express from "express";
-// import {
-//   sendOtp,
-//   verifyOtp,
-//   getTodayAttendanceSummary,
-// } from "../../controllers/AttendenceController/attendanceController.js";
+// routes/attendanceRoutes.js
+const express = require('express');
+const router = express.Router();
+const { 
+  sendOtp, 
+  verifyOtp, 
+  getTodayAttendanceSummary, 
+  getAllAttendance,
+  getEmployeeAttendance 
+} = require('../controllers/attendanceController');
 
+router.post("/send-otp", sendOtp);
+router.post("/verify-otp", verifyOtp);
+router.get("/today", getTodayAttendanceSummary);
+router.get("/all", getAllAttendance);
+router.get("/employee/:employeeId", getEmployeeAttendance);
 
-// const router = express.Router();
-
-// // Attendance OTP routes
-// router.post("/send-otp", sendOtp);
-// router.post("/verify-otp", verifyOtp);
-// router.get("/summary", getTodayAttendanceSummary);
-
-// export default router;
+module.exports = router;

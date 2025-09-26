@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import TaskCard from "../../Cards/TaskCard";
-import SelectChecklist from "../../inputs/SelectCheckList";
+import TaskCard from "../../components/Cards/TaskCard";
+import SelectChecklist from "../../components/inputs/SelectCheckList";
 
 const TaskList = ({ tasks }) => {
   const [openChecklistTaskId, setOpenChecklistTaskId] = useState(null);

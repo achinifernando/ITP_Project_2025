@@ -3,7 +3,7 @@ import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
-import "../../CSS/TaskManagerCSS/TaskCard.css";
+import "../../CSS/TaskManagerCSS/ManageTasks.css";
 import TaskCard from "../../components/Cards/TaskCard";
 
 const MyTasks = () => {

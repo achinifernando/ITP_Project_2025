@@ -1,16 +1,13 @@
-import Employee from "../../models/AttendenceTaskModel/User.js";
-import Attendance from "../../models/AttendenceTaskModel/Attendance.js";
-import Otp from "../../models/AttendenceTaskModel/otp.js";
-import nodemailer from "nodemailer";
+// controllers/attendanceController.js
+const Employee = require("../models/User");
+const Attendance = require("../models/Attendance");
+const Otp = require("../models/otp");
+const nodemailer = require("nodemailer");
 
-// ============================
 // Helper: Generate a 6-digit OTP
-// ============================
 const generateOtp = () => Math.floor(100000 + Math.random() * 900000).toString();
 
-// ============================
 // Configure mail transporter
-// ============================
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -19,11 +16,33 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ============================
+// Helper function to send email
+const sendEmail = async (to, subject, text) => {
+  const mailOptions = {
+    from: process.env.EMAIL_USER,
+    to,
+    subject,
+    text,
+  };
+  
+  return await transporter.sendMail(mailOptions);
+};
+
+// Calculate status based on time-in
+const calculateStatus = (timeIn) => {
+  const timeInHour = timeIn.getHours();
+  const timeInMinute = timeIn.getMinutes();
+  
+  // Consider late after 9:30 AM
+  if (timeInHour > 9 || (timeInHour === 9 && timeInMinute > 30)) {
+    return 'late';
+  }
+  return 'present';
+};
+
 // Send OTP
-// ============================
-export const sendOtp = async (req, res) => {
-  const { employeeId, action } = req.body; // action = "time-in" | "time-out"
+const sendOtp = async (req, res) => {
+  const { employeeId, action } = req.body;
   if (!employeeId || !action) {
     return res.status(400).json({ message: "employeeId and action required" });
   }
@@ -32,39 +51,44 @@ export const sendOtp = async (req, res) => {
     const employee = await Employee.findOne({ employeeId });
     if (!employee) return res.status(404).json({ message: "Employee not found" });
 
-    // If action is time-out, check if there's an open attendance session
     if (action === "time-out") {
-      const open = await Attendance.findOne({ employeeId, timeOut: null }).sort({ timeIn: -1 });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const open = await Attendance.findOne({ 
+        employeeId, 
+        date: { $gte: today },
+        timeOut: null 
+      });
       if (!open) return res.status(400).json({ message: "No active time-in found to time-out" });
     }
 
-    // Generate OTP (valid for 2 minutes)
     const otp = generateOtp();
     const expiresAt = new Date(Date.now() + 2 * 60 * 1000);
 
-    // Clear old OTPs for this employee
     await Otp.deleteMany({ employeeId });
     await Otp.create({ employeeId, otp, expiresAt, action });
 
-    // Send OTP via email
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: employee.email,
-      subject: `Your Attendance OTP (${action})`,
-      text: `Your OTP for ${action} is ${otp}. It is valid for 2 minutes.`,
-    });
-
-    res.json({ message: "OTP sent successfully. Check your email." });
+    try {
+      await sendEmail(
+        employee.email,
+        `Your Attendance OTP (${action})`,
+        `Your OTP for ${action} is ${otp}. It is valid for 2 minutes.`
+      );
+      console.log(`OTP sent to ${employee.email}`);
+      res.json({ message: "OTP sent successfully. Check your email." });
+    } catch (emailError) {
+      console.error("Email sending failed:", emailError);
+      await Otp.deleteMany({ employeeId });
+      res.status(500).json({ message: "Failed to send OTP email. Please check email configuration." });
+    }
   } catch (err) {
     console.error("Error in sendOtp:", err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
-// ============================
 // Verify OTP
-// ============================
-export const verifyOtp = async (req, res) => {
+const verifyOtp = async (req, res) => {
   const { employeeId, otp, action } = req.body;
   if (!employeeId || !otp || !action) {
     return res.status(400).json({ message: "employeeId, otp and action required" });
@@ -80,42 +104,55 @@ export const verifyOtp = async (req, res) => {
       return res.status(400).json({ message: "OTP expired" });
     }
 
+    const now = new Date();
+    const today = new Date(now);
+    today.setHours(0, 0, 0, 0);
+
     // Handle time-in
     if (action === "time-in") {
-      const now = new Date();
-
-      // Work start time rule (9:00 AM)
-      const workStart = new Date();
-      workStart.setHours(9, 0, 0, 0);
-
-      const status = now > workStart ? "late" : "present";
-
-      await Attendance.create({
+      // Check if already timed in today
+      const existingAttendance = await Attendance.findOne({
         employeeId,
-        date: now,
-        timeIn: now,
-        status,
+        date: { $gte: today }
       });
 
+      if (existingAttendance) {
+        await Otp.deleteMany({ employeeId });
+        return res.status(400).json({ message: "Already timed in for today" });
+      }
+
+      const status = calculateStatus(now);
+      await Attendance.create({ 
+        employeeId, 
+        timeIn: now,
+        date: today,
+        status
+      });
+      
       await Otp.deleteMany({ employeeId });
       return res.json({ message: "Time-In recorded successfully", status });
     }
 
     // Handle time-out
     if (action === "time-out") {
-      const open = await Attendance.findOne({ employeeId, timeOut: null }).sort({ timeIn: -1 });
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const open = await Attendance.findOne({ 
+        employeeId, 
+        date: { $gte: today },
+        timeOut: null 
+      });
+      
       if (!open) {
         await Otp.deleteMany({ employeeId });
         return res.status(400).json({ message: "No open time-in found to time-out" });
       }
-
-      const timeOut = new Date();
-      open.timeOut = timeOut;
-      open.workedHours = (timeOut - open.timeIn) / (1000 * 60 * 60); // hours
+      
+      open.timeOut = now;
       await open.save();
-
       await Otp.deleteMany({ employeeId });
-      return res.json({ message: "Time-Out recorded successfully", workedHours: open.workedHours });
+      return res.json({ message: "Time-Out recorded successfully" });
     }
 
     return res.status(400).json({ message: "Unknown action" });
@@ -125,30 +162,116 @@ export const verifyOtp = async (req, res) => {
   }
 };
 
-// ============================
 // Get today attendance summary
-// ============================
-export const getTodayAttendanceSummary = async (req, res) => {
+const getTodayAttendanceSummary = async (req, res) => {
   try {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-
+    
     const totalEmployees = await Employee.countDocuments();
-
-    const present = await Attendance.countDocuments({
+    
+    // Count present employees (those with attendance record today)
+    const presentCount = await Attendance.countDocuments({ 
+      date: { $gte: today } 
+    });
+    
+    const absentCount = totalEmployees - presentCount;
+    
+    // Count late employees today
+    const lateCount = await Attendance.countDocuments({
       date: { $gte: today },
-      status: "present",
+      status: 'late'
     });
 
-    const late = await Attendance.countDocuments({
-      date: { $gte: today },
-      status: "late",
+    res.json({ 
+      total: totalEmployees, 
+      present: presentCount, 
+      absent: absentCount, 
+      late: lateCount 
     });
-
-    const absent = totalEmployees - (present + late);
-
-    res.json({ total: totalEmployees, present, late, absent });
   } catch (err) {
+    console.error("Error in getTodayAttendanceSummary:", err);
     res.status(500).json({ message: err.message });
   }
+};
+
+// Get all attendance records with employee details
+const getAllAttendance = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, date } = req.query;
+    const query = {};
+
+    // Validate and parse date filter
+    if (date) {
+      const parsedDate = new Date(date);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ message: "Invalid date format" });
+      }
+
+      parsedDate.setHours(0, 0, 0, 0);
+      const nextDay = new Date(parsedDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+
+      query.date = { $gte: parsedDate, $lt: nextDay };
+    }
+
+    const records = await Attendance.find(query)
+      .populate('employeeId', 'name email employeeId')
+      .sort({ timeIn: -1 })
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit))
+      .exec();
+
+    const total = await Attendance.countDocuments(query);
+
+    res.json({
+      records,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number(page),
+      total
+    });
+  } catch (err) {
+    console.error("Error in getAllAttendance:", err);
+    res.status(500).json({ message: "Failed to fetch attendance records" });
+  }
+};
+
+
+// Get attendance for specific employee
+const getEmployeeAttendance = async (req, res) => {
+  try {
+    const { employeeId } = req.params;
+    const { page = 1, limit = 30 } = req.query;
+    
+    const employee = await findEmployeeByEmployeeId(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    
+    const records = await Attendance.find({ employeeId: employee._id }) // Use ObjectId here
+      .sort({ timeIn: -1 })
+      .limit(Number(limit))
+      .skip((Number(page) - 1) * Number(limit))
+      .exec();
+
+    const total = await Attendance.countDocuments({ employeeId: employee._id });
+
+    res.json({
+      records,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number(page),
+      total
+    });
+  } catch (err) {
+    console.error("Error in getEmployeeAttendance:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
+module.exports = {
+  sendOtp,
+  verifyOtp,
+  getTodayAttendanceSummary,
+  getAllAttendance,
+  getEmployeeAttendance
 };

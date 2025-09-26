@@ -1,11 +1,11 @@
 const express = require("express");
-const { protect, hrManagerOrAdmin } = require("../../middleware/authMiddleware");
+const { protect, hrManagerOrAdmin } = require("../middleware/authMiddleware");
 const {
   getAllLeaves,
   createLeave,
   updateLeaveStatus,
   getMyLeaves
-} = require("../../controllers/AttendenceController/leaveController");
+} = require("../controllers/leaveController");
 
 const router = express.Router();
 

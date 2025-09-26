@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { UserContext } from "../../components/context/userContext";
 import { Navigate } from "react-router-dom";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
-import NavBar from "../layouts/attendanceNavbar";
+import NavBar from "../layouts/Navbar";
 import AttendanceSideMenu from "../layouts/attendanceSidebar";
 
 const AttendanceDashboardLayout = ({ children, activeMenu, requiredRole }) => {

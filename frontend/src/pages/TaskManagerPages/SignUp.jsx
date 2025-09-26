@@ -11,6 +11,8 @@ const Signup = () => {
   const [profilePic, setProfilePic] = useState(null);
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [address, setAddress] = useState("");
   const [password, setPassword] = useState("");
   const [adminInviteToken, setAdminInviteToken] = useState("");
   const [error, setError] = useState(null);
@@ -19,12 +21,14 @@ const Signup = () => {
   const { updateUser } = useContext(UserContext);
   const navigate = useNavigate();
 
-  // Email validation
   const validateEmail = (email) => {
     return /\S+@\S+\.\S+/.test(email);
   };
 
-  // Image upload function
+  const validateContactNumber = (number) => {
+    return /^[0-9]{10}$/.test(number);
+  };
+
   const uploadImage = async (imageFile) => {
     const formData = new FormData();
     formData.append("image", imageFile);
@@ -59,6 +63,18 @@ const Signup = () => {
       return;
     }
     
+    if (!validateContactNumber(contactNumber)) {
+      setError("Please enter a valid 10-digit contact number.");
+      setIsLoading(false);
+      return;
+    }
+    
+    if (!address.trim()) {
+      setError("Please enter your address.");
+      setIsLoading(false);
+      return;
+    }
+    
     if (!password.trim()) {
       setError("Please enter your password.");
       setIsLoading(false);
@@ -76,7 +92,6 @@ const Signup = () => {
     try {
       let profileImageUrl = "";
       
-      // Upload image if present
       if (profilePic) {
         try {
           const imgUploadRes = await uploadImage(profilePic);
@@ -91,18 +106,22 @@ const Signup = () => {
       const response = await axiosInstance.post(API_PATHS.AUTH.REGISTER, {
         name: fullName,
         email,
+        contactNumber,
+        address,
         password,
         adminInviteToken: adminInviteToken || undefined,
         profileImage: profileImageUrl || undefined
       });
 
-      const { token, role, user } = response.data;
+      const { token, role, user, employeeId } = response.data;
 
       if (token) {
         localStorage.setItem("token", token);
-        updateUser({ ...user, token });
+        updateUser({ ...user, token, employeeId });
 
-        // Redirect based on role
+        // Show employee ID to user
+        alert(`Registration successful! Your Employee ID is: ${employeeId}`);
+        
         if (role === "admin") {
           navigate("/admin/dashboard");
         } else {
@@ -125,6 +144,7 @@ const Signup = () => {
       <div className="signup-form">
         <h3 className="welcome">Create an Account</h3>
         <p className="signup-p">Join us today by entering your details below.</p>
+        <p className="employee-id-note">Your Employee ID will be automatically generated (e.g., 001, 002, 003)</p>
 
         <form onSubmit={handleSignUp}>
           <label className="form-label">Profile Photo</label>
@@ -154,11 +174,36 @@ const Signup = () => {
             }}
           />
 
+          <label className="form-label" htmlFor="contactNumber">Contact Number</label>
+          <input
+            id="contactNumber"
+            type="tel"
+            placeholder="Enter your 10-digit contact number"
+            value={contactNumber}
+            onChange={(e) => {
+              setContactNumber(e.target.value);
+              if (error) setError("");
+            }}
+            maxLength="10"
+          />
+
+          <label className="form-label" htmlFor="address">Address</label>
+          <textarea
+            id="address"
+            placeholder="Enter your full address"
+            value={address}
+            onChange={(e) => {
+              setAddress(e.target.value);
+              if (error) setError("");
+            }}
+            rows="3"
+          />
+
           <label className="form-label" htmlFor="password">Password</label>
           <input
             id="password"
             type="password"
-            placeholder="Min 8 Characters"
+            placeholder="Min 6 Characters"
             value={password}
             onChange={(e) => {
               setPassword(e.target.value);
@@ -183,7 +228,7 @@ const Signup = () => {
 
           <p className="login-link">
             Already have an account?{" "}
-            <Link to="/Companylogin" className="login-text">Login</Link>
+            <Link to="/login" className="login-text">Login</Link>
           </p>
         </form>
       </div>

@@ -289,3 +289,11 @@
             border-radius: 8px;
             border-left: 3px solid #ff6b6b;
         }
+
+        .employee-id-note {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            }

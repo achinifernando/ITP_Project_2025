@@ -1,6 +1,6 @@
 // controllers/UserController.js
-const User = require("../../models/AttendenceTaskModel/User");
-const Task = require("../../models/AttendenceTaskModel/Task");
+const User = require("../models/User");
+const Task = require("../models/Task");
 const bcrypt = require("bcryptjs");
 
 // Get all users (Admin or HR Manager only)

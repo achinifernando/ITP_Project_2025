@@ -1,11 +1,11 @@
 const express = require("express");
-const { protect, adminOnly } = require("../../middleware/authMiddleware");
+const { protect, adminOnly } = require("../middleware/authMiddleware");
 const {
   createTemplate,
   getTemplates,
   getTemplateById,
   deleteTemplate,
-} = require("../../controllers/TaskControllers/checklistController");
+} = require("../controllers/checklistController");
 
 const router = express.Router();
 

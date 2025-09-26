@@ -1,4 +1,4 @@
-const Leave = require("../../models/AttendenceTaskModel/Leave");
+const Leave = require("../models/Leave");
 
 // ✅ Get all leaves
 const getAllLeaves = async (req, res) => {
