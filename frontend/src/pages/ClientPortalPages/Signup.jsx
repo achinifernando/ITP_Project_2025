@@ -141,6 +141,13 @@ const [profilePic, setProfilePic] = useState(null);
           <p className="register-bottom-p">
             Already have an account? <Link to="/login">Log in</Link>
           </p>
+          <p className="register-bottom-p">
+            Are you a company memeber?{" "}
+            <Link to="/Companysignup" className="signup-text">
+              Sign Up
+            </Link>
+            
+          </p>
         </div>
       </div>
     </div>

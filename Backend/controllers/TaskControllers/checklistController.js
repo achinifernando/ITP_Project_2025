@@ -1,4 +1,4 @@
-const ChecklistTemplate = require("../models/ChecklistTemplate");
+const ChecklistTemplate = require("../../models/AttendenceTaskModel/ChecklistTemplate");
 
 // @desc Create a new checklist template
 const createTemplate = async (req, res) => {

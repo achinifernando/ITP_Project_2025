@@ -7,7 +7,7 @@ const {
   getTodayAttendanceSummary, 
   getAllAttendance,
   getEmployeeAttendance 
-} = require('../controllers/attendanceController');
+} = require('../../controllers/AttendenceController/attendanceController.js');
 
 router.post("/send-otp", sendOtp);
 router.post("/verify-otp", verifyOtp);

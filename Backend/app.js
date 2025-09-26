@@ -36,10 +36,10 @@ app.use("/files", express.static(path.join(__dirname, "uploads")));
 
 // =============== AUTHENTICATION ROUTES (ADD THESE FIRST) =======================
 app.use("/api/company", require("./routes/AttendenceRoutes/authRoute")); 
-app.use("/api/clients", require("./routes/clientAuthRoutes"));  // Client auth
+app.use("/client", require("./routes/ClientPortalRoutes/clientRoute"));
 
 // =============== CLIENT PORTAL ROUTES =======================
-app.use("/client", require("./routes/ClientPortalRoutes/clientRoute"));
+
 app.use("/lorryCategories", require("./routes/ClientPortalRoutes/lorryCategoryRoute"));
 app.use("/lorryType", require("./routes/ClientPortalRoutes/lorryTypesRoute"));
 app.use("/lorryBrands", require("./routes/ClientPortalRoutes/lorrymodelRoute"));

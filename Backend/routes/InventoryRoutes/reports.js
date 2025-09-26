@@ -1,8 +1,8 @@
-import { Router } from 'express';
-import Stock from '../../models/InventoryModels/Stock.js';
-import SupplierRequest from '../../models/InventoryModels/SupplierRequest.js';
+const express = require("express");
+const Stock = require("../../models/InventoryModels/Stock");
+const SupplierRequest = require("../../models/InventoryModels/SupplierRequest");
 
-const router = Router();
+const router = express.Router();
 
 /**
  * GET /api/reports/stock-summary
@@ -10,7 +10,7 @@ const router = Router();
  * - low stock count
  * - items with expiry
  */
-router.get('/stock-summary', async (_req, res) => {
+router.get("/stock-summary", async (_req, res) => {
   const all = await Stock.find();
   const byUnit = {};
   let lowStock = 0;
@@ -18,14 +18,14 @@ router.get('/stock-summary', async (_req, res) => {
   for (const s of all) {
     if (s.quantity <= s.threshold) lowStock++;
     if (s.expiryDate) withExpiry++;
-    if (!byUnit[s.unit || 'unitless']) byUnit[s.unit || 'unitless'] = 0;
-    byUnit[s.unit || 'unitless'] += s.quantity;
+    if (!byUnit[s.unit || "unitless"]) byUnit[s.unit || "unitless"] = 0;
+    byUnit[s.unit || "unitless"] += s.quantity;
   }
   res.json({
     totalItems: all.length,
     totalsByUnit: byUnit,
     lowStock,
-    withExpiry
+    withExpiry,
   });
 });
 
@@ -33,10 +33,12 @@ router.get('/stock-summary', async (_req, res) => {
  * GET /api/reports/supplier-history/:supplierId
  * basic request history for a supplier
  */
-router.get('/supplier-history/:supplierId', async (req, res) => {
+router.get("/supplier-history/:supplierId", async (req, res) => {
   const { supplierId } = req.params;
-  const history = await SupplierRequest.find({ supplier: supplierId }).sort({ createdAt: -1 });
+  const history = await SupplierRequest.find({ supplier: supplierId }).sort({
+    createdAt: -1,
+  });
   res.json(history);
 });
 
-export default router;
+module.exports = router;

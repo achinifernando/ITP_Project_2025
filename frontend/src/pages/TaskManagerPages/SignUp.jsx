@@ -32,13 +32,17 @@ const Signup = () => {
   const uploadImage = async (imageFile) => {
     const formData = new FormData();
     formData.append("image", imageFile);
-    
+
     try {
-      const response = await axiosInstance.post(API_PATHS.AUTH.UPLOAD_IMAGE, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axiosInstance.post(
+        API_PATHS.AUTH.UPLOAD_IMAGE,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       return response.data;
     } catch (error) {
       console.error("Image upload failed:", error);
@@ -49,38 +53,38 @@ const Signup = () => {
   const handleSignUp = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    
+
     // Validation
     if (!fullName.trim()) {
       setError("Please enter your full name.");
       setIsLoading(false);
       return;
     }
-    
+
     if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       setIsLoading(false);
       return;
     }
-    
+
     if (!validateContactNumber(contactNumber)) {
       setError("Please enter a valid 10-digit contact number.");
       setIsLoading(false);
       return;
     }
-    
+
     if (!address.trim()) {
       setError("Please enter your address.");
       setIsLoading(false);
       return;
     }
-    
+
     if (!password.trim()) {
       setError("Please enter your password.");
       setIsLoading(false);
       return;
     }
-    
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters.");
       setIsLoading(false);
@@ -91,7 +95,7 @@ const Signup = () => {
 
     try {
       let profileImageUrl = "";
-      
+
       if (profilePic) {
         try {
           const imgUploadRes = await uploadImage(profilePic);
@@ -110,7 +114,7 @@ const Signup = () => {
         address,
         password,
         adminInviteToken: adminInviteToken || undefined,
-        profileImage: profileImageUrl || undefined
+        profileImage: profileImageUrl || undefined,
       });
 
       const { token, role, user, employeeId } = response.data;
@@ -121,7 +125,7 @@ const Signup = () => {
 
         // Show employee ID to user
         alert(`Registration successful! Your Employee ID is: ${employeeId}`);
-        
+
         if (role === "admin") {
           navigate("/admin/dashboard");
         } else {
@@ -143,16 +147,23 @@ const Signup = () => {
     <AuthLayout>
       <div className="signup-form">
         <h3 className="welcome">Create an Account</h3>
-        <p className="signup-p">Join us today by entering your details below.</p>
-        <p className="employee-id-note">Your Employee ID will be automatically generated (e.g., 001, 002, 003)</p>
+        <p className="signup-p">
+          Join us today by entering your details below.
+        </p>
+        <p className="employee-id-note">
+          Your Employee ID will be automatically generated (e.g., 001, 002, 003)
+        </p>
 
         <form onSubmit={handleSignUp}>
           <label className="form-label">Profile Photo</label>
           <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
 
-          <label className="form-label" htmlFor="fullName">Full Name</label>
+          <label className="form-label" htmlFor="fullName">
+            Full Name
+          </label>
           <input
             id="fullName"
+            name="fullName"
             type="text"
             placeholder="Enter your full name"
             value={fullName}
@@ -162,9 +173,12 @@ const Signup = () => {
             }}
           />
 
-          <label className="form-label" htmlFor="email">Email Address</label>
+          <label className="form-label" htmlFor="email">
+            Email Address
+          </label>
           <input
             id="email"
+            name="email"
             type="email"
             placeholder="Enter your email"
             value={email}
@@ -174,9 +188,12 @@ const Signup = () => {
             }}
           />
 
-          <label className="form-label" htmlFor="contactNumber">Contact Number</label>
+          <label className="form-label" htmlFor="contactNumber">
+            Contact Number
+          </label>
           <input
             id="contactNumber"
+            name="contactNumber"
             type="tel"
             placeholder="Enter your 10-digit contact number"
             value={contactNumber}
@@ -187,9 +204,12 @@ const Signup = () => {
             maxLength="10"
           />
 
-          <label className="form-label" htmlFor="address">Address</label>
+          <label className="form-label" htmlFor="address">
+            Address
+          </label>
           <textarea
             id="address"
+            name="address"
             placeholder="Enter your full address"
             value={address}
             onChange={(e) => {
@@ -199,9 +219,12 @@ const Signup = () => {
             rows="3"
           />
 
-          <label className="form-label" htmlFor="password">Password</label>
+          <label className="form-label" htmlFor="password">
+            Password
+          </label>
           <input
             id="password"
+            name="password"
             type="password"
             placeholder="Min 6 Characters"
             value={password}
@@ -211,9 +234,12 @@ const Signup = () => {
             }}
           />
 
-          <label className="form-label" htmlFor="adminInviteToken">Admin Invite Token (Optional)</label>
+          <label className="form-label" htmlFor="adminInviteToken">
+            Admin Invite Token (Optional)
+          </label>
           <input
             id="adminInviteToken"
+            name="adminInviteToken"
             type="text"
             placeholder="6 Digit Code"
             value={adminInviteToken}
@@ -228,7 +254,9 @@ const Signup = () => {
 
           <p className="login-link">
             Already have an account?{" "}
-            <Link to="/login" className="login-text">Login</Link>
+            <Link to="/login" className="login-text">
+              Login
+            </Link>
           </p>
         </form>
       </div>

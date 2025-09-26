@@ -1,6 +1,6 @@
 // controllers/taskController.js
-const Task = require("../models/Task");
-const ChecklistTemplate = require("../models/ChecklistTemplate");
+const Task = require("../../models/AttendenceTaskModel/Task");
+const ChecklistTemplate = require("../../models/AttendenceTaskModel/ChecklistTemplate");
 
 // ================= Dashboard =================
 const getDashboardData = async (req, res) => {

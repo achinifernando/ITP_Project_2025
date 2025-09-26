@@ -1,25 +1,25 @@
 const express = require("express");
-const { protect, adminOnly } = require("../middleware/authMiddleware");
+const { protectUser, adminOnly } = require("../../middleware/authMiddleware");
 const {
   createTemplate,
   getTemplates,
   getTemplateById,
   deleteTemplate,
-} = require("../controllers/checklistController");
+} = require("../../controllers/TaskControllers/checklistController");
 
 const router = express.Router();
 
 // Create a new checklist template (Admin only)
-router.post("/", protect, adminOnly, createTemplate);
+router.post("/", protectUser, adminOnly, createTemplate);
 
 // Get all templates
-router.get("/", protect, getTemplates);
+router.get("/", protectUser, getTemplates);
 
 // Get one template by ID
-router.get("/:id", protect, getTemplateById);
+router.get("/:id", protectUser, getTemplateById);
 
 // Delete a template (Admin only)
-router.delete("/:id", protect, adminOnly, deleteTemplate);
+router.delete("/:id", protectUser, adminOnly, deleteTemplate);
 
 module.exports = router;
 

@@ -112,9 +112,9 @@ export default function Login() {
           </p>
 
           <p className="signup-link">
-            Are you a company memeber?{" "}
-            <Link to="/Companysignup" className="signup-text">
-              Sign Up
+            Company Login?{" "}
+            <Link to="/Companylogin" className="signup-text">
+              LOGIN
             </Link>
             
           </p>

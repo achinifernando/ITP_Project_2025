@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 /**
@@ -20,16 +20,16 @@ const stockSchema = new Schema(
     quantity: { type: Number, required: true },
     unit: { type: String }, // "kg", "liters", "pieces"
     threshold: { type: Number, default: 0 },
-    supplierId: { type: Schema.Types.ObjectId, ref: 'Supplier' },
+    supplierId: { type: Schema.Types.ObjectId, ref: "Supplier" },
     expiryDate: { type: Date }, // optional
-    lastUpdated: { type: Date, default: Date.now }
+    lastUpdated: { type: Date, default: Date.now },
   },
   { versionKey: false }
 );
 
-stockSchema.pre('save', function (next) {
+stockSchema.pre("save", function (next) {
   this.lastUpdated = Date.now();
   next();
 });
 
-export default mongoose.model('Stock', stockSchema);
+module.exports = mongoose.model("Stock", stockSchema);
