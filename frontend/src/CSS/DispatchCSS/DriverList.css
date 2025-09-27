@@ -1,129 +1,265 @@
+/* DriverList.css */
+
 .driver-management {
   padding: 20px;
   max-width: 1200px;
   margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #e0e0e0;
 }
 
-.driver-form {
-  background: #f5f5f5;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
+.header h2 {
+  color: #333;
+  margin: 0;
+  font-size: 28px;
+  font-weight: 600;
 }
 
-.form-group {
-  margin-bottom: 15px;
-}
-
-.form-group label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-.form-control {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  box-sizing: border-box;
-}
-
-.form-actions {
-  display: flex;
-  gap: 10px;
-}
-
-.drivers-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.drivers-table th,
-.drivers-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #ddd;
-}
-
-.drivers-table th {
-  background: #f8f9fa;
-  font-weight: bold;
-}
-
-.status-available {
-  color: #28a745;
-  font-weight: bold;
-}
-
-.status-unavailable {
-  color: #dc3545;
-  font-weight: bold;
-}
-
-.action-cell {
-  display: flex;
-  gap: 5px;
-}
-
+/* Button Styles */
 .btn {
-  padding: 8px 12px;
+  padding: 10px 20px;
   border: none;
-  border-radius: 4px;
+  border-radius: 5px;
   cursor: pointer;
   font-size: 14px;
-  transition: opacity 0.2s;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+  text-align: center;
+}
+
+.btn-primary {
+  background-color: #007bff;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}
+
+.btn-cancel {
+  background-color: #6c757d;
+  color: white;
+}
+
+.btn-cancel:hover:not(:disabled) {
+  background-color: #545b62;
+}
+
+.btn-update {
+  background-color: #28a745;
+  color: white;
+}
+
+.btn-update:hover:not(:disabled) {
+  background-color: #1e7e34;
+}
+
+.btn-edit {
+  background-color: #ffc107;
+  color: #212529;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.btn-edit:hover:not(:disabled) {
+  background-color: #e0a800;
+  transform: translateY(-1px);
+}
+
+.btn-delete {
+  background-color: #dc3545;
+  color: white;
+  padding: 6px 12px;
+  font-size: 12px;
+}
+
+.btn-delete:hover:not(:disabled) {
+  background-color: #c82333;
+  transform: translateY(-1px);
+}
+
+.btn-delete-disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-delete-disabled:hover {
+  background-color: #6c757d;
+  transform: none;
 }
 
 .btn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-.btn-primary {
-  background: #007bff;
-  color: white;
+  transform: none;
 }
 
 .btn-secondary {
-  background: #6c757d;
+  background-color: #6c757d;
+  color: white;
+  margin-left: 10px;
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background-color: #545b62;
+}
+
+/* Form Styles */
+.driver-form {
+  background-color: #f8f9fa;
+  padding: 25px;
+  border-radius: 8px;
+  margin-bottom: 30px;
+  border-left: 4px solid #007bff;
+}
+
+.driver-form h3 {
+  margin-top: 0;
+  color: #333;
+  font-size: 22px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #555;
+}
+
+.form-control {
+  width: 100%;
+  max-width: 400px;
+  padding: 10px 12px;
+  border: 2px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+  transition: border-color 0.3s ease;
+  box-sizing: border-box;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+}
+
+.form-control.error {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.1);
+}
+
+.form-control:disabled {
+  background-color: #f8f9fa;
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 12px;
+  margin-top: 5px;
+  display: block;
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+/* Table Styles */
+.drivers-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.drivers-table thead {
+  background-color: #343a40;
   color: white;
 }
 
-.btn-update {
-  background: #28a745;
-  color: white;
+.drivers-table th {
+  padding: 15px 12px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.btn-edit {
-  background: #ffc107;
-  color: black;
+.drivers-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+  transition: background-color 0.3s ease;
 }
 
-.btn-delete {
-  background: #dc3545;
-  color: white;
+.drivers-table tbody tr:hover {
+  background-color: #f8f9fa;
 }
 
-.btn-cancel {
-  background: #6c757d;
-  color: white;
+.drivers-table tbody tr.row-disabled {
+  background-color: #f8f9fa;
+  opacity: 0.7;
 }
 
+.drivers-table tbody tr.row-disabled:hover {
+  background-color: #e9ecef;
+}
+
+.drivers-table td {
+  padding: 12px;
+  font-size: 14px;
+  color: #555;
+}
+
+/* Status Styles */
+.status-available {
+  color: #28a745;
+  font-weight: 600;
+}
+
+.status-unavailable {
+  color: #dc3545;
+  font-weight: 600;
+}
+
+/* Action Cell Styles */
+.action-cell {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Loading and Empty States */
 .loading {
   text-align: center;
-  padding: 20px;
-  font-style: italic;
+  padding: 40px;
+  font-size: 16px;
   color: #6c757d;
+  font-style: italic;
 }
 
 .no-drivers {
@@ -131,4 +267,127 @@
   padding: 40px;
   color: #6c757d;
   font-style: italic;
+  font-size: 16px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .driver-management {
+    padding: 15px;
+  }
+  
+  .header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .header h2 {
+    font-size: 24px;
+  }
+  
+  .driver-form {
+    padding: 20px;
+  }
+  
+  .form-control {
+    max-width: 100%;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .btn-secondary {
+    margin-left: 0;
+    margin-top: 10px;
+  }
+  
+  .drivers-table {
+    display: block;
+    overflow-x: auto;
+  }
+  
+  .drivers-table th,
+  .drivers-table td {
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+  
+  .action-cell {
+    flex-direction: column;
+    gap: 5px;
+  }
+  
+  .btn-edit,
+  .btn-delete {
+    width: 100%;
+    margin-right: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .driver-management {
+    padding: 10px;
+  }
+  
+  .header h2 {
+    font-size: 20px;
+  }
+  
+  .driver-form h3 {
+    font-size: 18px;
+  }
+  
+  .drivers-table th {
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+  
+  .drivers-table td {
+    font-size: 12px;
+    padding: 8px 6px;
+  }
+}
+
+/* Animation for smooth transitions */
+.driver-form,
+.drivers-table {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scrollbar styling for table */
+.drivers-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+}
+
+.drivers-table-container::-webkit-scrollbar {
+  height: 8px;
+}
+
+.drivers-table-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+.drivers-table-container::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+.drivers-table-container::-webkit-scrollbar-thumb:hover {
+  background: #a8a8a8;
 }

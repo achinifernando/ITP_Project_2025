@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios"; // Added axios import
 import axiosInstance from "../../utils/axiosInstance";
 import {
   MapContainer,
@@ -54,19 +55,70 @@ export default function AddDelivery() {
   const [distance, setDistance] = useState(null);
   const [route, setRoute] = useState(null);
   const [isCalculating, setIsCalculating] = useState(false);
-  const [watchId, setWatchId] = useState(null); // For tracking live location
-  const [isTracking, setIsTracking] = useState(false); // Track if live location is active
+  const [watchId, setWatchId] = useState(null);
+  const [isTracking, setIsTracking] = useState(false);
+  // Added missing state variables
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const mapRef = useRef();
 
-  // Get user's initial location
+  // Validation rules for each field
+  const validationRules = {
+    customerName: {
+      required: true,
+      pattern: /^[a-zA-Z\s]{2,50}$/,
+      message: 'Customer name should contain only letters and spaces (2-50 characters)'
+    },
+    houseNo: {
+      required: true,
+      pattern: /^[a-zA-Z0-9/-\s]{1,20}$/, 
+      message: 'House number should be alphanumeric (1-20 characters)'
+    },
+    street: {
+      required: true,
+      pattern: /^[a-zA-Z0-9\s.,-]{2,50}$/, 
+      message: 'Street name should be valid (2-50 characters)'
+    },
+    city: {
+      required: true,
+      pattern: /^[a-zA-Z\s]{2,30}$/,
+      message: 'City name should contain only letters (2-30 characters)'
+    },
+    district: {
+      required: true,
+      pattern: /^[a-zA-Z\s]{2,30}$/,
+      message: 'District name should contain only letters (2-30 characters)'
+    },
+    province: {
+      required: true,
+      pattern: /^[a-zA-Z\s]{2,30}$/,
+      message: 'Province name should contain only letters (2-30 characters)'
+    },
+    contactPhone: {
+      required: true,
+      pattern: /^[0-9]{10}$/,
+      message: 'Phone number should be 10 digits'
+    },
+    deliveryDate: {
+      required: true,
+      validate: (value) => {
+        const selectedDate = new Date(value);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return selectedDate >= today;
+      },
+      message: 'Delivery date cannot be in the past'
+    }
+  };
+
+  // Get user's initial location on component mount
   useEffect(() => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
-          const newLocation = {
-            lat: position.coords.latitude,
-            lng: position.coords.longitude,
+          const newLocation = { 
+            lat: position.coords.latitude, 
+            lng: position.coords.longitude 
           };
           setUserLocation(newLocation);
         },
@@ -78,15 +130,93 @@ export default function AddDelivery() {
       setError("Geolocation not supported.");
     }
 
-    // Cleanup watch position when component unmounts
+    // Cleanup function to clear watch position when component unmounts
     return () => {
       if (watchId) {
         navigator.geolocation.clearWatch(watchId);
       }
     };
-  }, []);
+  }, [watchId]);
 
-  // Start/Stop live location tracking
+  // Validate individual field
+  const validateField = (name, value) => {
+    const rules = validationRules[name];
+    if (!rules) return true;
+
+    let isValid = true;
+    let errorMessage = '';
+
+    // Check required field
+    if (rules.required && !value.trim()) {
+      isValid = false;
+      errorMessage = 'This field is required';
+    }
+    // Check pattern
+    else if (rules.pattern && !rules.pattern.test(value)) {
+      isValid = false;
+      errorMessage = rules.message;
+    }
+    // Check custom validation function
+    else if (rules.validate && !rules.validate(value)) {
+      isValid = false;
+      errorMessage = rules.message;
+    }
+
+    // Update field errors
+    setFieldErrors(prev => ({
+      ...prev,
+      [name]: isValid ? '' : errorMessage
+    }));
+
+    return isValid;
+  };
+
+  // Validate all fields
+  const validateAllFields = () => {
+    const errors = {};
+    let isValid = true;
+
+    Object.keys(validationRules).forEach(fieldName => {
+      const rules = validationRules[fieldName];
+      const value = form[fieldName].trim();
+
+      if (rules.required && !value) {
+        errors[fieldName] = 'This field is required';
+        isValid = false;
+      } else if (rules.pattern && !rules.pattern.test(value)) {
+        errors[fieldName] = rules.message;
+        isValid = false;
+      } else if (rules.validate && !rules.validate(value)) {
+        errors[fieldName] = rules.message;
+        isValid = false;
+      }
+    });
+
+    setFieldErrors(errors);
+    return isValid;
+  };
+
+  // Handle form input changes with validation
+  const handleChange = e => {
+    const { name, value } = e.target;
+    setForm({ ...form, [name]: value });
+    
+    // Clear error when user starts typing
+    if (fieldErrors[name]) {
+      setFieldErrors(prev => ({
+        ...prev,
+        [name]: ''
+      }));
+    }
+  };
+
+  // Handle field blur (when user leaves the field)
+  const handleBlur = e => {
+    const { name, value } = e.target;
+    validateField(name, value);
+  };
+
+  // Toggle live location tracking
   const toggleLiveLocation = () => {
     if (isTracking) {
       // Stop tracking
@@ -100,12 +230,12 @@ export default function AddDelivery() {
       if (navigator.geolocation) {
         const id = navigator.geolocation.watchPosition(
           (position) => {
-            const newLocation = {
-              lat: position.coords.latitude,
-              lng: position.coords.longitude,
+            const newLocation = { 
+              lat: position.coords.latitude, 
+              lng: position.coords.longitude 
             };
             setUserLocation(newLocation);
-
+            
             // Recalculate distance if customer location exists
             if (customerCoords) {
               const dist = calculateDistance(newLocation, customerCoords);
@@ -117,10 +247,10 @@ export default function AddDelivery() {
             setError("Error tracking live location.");
             setIsTracking(false);
           },
-          {
-            enableHighAccuracy: true,
-            timeout: 5000,
-            maximumAge: 0,
+          { 
+            enableHighAccuracy: true, 
+            timeout: 5000, 
+            maximumAge: 0 
           }
         );
         setWatchId(id);
@@ -129,29 +259,23 @@ export default function AddDelivery() {
     }
   };
 
-  const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
+  // Geocode address to get coordinates
   const geocodeAddress = async (address) => {
     try {
-      const formattedAddress = address.replace(/\s+/g, "+");
-      const response = await axiosInstance.get(
-        `https://nominatim.openstreetmap.org/search`,
-        {
-          params: {
-            q: formattedAddress,
-            format: "json",
-            limit: 1,
-            addressdetails: 1,
-          },
+      const formattedAddress = address.replace(/\s+/g, '+');
+      const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+        params: { 
+          q: formattedAddress, 
+          format: 'json', 
+          limit: 1, 
+          addressdetails: 1 
         }
-      );
-
+      });
+      
       if (response.data && response.data.length > 0) {
-        return {
-          lat: parseFloat(response.data[0].lat),
-          lng: parseFloat(response.data[0].lon),
+        return { 
+          lat: parseFloat(response.data[0].lat), 
+          lng: parseFloat(response.data[0].lon) 
         };
       }
       return null;
@@ -161,21 +285,35 @@ export default function AddDelivery() {
     }
   };
 
+  // Calculate distance between two coordinates using Haversine formula
   const calculateDistance = (coord1, coord2) => {
-    const R = 6371;
-    const dLat = ((coord2.lat - coord1.lat) * Math.PI) / 180;
-    const dLng = ((coord2.lng - coord1.lng) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((coord1.lat * Math.PI) / 180) *
-        Math.cos((coord2.lat * Math.PI) / 180) *
-        Math.sin(dLng / 2) *
-        Math.sin(dLng / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c;
+    const R = 6371; // Earth's radius in kilometers
+    const dLat = (coord2.lat - coord1.lat) * Math.PI / 180;
+    const dLng = (coord2.lng - coord1.lng) * Math.PI / 180;
+    const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+      Math.cos(coord1.lat * Math.PI / 180) * Math.cos(coord2.lat * Math.PI / 180) * 
+      Math.sin(dLng/2) * Math.sin(dLng/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    return R * c; // Distance in kilometers
   };
 
+  // Calculate route and distance to customer address
   const calculateRoute = async () => {
+    // First validate address fields
+    const addressFields = ['houseNo', 'street', 'city', 'district', 'province'];
+    let hasErrors = false;
+    
+    addressFields.forEach(field => {
+      if (!validateField(field, form[field])) {
+        hasErrors = true;
+      }
+    });
+
+    if (hasErrors) {
+      setError("Please fix address errors before calculating distance.");
+      return;
+    }
+
     if (!userLocation) {
       setError("Please allow location access.");
       return;
@@ -188,13 +326,14 @@ export default function AddDelivery() {
     }
 
     setIsCalculating(true);
-    setError("");
+    setError('');
 
     try {
+      // Try different address formats for better geocoding results
       const addressVariations = [
         `${houseNo} ${street}, ${city}, ${district}, ${province}`,
         `${street}, ${city}, ${district}, ${province}`,
-        `${city}, ${district}, ${province}`,
+        `${city}, ${district}, ${province}`
       ];
 
       let coords = null;
@@ -208,7 +347,7 @@ export default function AddDelivery() {
         const dist = calculateDistance(userLocation, coords);
         setDistance(dist.toFixed(2));
         setRoute([userLocation, coords]);
-        setError("");
+        setError('');
       } else {
         setError("Address not found. Try being more specific.");
       }
@@ -219,42 +358,38 @@ export default function AddDelivery() {
     }
   };
 
-  const handleSubmit = async (e) => {
+  // Handle form submission
+  const handleSubmit = async e => {
     e.preventDefault();
-    setMessage("");
-    setError("");
+    setMessage('');
+    setError('');
 
-    if (
-      !form.customerName ||
-      !form.houseNo ||
-      !form.street ||
-      !form.city ||
-      !form.district ||
-      !form.province ||
-      !form.contactPhone ||
-      !form.deliveryDate
-    ) {
-      setError("Please fill all required fields.");
+    // Validate all fields before submission
+    if (!validateAllFields()) {
+      setError("Please fix all validation errors before submitting.");
       return;
     }
 
     try {
-      await axiosInstance.post(API_URL, {
-        ...form,
+      // Use axiosInstance instead of axios for consistency with your project
+      await axiosInstance.post(API_URL, { 
+        ...form, 
         address: `${form.houseNo}, ${form.street}, ${form.city}, ${form.district}, ${form.province}`,
-        distance: distance || 0,
+        distance: distance || 0
       });
       setMessage("Delivery added successfully!");
-      setForm({
-        customerName: "",
-        houseNo: "",
-        street: "",
-        city: "",
-        district: "",
-        province: "",
-        contactPhone: "",
-        deliveryDate: "",
+      // Reset form and state
+      setForm({ 
+        customerName: '', 
+        houseNo: '', 
+        street: '', 
+        city: '', 
+        district: '', 
+        province: '', 
+        contactPhone: '', 
+        deliveryDate: '' 
       });
+      setFieldErrors({});
       setDistance(null);
       setRoute(null);
       setCustomerCoords(null);
@@ -263,19 +398,21 @@ export default function AddDelivery() {
     }
   };
 
+  // Clear form and reset state
   const handleClear = () => {
-    setForm({
-      customerName: "",
-      houseNo: "",
-      street: "",
-      city: "",
-      district: "",
-      province: "",
-      contactPhone: "",
-      deliveryDate: "",
+    setForm({ 
+      customerName: '', 
+      houseNo: '', 
+      street: '', 
+      city: '', 
+      district: '', 
+      province: '', 
+      contactPhone: '', 
+      deliveryDate: '' 
     });
-    setMessage("");
-    setError("");
+    setMessage('');
+    setError('');
+    setFieldErrors({});
     setDistance(null);
     setRoute(null);
     setCustomerCoords(null);
@@ -285,163 +422,183 @@ export default function AddDelivery() {
     <div className="add-delivery-container">
       <h2>Add New Delivery</h2>
 
+      {/* Display messages and errors */}
       {message && <div className="message success-message">{message}</div>}
       {error && <div className="message error-message">{error}</div>}
 
       <form onSubmit={handleSubmit}>
+        {/* Customer name input */}
         <div className="form-group">
           <label className="required-field">Customer Name</label>
-          <input
-            type="text"
-            name="customerName"
-            value={form.customerName}
+          <input 
+            type="text" 
+            name="customerName" 
+            value={form.customerName} 
             onChange={handleChange}
-            required
+            onBlur={handleBlur}
+            placeholder="e.g. sethmi disara" 
+            className={fieldErrors.customerName ? 'error' : ''}
+            required 
           />
+          {fieldErrors.customerName && <span className="field-error">{fieldErrors.customerName}</span>}
         </div>
 
+        {/* Address section */}
         <div className="address-section">
           <h3>Delivery Address</h3>
-
+          
           <div className="form-group">
             <label className="required-field">House/Apartment Number</label>
-            <input
-              type="text"
-              name="houseNo"
-              value={form.houseNo}
+            <input 
+              type="text" 
+              name="houseNo" 
+              value={form.houseNo} 
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              placeholder="e.g. 123/A" 
+              className={fieldErrors.houseNo ? 'error' : ''}
+              required 
             />
+            {fieldErrors.houseNo && <span className="field-error">{fieldErrors.houseNo}</span>}
           </div>
 
           <div className="form-group">
             <label className="required-field">Street</label>
-            <input
-              type="text"
-              name="street"
-              value={form.street}
+            <input 
+              type="text" 
+              name="street" 
+              value={form.street} 
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              placeholder="e.g. Main Street" 
+              className={fieldErrors.street ? 'error' : ''}
+              required 
             />
+            {fieldErrors.street && <span className="field-error">{fieldErrors.street}</span>}
           </div>
 
           <div className="form-group">
             <label className="required-field">City</label>
-            <input
-              type="text"
-              name="city"
-              value={form.city}
+            <input 
+              type="text" 
+              name="city" 
+              value={form.city} 
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              placeholder="e.g. Colombo" 
+              className={fieldErrors.city ? 'error' : ''}
+              required 
             />
+            {fieldErrors.city && <span className="field-error">{fieldErrors.city}</span>}
           </div>
 
           <div className="form-group">
             <label className="required-field">District</label>
-            <input
-              type="text"
-              name="district"
-              value={form.district}
+            <input 
+              type="text" 
+              name="district" 
+              value={form.district} 
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              placeholder="e.g. Colombo District" 
+              className={fieldErrors.district ? 'error' : ''}
+              required 
             />
+            {fieldErrors.district && <span className="field-error">{fieldErrors.district}</span>}
           </div>
 
           <div className="form-group">
             <label className="required-field">Province</label>
-            <input
-              type="text"
-              name="province"
-              value={form.province}
+            <input 
+              type="text" 
+              name="province" 
+              value={form.province} 
               onChange={handleChange}
-              required
+              onBlur={handleBlur}
+              placeholder="e.g. Western Province" 
+              className={fieldErrors.province ? 'error' : ''}
+              required 
             />
+            {fieldErrors.province && <span className="field-error">{fieldErrors.province}</span>}
           </div>
 
+          {/* Action buttons for distance calculation and live tracking */}
           <div className="button-group">
-            <button
-              type="button"
-              onClick={calculateRoute}
-              disabled={isCalculating}
-              className="calculate-distance-btn"
-            >
-              {isCalculating ? "Calculating..." : "Calculate Distance"}
+            <button type="button" onClick={calculateRoute} disabled={isCalculating} className="calculate-distance-btn">
+              {isCalculating ? 'Calculating...' : 'Calculate Distance'}
             </button>
-            <button
-              type="button"
-              onClick={toggleLiveLocation}
-              className={`live-location-btn ${isTracking ? "tracking" : ""}`}
-            >
-              {isTracking ? "Stop Live Tracking" : "Start Live Location"}
+            <button type="button" onClick={toggleLiveLocation} className={`live-location-btn ${isTracking ? 'tracking' : ''}`}>
+              {isTracking ? 'Stop Live Tracking' : 'Start Live Location'}
             </button>
           </div>
         </div>
 
+        {/* Contact phone input */}
         <div className="form-group">
           <label className="required-field">Contact Phone</label>
-          <input
-            type="tel"
-            name="contactPhone"
-            value={form.contactPhone}
+          <input 
+            type="tel" 
+            name="contactPhone" 
+            value={form.contactPhone} 
             onChange={handleChange}
-            required
+            onBlur={handleBlur}
+            placeholder="e.g. 0771234567" 
+            className={fieldErrors.contactPhone ? 'error' : ''}
+            required 
           />
+          {fieldErrors.contactPhone && <span className="field-error">{fieldErrors.contactPhone}</span>}
         </div>
 
+        {/* Delivery date input */}
         <div className="form-group">
           <label className="required-field">Delivery Date</label>
-          <input
-            type="date"
-            name="deliveryDate"
-            value={form.deliveryDate}
+          <input 
+            type="date" 
+            name="deliveryDate" 
+            value={form.deliveryDate} 
             onChange={handleChange}
-            required
+            onBlur={handleBlur}
+            className={fieldErrors.deliveryDate ? 'error' : ''}
+            required 
           />
+          {fieldErrors.deliveryDate && <span className="field-error">{fieldErrors.deliveryDate}</span>}
         </div>
 
+        {/* Display map and distance information when available */}
         {(userLocation || distance) && (
           <div className="distance-display">
             <h3>Delivery Information</h3>
-            {distance && (
-              <p>
-                <strong>Estimated Distance:</strong> {distance} km
-              </p>
-            )}
-            {isTracking && (
-              <p>
-                <strong>Live Location:</strong> Active
-              </p>
-            )}
-
+            {distance && <p><strong>Estimated Distance:</strong> {distance} km</p>}
+            {isTracking && <p><strong>Live Location:</strong> Active</p>}
+            
+            {/* Map container with markers and route */}
             {userLocation && (
               <div className="map-container">
-                <MapContainer
-                  center={userLocation}
-                  zoom={13}
-                  style={{ height: "300px", width: "100%" }}
+                <MapContainer 
+                  center={userLocation} 
+                  zoom={13} 
+                  style={{ height: '300px', width: '100%' }}
                   ref={mapRef}
                 >
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-                  {/* Live Location Marker */}
+                  
+                  {/* Live location marker */}
                   <Marker position={userLocation} icon={liveLocationIcon}>
                     <Popup>
-                      <strong>Your Live Location</strong>
-                      <br />
-                      Lat: {userLocation.lat.toFixed(6)}
-                      <br />
+                      <strong>Your Live Location</strong><br />
+                      Lat: {userLocation.lat.toFixed(6)}<br />
                       Lng: {userLocation.lng.toFixed(6)}
                     </Popup>
                   </Marker>
-
-                  {/* Customer Location Marker */}
+                  
+                  {/* Customer location marker */}
                   {customerCoords && (
                     <Marker position={customerCoords}>
                       <Popup>Customer Location</Popup>
                     </Marker>
                   )}
-
-                  {/* Route Line */}
+                  
+                  {/* Route line between locations */}
                   {route && <Polyline positions={route} color="blue" />}
                 </MapContainer>
               </div>
@@ -449,13 +606,10 @@ export default function AddDelivery() {
           </div>
         )}
 
+        {/* Form action buttons */}
         <div className="button-group">
-          <button type="submit" className="submit-button">
-            Create Delivery
-          </button>
-          <button type="button" onClick={handleClear} className="clear-button">
-            Clear Form
-          </button>
+          <button type="submit" className="submit-button">Create Delivery</button>
+          <button type="button" onClick={handleClear} className="clear-button">Clear Form</button>
         </div>
       </form>
     </div>

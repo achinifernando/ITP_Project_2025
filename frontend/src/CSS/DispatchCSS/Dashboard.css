@@ -1,9 +1,10 @@
 /* src/components/Dashboard.css */
 .dashboard-container {
-  padding: 20px;
+  padding: 10px;
   font-family: 'Arial', sans-serif;
-  background-color: #f5f7f9;
-  min-height: 100vh;
+  background-color: #f8f9fa;
+  height: 100vh;
+  position: center;
 }
 
 .dashboard-container h2 {
@@ -11,6 +12,7 @@
   margin-bottom: 25px;
   font-size: 28px;
   font-weight: 600;
+  
 }
 
 .dashboard-container h3 {
@@ -32,7 +34,7 @@
   display: flex;
   gap: 10px;
   margin-bottom: 25px;
-  border-bottom: 2px solid #e9ecef;
+  border-bottom: 2px solid #efece9;
   padding-bottom: 10px;
 }
 
