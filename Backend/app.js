@@ -130,6 +130,7 @@ app.use("/api/requests", supplierRequests);
 app.use("/api/alerts", alertsRoute);
 app.use("/api/inventory-reports", reportsRoute);
 app.use("/api/suppliers", supplierRoute);
+app.use("/api/reports", reportsRoute);
 
 app.use("/admin-categories", categoryRoute);
 app.use("/admin-services", serviceRoute);

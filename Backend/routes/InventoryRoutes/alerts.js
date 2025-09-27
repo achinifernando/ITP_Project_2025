@@ -10,7 +10,7 @@ const router = express.Router();
  * GET /api/alerts/low-stock
  * Returns items where quantity <= threshold
  */
-router.get("/api/low-stock", protectUser, async (_req, res) => {
+router.get("/low-stock", protectUser, async (_req, res) => {
   const items = await Stock.find({
     $expr: { $lte: ["$quantity", "$threshold"] }
   }).sort({ itemName: 1 });
@@ -23,7 +23,7 @@ router.get("/api/low-stock", protectUser, async (_req, res) => {
  * - nearExpiry: expiryDate within `days` from now (and not expired yet)
  * - expired: expiryDate < now
  */
-router.get("/api/expiry", protectUser, async (req, res) => {
+router.get("/expiry", protectUser, async (req, res) => {
   const { value, error } = Joi.object({
     days: Joi.number().min(1).default(30)
   }).validate(req.query);

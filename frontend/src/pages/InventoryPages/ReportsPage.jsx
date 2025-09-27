@@ -21,7 +21,8 @@ function useToasts() {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((x) => x.id !== id));
+      setToasts((prev) => prev.filter((x) => x.id !== 
+      id));
     }, 2800);
   };
   return { toasts, push };
