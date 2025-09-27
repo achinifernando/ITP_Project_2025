@@ -87,7 +87,7 @@ function ProfilePage() {
 
       try {
         const response = await axios.get(
-          "http://localhost:5000/payments/my_payments",
+          "http://localhost:5000/client-payments/my_payments",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -422,7 +422,7 @@ function ProfilePage() {
                                     Place New Order
                                   </button>
                                 </Link>
-                                <Link to="/services">
+                                <Link to="/requestform">
                                   <button className="btn-save">
                                     Request Repair/Maintenance
                                   </button>

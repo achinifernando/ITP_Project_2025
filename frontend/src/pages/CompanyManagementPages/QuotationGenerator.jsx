@@ -3,6 +3,7 @@ import axios from "axios";
 import { PDFViewer, PDFDownloadLink, pdf } from "@react-pdf/renderer";
 import QuotationPDF from "./QuotationPDF";
 import "../../CSS/ClientPortalCSS/quotationGenerator.css";
+import { api } from '../../utils/apiPaths';
 import { useParams } from "react-router-dom";
 
 function QuotationForm() {
@@ -76,12 +77,25 @@ function QuotationForm() {
       .catch(console.error);
   }, []);
 
-  // Fetch stock items
-  useEffect(() => {
-    axios.get("http://localhost:5000/stock/items")
-      .then((res) => setStockItems(res.data))
-      .catch(console.error);
-  }, []);
+ // Fetch stock items
+useEffect(() => {
+  const token = localStorage.getItem("token"); // or sessionStorage
+  if (!token) return;
+
+  axios
+    .get("http://localhost:5000/api/stocks", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      setStockItems(res.data);
+    })
+    .catch((err) => {
+      console.error("Error fetching stock items:", err);
+    });
+}, []);
+
 
   // Derived total price
   const totalPrice = formData.items
@@ -99,19 +113,25 @@ function QuotationForm() {
   };
 
   // Add item from stock
-  const addItem = (itemId) => {
-    if (!itemId) return;
-    const stockItem = stockItems.find((i) => i._id === itemId);
-    if (!stockItem) return;
+ const addItem = (itemId) => {
+  if (!itemId) return;
+  const stockItem = stockItems.find((i) => i._id === itemId);
+  if (!stockItem) return;
 
-    // Prevent duplicate items
-    setFormData((prev) => ({
-      ...prev,
-      items: prev.items.some(i => i._id === stockItem._id)
-        ? prev.items
-        : [...prev.items, { _id: stockItem._id, name: stockItem.item, quantity: 1, price: stockItem.price }],
-    }));
-  };
+  setFormData((prev) => ({
+    ...prev,
+    items: prev.items.some(i => i._id === stockItem._id)
+      ? prev.items
+      : [...prev.items, {
+          _id: stockItem._id,
+          name: stockItem.itemName,
+          unit: stockItem.unit,   // ✅ include unit
+          quantity: 1,
+          price: stockItem.price,
+        }],
+  }));
+};
+
 
   // Update or delete items
   const updateItem = (index, field, value) => {
@@ -201,15 +221,18 @@ function QuotationForm() {
           <div className="items-section">
             <h3>Items</h3>
             <select onChange={(e) => addItem(e.target.value)}>
-              <option value="">Add item from stock</option>
-              {stockItems.map((item) => (
-                <option key={item._id} value={item._id}>{item.item}</option>
-              ))}
-            </select>
+  <option value="">Add item from stock</option>
+  {stockItems.map((item) => (
+    <option key={item._id} value={item._id}>
+      {item.itemName} ({item.quantity} {item.unit})
+    </option>
+  ))}
+</select>
+
 
             {formData.items.map((item, index) => (
               <div key={index} className="item-row">
-                <input type="text" value={item.name} readOnly />
+                <input type="text" value={`${item.name} (${item.unit || ""})`} readOnly />
                 <input type="number" value={item.quantity} min="1" placeholder="Qty" onChange={(e) => updateItem(index, "quantity", e.target.value)} />
                 <input type="number" value={item.price} placeholder="Price" onChange={(e) => updateItem(index, "price", e.target.value)} />
                 <button type="button" onClick={() => deleteItem(index)} className="delete-btn">Delete</button>

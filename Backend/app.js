@@ -37,8 +37,10 @@ mongoose
   .catch((err) => console.error(" Error in database connecting:", err));
 
 // ================= Static Files =================
+// Serve uploads folder
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+app.use("/files", express.static(path.join(__dirname, "uploads")));
 
 // ================= Routes =================
 // --- Authentication

@@ -2,7 +2,7 @@
 import express from "express";
 import Joi from "joi";
 import Stock from "../../models/InventoryModels/Stock.js";
-import { protectUser, inventoryManager } from "../../middleware/authMiddleware.js";
+import { protectUser,authorize } from "../../middleware/authMiddleware.js";
 
 // Create router
 const router = express.Router();
@@ -34,7 +34,7 @@ const pagination = Joi.object({
 });
 
 // Routes
-router.get("/", protectUser, async (req, res) => {
+router.get("/", protectUser, authorize("inventory_manager","company_manager"), async (req, res) => {
   const { value: q } = pagination.validate(req.query);
   const docs = await Stock.find()
     .populate("supplierId", "name email company status")

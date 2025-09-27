@@ -447,9 +447,7 @@ function HomePage() {
 
 
 
-      {/* quotation generator */}
-      <Link to={`/companyManagerDashbord`}>
-      <button className="book-meeting-btn">CompanyManagerDashbord</button></Link>
+      
 
   
       

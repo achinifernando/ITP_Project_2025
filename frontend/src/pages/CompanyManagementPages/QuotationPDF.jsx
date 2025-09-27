@@ -328,7 +328,7 @@ const QuotationPDF = ({ data, company }) => {
             </View>
             {data?.items?.map((item, index) => (
               <View style={styles.tableRow} key={index}>
-                <Text style={styles.tableCellDescription}>{item.name}</Text>
+                <Text style={styles.tableCellDescription}>{item.itemName}</Text>
                 <Text style={styles.tableCellQty}>{item.quantity}</Text>
                 <Text style={styles.tableCellPrice}>{Number(item.price).toFixed(2)}</Text>
                 <Text style={styles.tableCellAmount}>{(Number(item.quantity) * Number(item.price)).toFixed(2)}</Text>

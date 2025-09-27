@@ -74,7 +74,7 @@ function CheckoutPage() {
     try {
       setLoading(true);
       await axios.post(
-        `http://localhost:5000/payments/${type}/${id}/payment`,
+        `http://localhost:5000/client-payments/${type}/${id}/payment`,
         formData,
         {
           headers: {

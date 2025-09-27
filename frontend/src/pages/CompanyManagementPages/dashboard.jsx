@@ -3,6 +3,7 @@ import { Link, Outlet } from "react-router-dom";
 
 export default function DashboardLayout() {
   return (
+    <>
     <div className="d-flex">
       {/* Sidebar */}
       <aside
@@ -93,5 +94,10 @@ export default function DashboardLayout() {
         <Outlet />
       </main>
     </div>
+
+    {/* quotation generator */}
+      <Link to={`/companyManagerDashbord`}>
+      <button className="book-meeting-btn">CompanyManagerDashbord</button></Link>
+      </>
   );
 }

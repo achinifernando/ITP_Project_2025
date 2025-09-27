@@ -21,7 +21,7 @@ const transporter = nodemailer.createTransport({
 
 // Use service account credentials
 const auth = new google.auth.GoogleAuth({
-  keyFile: path.join(__dirname, "../keys/service-account.json"),
+  keyFile: path.join(__dirname, "../../keys/service-account.json"),
   scopes: ["https://www.googleapis.com/auth/calendar"],
 });
 

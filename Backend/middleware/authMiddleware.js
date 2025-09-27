@@ -1,8 +1,8 @@
-const jwt = require("jsonwebtoken");
-const Client = require("../models/ClientPortalModels/clientModel");
-const User = require("../models/AttendenceTaskModel/User");
+import jwt from "jsonwebtoken";
+import Client from "../models/ClientPortalModels/clientModel.js";
+import User from "../models/AttendenceTaskModel/User.js";
 
-const protectClient = async (req, res, next) => {
+export const protectClient = async (req, res, next) => {
   let token;
 
   if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
@@ -13,7 +13,7 @@ const protectClient = async (req, res, next) => {
       const client = await Client.findById(decoded.id).select("-password");
       if (!client) return res.status(401).json({ message: "Client not found" });
 
-      req.client = client; // Use req.client for clients
+      req.user = client;  
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
@@ -23,7 +23,7 @@ const protectClient = async (req, res, next) => {
   }
 };
 
-const protectUser = async (req, res, next) => {
+export const protectUser = async (req, res, next) => {
   try {
     let token;
 
@@ -37,7 +37,7 @@ const protectUser = async (req, res, next) => {
 
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      req.user = await User.findById(decoded.id).select("-password"); // Use req.user for company users
+      req.user = await User.findById(decoded.id).select("-password"); 
       next();
     } catch (error) {
       return res.status(401).json({ message: "Not authorized, token failed" });
@@ -47,7 +47,7 @@ const protectUser = async (req, res, next) => {
   }
 };
 
-const adminOnly = (req, res, next) => {
+export const adminOnly = (req, res, next) => {
   if (req.user && req.user.role === "admin") {
     next();
   } else {
@@ -55,32 +55,43 @@ const adminOnly = (req, res, next) => {
   }
 };
 
-const hrManagerOrAdmin = (req, res, next) => {
+export const hrManagerOrAdmin = (req, res, next) => {
   if (req.user && (req.user.role === "admin" || req.user.role === "hr_manager")) {
     next();
   } else {
     res.status(403).json({ message: "Access denied. HR Manager or Admin only." });
   }
 };
-const companyManager = (req, res, next) => {
-  if (req.user && (req.user.role === "company_manager")) {
+
+export const companyManager = (req, res, next) => {
+  if (req.user && req.user.role === "company_manager") {
     next();
   } else {
     res.status(403).json({ message: "Access denied. Company Manager only." });
   }
 };
-const inventoryManager = (req, res, next) => {
-  if (req.user && ( req.user.role === "inventory_manager")) {
+
+export const inventoryManager = (req, res, next) => {
+  if (req.user && req.user.role === "inventory_manager") {
     next();
   } else {
-    res.status(403).json({ message: "Access denied. Inventory Manager or Admin only." });
+    res.status(403).json({ message: "Access denied. Inventory Manager only." });
   }
 };
-const dispatchManager = (req, res, next) => {
-  if (req.user && ( req.user.role === "dispatch_manager")) {
+
+export const dispatchManager = (req, res, next) => {
+  if (req.user && req.user.role === "dispatch_manager") {
     next();
   } else {
-    res.status(403).json({ message: "Access denied. Dispatch Manager or Admin only." });
+    res.status(403).json({ message: "Access denied. Dispatch Manager only." });
   }
 };
-module.exports = { protectClient, protectUser, adminOnly, hrManagerOrAdmin,companyManager,inventoryManager,dispatchManager };
+
+export const authorize = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+    next();
+  };
+};

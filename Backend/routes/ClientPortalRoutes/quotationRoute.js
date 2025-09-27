@@ -192,7 +192,7 @@ router.get("/:id", protectClient, async (req, res) => {
     const quotation = await Quotation.findById(req.params.id)
       .populate("lorryCategory", "category")
       .populate("lorryType", "typeName")
-      .populate("items._id", "item "); // if linked to stock model
+      .populate("items._id", "itemName "); // if linked to stock model
 
     if (!quotation) {
       return res.status(404).json({ message: "Quotation not found" });
