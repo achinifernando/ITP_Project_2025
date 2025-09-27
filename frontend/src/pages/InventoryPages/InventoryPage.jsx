@@ -12,42 +12,48 @@ import {
   CalendarDays,
   Boxes,
 } from 'lucide-react';
-import { api } from '../lib/api';
-import { StockDTO, StockUpsert, clean } from '../types/dto';
-import Modal from '../components/Modal';
+import { api } from '../../utils/apiPaths';
+import Modal from '../../components/Modal';
+import '../../CSS/InventoryCSS/inventoryPage.css';
+
+// Helper to strip null/undefined/empty string before sending to backend
+function clean(obj) {
+  const out = {};
+  Object.entries(obj).forEach(([k, v]) => {
+    if (v !== null && v !== undefined && v !== '') out[k] = v;
+  });
+  return out;
+}
 
 /* ---------------- Tiny Toasts (success / error messages) ---------------- */
-type Toast = { id: string; title: string; desc?: string; tone?: 'ok' | 'err' };
 function useToasts() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const push = (t: Omit<Toast, 'id'>) => {
+  const [toasts, setToasts] = useState([]);
+  const push = (t) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => setToasts((prev) => prev.filter((x) => x.id !== id)), 2800);
   };
   return { toasts, push };
 }
-function ToastStack({ toasts }: { toasts: Toast[] }) {
+function ToastStack({ toasts }) {
   return (
-    <div className="fixed bottom-4 right-4 z-[60] space-y-2">
+    <div className="toast-stack">
       {toasts.map((t) => {
         const ok = t.tone !== 'err';
         return (
           <div
             key={t.id}
-            className={`w-[320px] rounded-xl border p-3 backdrop-blur shadow-lg ${
-              ok ? 'bg-white/90 border-emerald-200' : 'bg-white/90 border-rose-200'
-            }`}
+            className={`toast ${ok ? 'success' : 'error'}`}
           >
-            <div className="flex items-start gap-2">
+            <div style={{ display: 'flex', alignItems: 'start', gap: '8px' }}>
               {ok ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-0.5" />
+                <CheckCircle2 style={{ width: 20, height: 20, color: '#059669', marginTop: 2 }} />
               ) : (
-                <XCircle className="w-5 h-5 text-rose-600 mt-0.5" />
+                <XCircle style={{ width: 20, height: 20, color: '#dc2626', marginTop: 2 }} />
               )}
               <div>
-                <div className="font-semibold text-slate-900">{t.title}</div>
-                {t.desc ? <div className="text-xs text-slate-600 mt-0.5">{t.desc}</div> : null}
+                <div className="toast-title">{t.title}</div>
+                {t.desc ? <div className="toast-desc">{t.desc}</div> : null}
               </div>
             </div>
           </div>
@@ -59,28 +65,21 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
 /* ----------------------------------------------------------------------- */
 
 /* -------------------------- Simple SVG Charts -------------------------- */
-type BarDatum = { label: string; value: number };
 function BarChart({
   data,
   title,
   maxBars = 8,
   height = 220,
-}: {
-  data: BarDatum[];
-  title?: string;
-  maxBars?: number;
-  height?: number;
 }) {
+  const width = 360; // chart width
+  const gap = 18;    // space between bars
+  const barW = 28;   // width of each bar
   const bars = data.slice(0, maxBars);
   const max = Math.max(1, ...bars.map((b) => b.value));
-  const barW = 36;
-  const gap = 20;
-  const width = bars.length * (barW + gap) + gap;
-
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow transition">
-      {title && <div className="text-sm font-semibold text-slate-700 mb-3">{title}</div>}
-      <svg width={width} height={height} className="block overflow-visible">
+    <div className="bar-chart">
+      {title && <div className="bar-chart-title">{title}</div>}
+      <svg width={width} height={height} style={{ display: 'block', overflow: 'visible' }}>
         {/* axis */}
         <line x1={0} y1={height - 24} x2={width} y2={height - 24} stroke="#e5e7eb" />
         {bars.map((b, i) => {
@@ -93,21 +92,21 @@ function BarChart({
                 width={barW}
                 height={h}
                 rx={8}
-                className="fill-sky-400/80"
+                style={{ fill: '#38bdf8', opacity: 0.8 }}
               />
               <text
                 x={barW / 2}
                 y={h + 14}
                 textAnchor="middle"
-                className="fill-slate-500 text-[10px]"
+                className="bar-chart-label"
               >
-                {b.label.length > 8 ? b.label.slice(0, 7) + '…' : b.label}
+                {b.label.length > 8 ? b.label.slice(0, 7) + '26' : b.label}
               </text>
               <text
                 x={barW / 2}
                 y={-6}
                 textAnchor="middle"
-                className="fill-slate-700 text-[10px] font-medium"
+                className="bar-chart-value"
               >
                 {b.value}
               </text>
@@ -115,27 +114,22 @@ function BarChart({
           );
         })}
       </svg>
-      <div className="text-[11px] text-slate-500 mt-2">Top {Math.min(maxBars, data.length)} by total quantity</div>
+      <div className="bar-chart-footer">Top {Math.min(maxBars, data.length)} by total quantity</div>
     </div>
   );
 }
 
-type PieSlice = { label: string; value: number; color: string };
 function PieChart({
   data,
   size = 220,
   title,
-}: {
-  data: PieSlice[];
-  size?: number;
-  title?: string;
 }) {
   const total = Math.max(1, data.reduce((a, b) => a + b.value, 0));
   const r = size / 2;
   const ir = r * 0.64; // inner radius for donut
   let angle = -Math.PI / 2;
 
-  function arcPath(cx: number, cy: number, r1: number, r2: number, start: number, end: number) {
+  function arcPath(cx, cy, r1, r2, start, end) {
     const large = end - start > Math.PI ? 1 : 0;
     const x1o = cx + r1 * Math.cos(start);
     const y1o = cy + r1 * Math.sin(start);
@@ -158,10 +152,10 @@ function PieChart({
   const cy = r;
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow transition">
-      {title && <div className="text-sm font-semibold text-slate-700 mb-3">{title}</div>}
-      <div className="flex items-center gap-6">
-        <svg width={size} height={size} className="block">
+    <div className="pie-chart">
+      {title && <div className="pie-chart-title">{title}</div>}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+        <svg width={size} height={size} style={{ display: 'block' }}>
           {data.map((s, idx) => {
             const slice = (s.value / total) * Math.PI * 2;
             const start = angle;
@@ -173,20 +167,20 @@ function PieChart({
           })}
           {/* center text */}
           <circle cx={cx} cy={cy} r={ir - 1} fill="transparent" />
-          <text x={cx} y={cy - 4} textAnchor="middle" className="fill-slate-900 text-sm font-semibold">
+          <text x={cx} y={cy - 4} textAnchor="middle" style={{ fill: '#0f172a', fontSize: '14px', fontWeight: 600 }}>
             {total}
           </text>
-          <text x={cx} y={cy + 12} textAnchor="middle" className="fill-slate-500 text-[11px]">
+          <text x={cx} y={cy + 12} textAnchor="middle" style={{ fill: '#64748b', fontSize: '11px' }}>
             items
           </text>
         </svg>
 
-        <div className="space-y-2 text-sm">
+        <div className="pie-chart-legend">
           {data.map((s) => (
-            <div key={s.label} className="flex items-center gap-2">
-              <span className="w-3.5 h-3.5 rounded-sm" style={{ background: s.color }} />
-              <span className="text-slate-700 w-32">{s.label}</span>
-              <span className="text-slate-500">{s.value}</span>
+            <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+              <span style={{ width: '14px', height: '14px', borderRadius: '2px', background: s.color }} />
+              <span className="pie-chart-legend-label">{s.label}</span>
+              <span className="pie-chart-legend-value">{s.value}</span>
             </div>
           ))}
         </div>
@@ -197,12 +191,12 @@ function PieChart({
 /* ----------------------------------------------------------------------- */
 
 export default function InventoryPage() {
-  const [list, setList] = useState<StockDTO[]>([]);
+  const [list, setList] = useState([]);
   const [loading, setLoading] = useState(false);
   const [q, setQ] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const [edit, setEdit] = useState<StockDTO | null>(null);
-  const [form, setForm] = useState<StockUpsert>({
+  const [edit, setEdit] = useState(null);
+  const [form, setForm] = useState({
     itemName: '',
     quantity: 0,
     threshold: 0,
@@ -210,12 +204,7 @@ export default function InventoryPage() {
     category: '',
   });
   const [saving, setSaving] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<{
-    itemName?: string;
-    unit?: string;
-    quantity?: string;
-    threshold?: string;
-  }>({});
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const { toasts, push } = useToasts();
 
@@ -225,8 +214,8 @@ export default function InventoryPage() {
   async function load() {
     setLoading(true);
     try {
-      setList(await api.get<StockDTO[]>('/api/stocks'));
-    } catch (e: any) {
+      setList(await api.get('/api/stocks'));
+    } catch (e) {
       push({ title: 'Failed to load inventory', desc: e?.message ?? 'Network error', tone: 'err' });
     } finally {
       setLoading(false);
@@ -242,7 +231,7 @@ export default function InventoryPage() {
     setFieldErrors({});
     setModalOpen(true);
   }
-  function openEdit(row: StockDTO) {
+  function openEdit(row) {
     setEdit(row);
     setForm({
       itemName: row.itemName,
@@ -256,8 +245,8 @@ export default function InventoryPage() {
     setModalOpen(true);
   }
 
-  function validate(): boolean {
-    const errs: typeof fieldErrors = {};
+  function validate() {
+    const errs = {};
     if (!form.itemName?.trim()) errs.itemName = 'Item name is required.';
     if (!form.unit?.trim()) errs.unit = 'Unit is required.';
     if (form.quantity == null || Number.isNaN(form.quantity)) errs.quantity = 'Quantity is required.';
@@ -276,38 +265,38 @@ export default function InventoryPage() {
       setSaving(true);
       const payload = clean(form);
       if (edit) {
-        const updated = await api.put<StockDTO>(`/api/stocks/${edit._id}`, payload);
+        const updated = await api.put(`/api/stocks/${edit._id}`, payload);
         setList((prev) => prev.map((x) => (x._id === edit._id ? updated : x)));
         push({ title: 'Item updated', desc: `"${updated.itemName}" saved successfully.` });
       } else {
-        const created = await api.post<StockDTO>('/api/stocks', payload);
+        const created = await api.post('/api/stocks', payload);
         setList((prev) => [created, ...prev]);
         push({ title: 'Item added', desc: `"${created.itemName}" created successfully.` });
       }
       setModalOpen(false);
-    } catch (e: any) {
+    } catch (e) {
       push({ title: 'Save failed', desc: e?.message ?? 'Request error', tone: 'err' });
     } finally {
       setSaving(false);
     }
   }
 
-  async function remove(id: string) {
-    if (!confirm('Delete this item?')) return;
+  async function remove(id) {
+    if (!window.confirm('Delete this item?')) return;
     try {
       await api.delete(`/api/stocks/${id}`);
       setList((prev) => prev.filter((x) => x._id !== id));
       push({ title: 'Item deleted' });
-    } catch (e: any) {
+    } catch (e) {
       push({ title: 'Delete failed', desc: e?.message ?? 'Request error', tone: 'err' });
     }
   }
 
-  async function changeQty(id: string, delta: number) {
+  async function changeQty(id, delta) {
     try {
-      const updated = await api.patch<StockDTO>(`/api/stocks/${id}/quantity`, { delta });
+      const updated = await api.patch(`/api/stocks/${id}/quantity`, { delta });
       setList((prev) => prev.map((x) => (x._id === id ? updated : x)));
-    } catch (e: any) {
+    } catch (e) {
       push({ title: 'Quantity update failed', desc: e?.message ?? 'Request error', tone: 'err' });
     }
   }
@@ -329,7 +318,7 @@ export default function InventoryPage() {
     let low = 0;
     let expired = 0;
     let near = 0;
-    const categories = new Set<string>();
+    const categories = new Set();
 
     for (const r of list) {
       if (r.category) categories.add(r.category);
@@ -350,8 +339,8 @@ export default function InventoryPage() {
   }, [list]);
 
   // ---------- Chart data (do not alter above logic) ----------
-  const barData: BarDatum[] = useMemo(() => {
-    const byCat = new Map<string, number>();
+  const barData = useMemo(() => {
+    const byCat = new Map();
     for (const r of list) {
       const key = r.category || 'Uncategorized';
       byCat.set(key, (byCat.get(key) ?? 0) + (Number(r.quantity) || 0));
@@ -361,7 +350,7 @@ export default function InventoryPage() {
       .sort((a, b) => b.value - a.value);
   }, [list]);
 
-  const pieData: PieSlice[] = useMemo(() => {
+  const pieData = useMemo(() => {
     const now = new Date();
     const nearCutoff = new Date();
     nearCutoff.setDate(now.getDate() + ANALYSIS_DAYS);
@@ -373,7 +362,7 @@ export default function InventoryPage() {
 
     for (const r of list) {
       const hasExpiry = !!r.expiryDate;
-      const d = hasExpiry ? new Date(r.expiryDate!) : null;
+      const d = hasExpiry ? new Date(r.expiryDate) : null;
 
       if (d && d < now) {
         expired++;
@@ -397,6 +386,8 @@ export default function InventoryPage() {
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-sky-50 via-white to-sky-50">
       <div className="max-w-7xl mx-auto p-6">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Inventory Management System</h1>
+        {loading && <div className="text-blue-600">Loading...</div>}
         {/* Analysis section */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm hover:shadow transition">

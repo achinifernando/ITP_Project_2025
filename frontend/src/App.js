@@ -43,7 +43,7 @@ import Employees from "./pages/AttendancePages/Employees";
 import Leaves from "./pages/AttendancePages/Leaves";
 import Salary from "./pages/AttendancePages/Salary";
 import Attendance from "./pages/AttendancePages/Attendance";
-import AttendanceReports from "./pages/AttendancePages/AttendanceReports"; // Renamed
+import AttendanceReports from "./pages/AttendancePages/AttendanceReports";
 import { UserContext } from "./components/context/userContext";
 
 // Inventory components
@@ -53,10 +53,10 @@ import RequestsPage from "./pages/InventoryPages/RequestsPage";
 import AlertsPage from "./pages/InventoryPages/AlertsPage";
 import ReportsPage from "./pages/InventoryPages/ReportsPage";
 
-// Dispatch management components - RENAMED IMPORTS
+// Dispatch management components
 import DispatchSidebar from "./pages/DispatchPages/DispatchSidebar";
-import DispatchHeader from "./pages/DispatchPages/DispatchHeader"; // Assuming this is a different Header
-import DispatchReports from "./pages/DispatchPages/DispatchReports"; // Renamed
+import DispatchHeader from "./pages/DispatchPages/DispatchHeader";
+import DispatchReports from "./pages/DispatchPages/DispatchReports";
 import AddDelivery from "./pages/DispatchPages/AddDelivery";
 import AssignedDeliveries from "./pages/DispatchPages/AssignedDeliveries";
 import DispatchDashboard from "./pages/DispatchPages/Dashboard";
@@ -65,7 +65,7 @@ import VehicleList from "./pages/DispatchPages/VehicleList";
 import DeliveryMap from "./pages/DispatchPages/DeliveryMap";
 import GpsTracking from "./pages/DispatchPages/gpsTracking";
 
-//CompanyManagement componets
+// CompanyManagement components
 import AddCategory from "./pages/CompanyManagementPages/addCategory";
 import AllCategories from "./pages/CompanyManagementPages/allCategories";
 import AllServices from "./pages/CompanyManagementPages/allServices";
@@ -78,12 +78,13 @@ import PayrollDashboard from "./pages/CompanyManagementPages/payrollDashboard";
 import AddService from "./pages/CompanyManagementPages/addService";
 import AddModel from "./pages/CompanyManagementPages/addModel";
 import AddLorryType from "./pages/CompanyManagementPages/addLorryType";
-
 import DashboardLayout from "./pages/CompanyManagementPages/dashboard";
 import UpdateCategory from "./pages/CompanyManagementPages/updateCategory";
 
 // Layout components for different sections
 import { Outlet } from "react-router-dom";
+
+// Layout Components
 const DispatchLayout = () => (
   <div style={{ display: "flex" }}>
     <DispatchSidebar />
@@ -96,25 +97,23 @@ const DispatchLayout = () => (
   </div>
 );
 
-const InventoryLayout = ({ children }) => (
-  <>
+const InventoryLayout = () => (
+  <div>
     <nav className="bg-white border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-6">
         {[
-          ["/inventory", "Inventory"],
-          ["/suppliers", "Suppliers"],
-          ["/requests", "Requests"],
-          ["/alerts", "Alerts"],
-          ["/inventory-reports", "Reports"], // Changed path to avoid conflict
+          ['/inventory', 'Inventory'],
+          ['/inventory/suppliers', 'Suppliers'],
+          ['/inventory/requests', 'Requests'],
+          ['/inventory/alerts', 'Alerts'],
+          ['/inventory/reports', 'Reports'],
         ].map(([to, label]) => (
           <NavLink
             key={to}
             to={to}
-            end={to === "/inventory"}
+            end={to === '/'}
             className={({ isActive }) =>
-              `text-sm font-medium ${
-                isActive ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-              }`
+              `text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`
             }
           >
             {label}
@@ -122,8 +121,17 @@ const InventoryLayout = ({ children }) => (
         ))}
       </div>
     </nav>
-    {children}
-  </>
+    <Outlet />
+  </div>
+);
+
+// Company Management Layout
+const CompanyManagementLayout = () => (
+  <div>
+    <DashboardLayout>
+      <Outlet />
+    </DashboardLayout>
+  </div>
 );
 
 function App() {
@@ -340,10 +348,7 @@ function App() {
 
           {/* HR Manager Routes - Attendance System */}
           <Route element={<PrivateRoute allowedRoles={["hr_manager"]} />}>
-            <Route
-              path="/attendance/dashboard"
-              element={<AttendanceDashboard />}
-            />
+            <Route path="/attendance/dashboard" element={<AttendanceDashboard />} />
             <Route path="/attendance/employees" element={<Employees />} />
             <Route path="/attendance/leaves" element={<Leaves />} />
             <Route path="/attendance/salary" element={<Salary />} />
@@ -352,12 +357,9 @@ function App() {
           </Route>
 
           {/* Dispatch Management Routes with Layout */}
-          <Route element={<PrivateRoute allowedRoles={["dispatch_manager"]} />}>
-            <Route element={<DispatchLayout />}>
-              <Route
-                path="/dispatchDashboard"
-                element={<DispatchDashboard />}
-              />
+          <Route element={<DispatchLayout />}>
+            <Route element={<PrivateRoute allowedRoles={["dispatch_manager"]} />}>
+              <Route path="/dispatchDashboard" element={<DispatchDashboard />} />
               <Route path="/add-delivery" element={<AddDelivery />} />
               <Route path="/drivers" element={<DriverList />} />
               <Route path="/vehicles" element={<VehicleList />} />
@@ -368,17 +370,35 @@ function App() {
             </Route>
           </Route>
 
-          {/* Inventory Management Routes */}
-          <Route
-            element={<PrivateRoute allowedRoles={["inventory_manager"]} />}
-          >
-            
-            <Route path="/inventory" element={<InventoryPage />} />
-            <Route path="/suppliers" element={<SuppliersPage />} />
-            <Route path="/requests" element={<RequestsPage />} />
-            <Route path="/alerts" element={<AlertsPage />} />
-            <Route path="/reports" element={<ReportsPage />} />
-            
+          {/*Inventory Management Routes */}
+          <Route element={<InventoryLayout />}>
+            <Route element={<PrivateRoute allowedRoles={["inventory_manager"]} />}>
+              <Route path="/inventory" element={<InventoryPage />} />
+              <Route path="/inventory/suppliers" element={<SuppliersPage />} />
+              <Route path="/inventory/requests" element={<RequestsPage />} />
+              <Route path="/inventory/alerts" element={<AlertsPage />} />
+              <Route path="/inventory/reports" element={<ReportsPage />} />
+            </Route>
+          </Route>
+
+          {/* Company Management Routes */}
+          <Route element={<CompanyManagementLayout />}>
+            <Route element={<PrivateRoute allowedRoles={["company_manager"]} />}>
+              <Route path="/company-manager-dashboard" element={<Outlet />} />
+              <Route path="/categories" element={<AllCategories />} />
+              <Route path="/addCategory" element={<AddCategory />} />
+              <Route path="/update/:id" element={<UpdateCategory />} />
+              <Route path="/admin-services" element={<AllServices />} />
+              <Route path="/admin-services/add" element={<AddService />} />
+              <Route path="/models" element={<AllModels />} />
+              <Route path="/types" element={<AllLorryTypes />} />
+              <Route path="/type/add" element={<AddLorryType />} />
+              <Route path="/orders" element={<AdminOrders />} />
+              <Route path="/payments" element={<AdminPayments />} />
+              <Route path="/repairs" element={<AdminRepairs />} />
+              <Route path="/payroll" element={<PayrollDashboard />} />
+              <Route path="/model/add" element={<AddModel />} />
+            </Route>
           </Route>
 
           {/* Root redirect based on user role */}
@@ -386,28 +406,6 @@ function App() {
 
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/" replace />} />
-
-          {/* Company Management Routes */}
-          <Route element={<PrivateRoute allowedRoles={["company_manager"]} />}>
-            <Route
-              path="/company-manager-dashboard"
-              element={<DashboardLayout />}
-            />
-            {/* Nested routes inside Dashboard */}
-            <Route path="categories" element={<AllCategories />} />
-            <Route path="addCategory" element={<AddCategory />} />
-            <Route path="update/:id" element={<UpdateCategory />} />
-            <Route path="admin-services" element={<AllServices />} />
-            <Route path="admin-services/add" element={<AddService />} />
-            <Route path="/models" element={<AllModels />} />
-            <Route path="types" element={<AllLorryTypes />} />
-            <Route path="type/add" element={<AddLorryType />} />
-            <Route path="orders" element={<AdminOrders />} />
-            <Route path="/payments" element={<AdminPayments />} />
-            <Route path="/repairs" element={<AdminRepairs />} />
-            <Route path="payroll" element={<PayrollDashboard />} />
-            <Route path="model/add" element={<AddModel />} />
-          </Route>
         </Routes>
       </div>
     </Router>
@@ -433,6 +431,12 @@ const Root = () => {
       return <Navigate to="/attendance/dashboard" />;
     case "employee":
       return <Navigate to="/user/dashboard" />;
+    case "dispatch_manager":
+      return <Navigate to="/dispatchDashboard" />;
+    case "inventory_manager":
+      return <Navigate to="/inventoryDashboard" />;
+    case "company_manager":
+      return <Navigate to="/company-manager-dashboard" />;
     default:
       return <Navigate to="/login" />;
   }

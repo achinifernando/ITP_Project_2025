@@ -1,0 +1,139 @@
+/* RequestsPage external CSS - replace Tailwind classes */
+
+.requests-container {
+  padding: 24px;
+}
+
+.requests-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.requests-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a202c;
+}
+
+.requests-new-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #2563eb;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  font-weight: 500;
+}
+.requests-new-btn:hover {
+  background: #1d4ed8;
+}
+
+.requests-table {
+  width: 100%;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow-x: auto;
+}
+
+.requests-table th {
+  background: #f9fafb;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
+  padding: 12px 16px;
+  text-transform: uppercase;
+}
+
+.requests-table td {
+  padding: 16px;
+  font-size: 1rem;
+  color: #374151;
+}
+
+.requests-empty {
+  text-align: center;
+  padding: 48px 0;
+  color: #6b7280;
+}
+
+.requests-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,0.4);
+}
+
+.requests-modal-content {
+  background: #fff;
+  border-radius: 16px;
+  max-width: 480px;
+  width: 100%;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+.requests-modal-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+
+.requests-modal-form label {
+  font-size: 1rem;
+  font-weight: 500;
+  margin-bottom: 4px;
+  color: #374151;
+}
+
+.requests-modal-form input,
+.requests-modal-form select,
+.requests-modal-form textarea {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.requests-modal-form .requests-modal-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.requests-modal-form .requests-modal-actions button {
+  flex: 1;
+  padding: 10px 0;
+  border-radius: 8px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+}
+
+.requests-modal-form .requests-modal-actions .primary {
+  background: #2563eb;
+  color: #fff;
+}
+.requests-modal-form .requests-modal-actions .primary:hover {
+  background: #1d4ed8;
+}
+.requests-modal-form .requests-modal-actions .secondary {
+  background: #f3f4f6;
+  color: #374151;
+}
+.requests-modal-form .requests-modal-actions .secondary:hover {
+  background: #e5e7eb;
+}

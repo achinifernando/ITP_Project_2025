@@ -133,7 +133,7 @@ const Signup = () => {
         } else if (role === "company_manager") {
           navigate("/company-manager-dashboard");
         } else if (role === "inventory_manager") {
-          navigate("/inventoryDashboard");
+          navigate("/inventory");
         } else if (role === "dispatch_manager") {
           navigate("/dispatchDashboard");
         } else {

@@ -1,15 +1,9 @@
 import React from 'react';
 
 export default function Modal({
-  open,
-  title,
-  children,
-  onClose,
-  onSubmit,
-  submitLabel = 'Save'
+  open, title, children, onClose, onSubmit, submitLabel = 'Save',
 }) {
   if (!open) return null;
-  
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl w-full max-w-xl p-6 space-y-4 shadow-xl">

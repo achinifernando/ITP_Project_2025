@@ -1,7 +1,7 @@
-// src/pages/AlertsPage.tsx
+// src/pages/AlertsPage.jsx
 import React, { useEffect, useMemo, useState } from "react";
-import { api } from "../lib/api";
-import { StockDTO } from "../types/dto";
+import { api } from "../../utils/apiPaths";
+
 import {
   AlertTriangle,
   Clock,
@@ -10,16 +10,12 @@ import {
   CalendarClock,
   Info,
 } from "lucide-react";
-
-/* ----------------------- Types ----------------------- */
-type LowRes = { count: number; items: StockDTO[] };
-type ExpRes = { nearDays: number; nearExpiry: StockDTO[]; expired: StockDTO[] };
+import '../../CSS/InventoryCSS/alertsPage.css';
 
 /* ----------------------- Tiny Toasts ----------------------- */
-type Toast = { id: string; title: string; desc?: string };
 function useToasts() {
-  const [toasts, setToasts] = useState<Toast[]>([]);
-  const push = (t: Omit<Toast, "id">) => {
+  const [toasts, setToasts] = useState([]);
+  const push = (t) => {
     const id = crypto.randomUUID();
     setToasts((prev) => [...prev, { id, ...t }]);
     setTimeout(() => {
@@ -28,22 +24,19 @@ function useToasts() {
   };
   return { toasts, push };
 }
-function ToastStack({ toasts }: { toasts: Toast[] }) {
+function ToastStack({ toasts }) {
   return (
-    <div className="fixed bottom-4 right-4 z-[60] space-y-2">
+    <div className="alerts-toast-stack">
       {toasts.map((t) => (
-        <div
-          key={t.id}
-          className="w-[320px] rounded-xl border border-sky-200 bg-white/90 backdrop-blur shadow-lg p-3 animate-[slideUp_0.25s_ease-out]"
-        >
-          <div className="flex items-start gap-3">
-            <div className="mt-0.5">
-              <Info className="w-5 h-5 text-sky-600" />
+        <div key={t.id} className="alerts-toast">
+          <div style={{ display: 'flex', alignItems: 'start', gap: '12px' }}>
+            <div style={{ marginTop: '2px' }}>
+              <Info style={{ width: 20, height: 20, color: '#0369a1' }} />
             </div>
             <div>
-              <div className="font-semibold text-gray-900">{t.title}</div>
+              <div className="alerts-toast-title">{t.title}</div>
               {t.desc ? (
-                <div className="text-xs text-gray-600 mt-0.5">{t.desc}</div>
+                <div className="alerts-toast-desc">{t.desc}</div>
               ) : null}
             </div>
           </div>
@@ -54,7 +47,7 @@ function ToastStack({ toasts }: { toasts: Toast[] }) {
 }
 
 /* ----------------------- Helpers ----------------------- */
-function fmtDate(d?: string | null) {
+function fmtDate(d) {
   if (!d) return "";
   const dt = new Date(d);
   if (isNaN(dt.getTime())) return "";
@@ -64,11 +57,8 @@ function fmtDate(d?: string | null) {
 function StatBadge({
   color,
   children,
-}: {
-  color: "amber" | "rose" | "sky" | "emerald";
-  children: React.ReactNode;
 }) {
-  const map: Record<string, string> = {
+  const map = {
     amber: "bg-amber-50 text-amber-700 border-amber-200",
     rose: "bg-rose-50 text-rose-700 border-rose-200",
     sky: "bg-sky-50 text-sky-700 border-sky-200",
@@ -85,8 +75,8 @@ function StatBadge({
 
 /* ----------------------- Page ----------------------- */
 export default function AlertsPage() {
-  const [low, setLow] = useState<LowRes | null>(null);
-  const [exp, setExp] = useState<ExpRes | null>(null);
+  const [low, setLow] = useState(null);
+  const [exp, setExp] = useState(null);
   const [days, setDays] = useState(30);
   const [loading, setLoading] = useState(false);
   const { toasts, push } = useToasts();
@@ -99,8 +89,8 @@ export default function AlertsPage() {
     try {
       setLoading(true);
       const [l, e] = await Promise.all([
-        api.get<LowRes>("/api/alerts/low-stock"),
-        api.get<ExpRes>(`/api/alerts/expiry?days=${days}`),
+        api.get("/api/alerts/low-stock"),
+        api.get(`/api/alerts/expiry?days=${days}`),
       ]);
       setLow(l);
       setExp(e);
@@ -110,7 +100,7 @@ export default function AlertsPage() {
           desc: `Window: ${e.nearDays} day(s) • ${l.count} low, ${e.nearExpiry.length} near, ${e.expired.length} expired`,
         });
       }
-    } catch (err: any) {
+    } catch (err) {
       push({
         title: "Failed to load alerts",
         desc: err?.message ?? "Network error",
@@ -162,13 +152,8 @@ export default function AlertsPage() {
     icon,
     tone,
     rows,
-  }: {
-    title: string;
-    icon: React.ReactNode;
-    tone: "sky" | "amber" | "rose";
-    rows: StockDTO[];
   }) => {
-    const accents: Record<string, string> = {
+    const accents = {
       sky: "border-sky-100 hover:shadow-sky-100/40",
       amber: "border-amber-100 hover:shadow-amber-100/40",
       rose: "border-rose-100 hover:shadow-rose-100/40",
@@ -351,9 +336,4 @@ export default function AlertsPage() {
       <ToastStack toasts={toasts} />
     </div>
   );
-}
-
-/* Tailwind keyframes for the toast pop-in */
-declare global {
-  interface CSSStyleDeclaration {}
 }

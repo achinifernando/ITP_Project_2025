@@ -1,0 +1,107 @@
+/* AlertsPage styles migrated from Tailwind */
+.alerts-toast-stack {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.alerts-toast {
+  width: 320px;
+  border-radius: 1rem;
+  border: 1px solid #bae6fd;
+  padding: 0.75rem;
+  backdrop-filter: blur(2px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  background: #fff;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+.alerts-toast-title {
+  font-weight: 600;
+  color: #0f172a;
+}
+.alerts-toast-desc {
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+.alerts-root {
+  min-height: calc(100vh - 64px);
+  background: linear-gradient(to bottom, #e0f2fe 0%, #fff 50%, #e0f2fe 100%);
+}
+.alerts-header {
+  border-bottom: 1px solid #e0e7ef;
+  background: rgba(255,255,255,0.7);
+  backdrop-filter: blur(2px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.alerts-header-inner {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 1.5rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.alerts-header-title {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.alerts-header-icon {
+  padding: 0.5rem;
+  border-radius: 1rem;
+  background: #e0e7ef;
+  color: #0369a1;
+}
+.alerts-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.alerts-content {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 2rem 1.5rem;
+}
+.alerts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .alerts-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+.alerts-card {
+  padding: 1.5rem;
+  border-radius: 1rem;
+  background: #fff;
+  border: 1px solid #e0e7ef;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.alerts-card-pulse {
+  height: 1.25rem;
+  width: 10rem;
+  background: #e2e8f0;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  animation: pulse 1.2s infinite;
+}
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+.alerts-card-space {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}

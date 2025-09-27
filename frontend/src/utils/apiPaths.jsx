@@ -78,16 +78,25 @@ async function handle(res) {
   return res.json();
 }
 
+function getAuthHeaders() {
+  const token = localStorage.getItem('token'); // or wherever you store the token
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+}
 export const api = {
-  get: (path) => 
+   get: (path) => 
     fetch(`${API_BASE}${path}`, { 
+      headers: getAuthHeaders(),
       credentials: 'include' 
     }).then(handle),
   
   post: (path, body) =>
     fetch(`${API_BASE}${path}`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify(body),
     }).then(handle),
@@ -95,7 +104,7 @@ export const api = {
   put: (path, body) =>
     fetch(`${API_BASE}${path}`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify(body),
     }).then(handle),
@@ -103,7 +112,7 @@ export const api = {
   patch: (path, body) =>
     fetch(`${API_BASE}${path}`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getAuthHeaders(),
       credentials: 'include',
       body: JSON.stringify(body),
     }).then(handle),
@@ -111,6 +120,7 @@ export const api = {
   delete: (path) =>
     fetch(`${API_BASE}${path}`, { 
       method: 'DELETE', 
-      credentials: 'include' 
+      headers: getAuthHeaders(),
+      credentials: 'include'
     }).then(handle),
 };

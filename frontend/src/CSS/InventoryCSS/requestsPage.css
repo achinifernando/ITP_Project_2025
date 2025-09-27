@@ -1,0 +1,90 @@
+/* External CSS for RequestsPage */
+
+.requests-container {
+  padding: 24px;
+}
+.requests-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.requests-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #1a202c;
+}
+.requests-table {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  overflow-x: auto;
+}
+.requests-table th {
+  background: #f9fafb;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  padding: 12px 16px;
+}
+.requests-table td {
+  padding: 16px;
+  font-size: 1rem;
+  color: #374151;
+}
+.requests-empty {
+  text-align: center;
+  padding: 48px 0;
+  color: #6b7280;
+}
+.requests-modal {
+  background: #fff;
+  border-radius: 16px;
+  padding: 32px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.12);
+  max-width: 480px;
+  margin: 0 auto;
+}
+.requests-form label {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+}
+.requests-form input,
+.requests-form select,
+.requests-form textarea {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+.requests-form .actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 16px;
+}
+.requests-form .actions button {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.requests-form .actions .primary {
+  background: #2563eb;
+  color: #fff;
+  border: none;
+}
+.requests-form .actions .secondary {
+  background: #f3f4f6;
+  color: #374151;
+  border: none;
+}

@@ -75,7 +75,7 @@ const Login = () => {
             navigate("/company-manager-dashboard");
             break;
           case "inventory_manager":
-            navigate("/inventoryDashboard");
+            navigate("/inventory");
             break;
           case "dispatch_manager":
             navigate("/dispatchDashboard");

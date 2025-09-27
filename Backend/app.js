@@ -1,152 +1,201 @@
-//mongoDB_pwd : UhgdXG1oIShwMf3r
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-const bodyParser = require("body-parser");
-const path = require("path");
-const cookieParser = require("cookie-parser");
-const http = require("http");
-const { Server } = require("socket.io");
-const websocketServer = require("./websocket");
-const morgan = require("morgan");
+import dotenv from "dotenv";
+dotenv.config();
+
+import express from "express";
+import mongoose from "mongoose";
+import cors from "cors";
+import bodyParser from "body-parser";
+import path from "path";
+import cookieParser from "cookie-parser";
+import http from "http";
+import { Server } from "socket.io";
+import websocketServer from "./websocket.js";
+import morgan from "morgan";
+import { fileURLToPath } from "url";
 
 const app = express();
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-// Middleware to parse JSON
-app.use(cors());
+// ================= Middleware =================
+app.use(cors({ origin: true, credentials: true }));
 app.use(bodyParser.json());
 app.use(express.json());
-app.use(cookieParser()); 
-app.use(morgan('dev'));
-
-// parse URL-encoded bodies (for forms)
+app.use(cookieParser());
+app.use(morgan("dev"));
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB connection
-const MONGODB_URL = "mongodb+srv://achinifernando401:05T4v8GBwkd90Unb@cluster0.iecga0o.mongodb.net/";
-mongoose.connect(MONGODB_URL)
-    .then(() => {
-        console.log('Database connected successfully..');
-    })
-    .catch(err => console.error('Error in database connecting:', err));
+// ================= MongoDB Connection =================
+const MONGODB_URL =
+  process.env.MONGODB_URL ||
+  "mongodb+srv://achinifernando401:05T4v8GBwkd90Unb@cluster0.iecga0o.mongodb.net/";
 
-// Make uploads folder public
-app.use("/files", express.static(path.join(__dirname, "uploads")));
+mongoose
+  .connect(MONGODB_URL)
+  .then(() => {
+    console.log(" Database connected successfully..");
+  })
+  .catch((err) => console.error(" Error in database connecting:", err));
 
-// =============== AUTHENTICATION ROUTES (ADD THESE FIRST) =======================
-app.use("/api/company", require("./routes/AttendenceRoutes/authRoute")); 
-app.use("/client", require("./routes/ClientPortalRoutes/clientRoute"));
+// ================= Static Files =================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// =============== CLIENT PORTAL ROUTES =======================
+// ================= Routes =================
+// --- Authentication
+import authRoute from "./routes/AttendenceRoutes/authRoute.js";
+import clientRoute from "./routes/ClientPortalRoutes/clientRoute.js";
 
-app.use("/lorryCategories", require("./routes/ClientPortalRoutes/lorryCategoryRoute"));
-app.use("/lorryType", require("./routes/ClientPortalRoutes/lorryTypesRoute"));
-app.use("/lorryBrands", require("./routes/ClientPortalRoutes/lorrymodelRoute"));
-app.use("/serviceRequest", require("./routes/ClientPortalRoutes/serviceRequestRoute"));
-app.use("/service", require("./routes/ClientPortalRoutes/servicesRoute"));
-app.use("/orders", require("./routes/ClientPortalRoutes/ordersRoute"));
-app.use("/quotations", require("./routes/ClientPortalRoutes/quotationRoute"));
-app.use("/quotationRequest", require("./routes/ClientPortalRoutes/quotationRequestsRoute"));
-app.use("/client-payments", require("./routes/ClientPortalRoutes/paymentRoute")); // Renamed to avoid conflict
-app.use("/googleAuth", require("./routes/ClientPortalRoutes/googleAuthRoute"));
+// --- Client Portal
+import lorryCategoryRoute from "./routes/ClientPortalRoutes/lorryCategoryRoute.js";
+import lorryTypesRoute from "./routes/ClientPortalRoutes/lorryTypesRoute.js";
+import lorryModelRoute from "./routes/ClientPortalRoutes/lorrymodelRoute.js";
+import serviceRequestRoute from "./routes/ClientPortalRoutes/serviceRequestRoute.js";
+import servicesRoute from "./routes/ClientPortalRoutes/servicesRoute.js";
+import ordersRoute from "./routes/ClientPortalRoutes/ordersRoute.js";
+import quotationRoute from "./routes/ClientPortalRoutes/quotationRoute.js";
+import quotationRequestsRoute from "./routes/ClientPortalRoutes/quotationRequestsRoute.js";
+import paymentRoute from "./routes/ClientPortalRoutes/paymentRoute.js";
+import googleAuthRoute from "./routes/ClientPortalRoutes/googleAuthRoute.js";
 
-// =============== DISPATCH ROUTES =======================
-app.use("/deliveries", require("./routes/DispatchRoutes/deliveries"));
-app.use("/drivers", require("./routes/DispatchRoutes/drivers"));
-app.use("/vehicles", require("./routes/DispatchRoutes/vehicles"));
-app.use("/assignments", require("./routes/DispatchRoutes/assignment"));
-app.use("/notifications", require("./routes/DispatchRoutes/notifications"));
-app.use("/tracking", require("./routes/DispatchRoutes/tracking"));
-app.use("/dispatch-reports", require("./routes/DispatchRoutes/dispatchreports"));
+// --- Dispatch
+import deliveriesRoute from "./routes/DispatchRoutes/deliveries.js";
+import driversRoute from "./routes/DispatchRoutes/drivers.js";
+import vehiclesRoute from "./routes/DispatchRoutes/vehicles.js";
+import assignmentRoute from "./routes/DispatchRoutes/assignment.js";
+import notificationsRoute from "./routes/DispatchRoutes/notifications.js";
+import trackingRoute from "./routes/DispatchRoutes/tracking.js";
+import dispatchReportsRoute from "./routes/DispatchRoutes/dispatchreports.js";
 
-// =============== ATTENDANCE MANAGEMENT & TASK MANAGEMENT ROUTES ===========
-app.use("/api/auth", require("./routes/AttendenceRoutes/authRoute"));
-app.use("/api/users", require("./routes/AttendenceRoutes/UserRoute"));
-app.use("/api/tasks", require("./routes/TaskManagementRoutes/taskRoute"));
-app.use("/api/task-reports", require("./routes/TaskManagementRoutes/reportRoutes"));
-app.use("/api/templates", require("./routes/TaskManagementRoutes/checklistRoute"));
-app.use("/api/attendance", require("./routes/AttendenceRoutes/attendanceRoutes"));
-app.use("/api/leaves", require("./routes/AttendenceRoutes/leaveRoute"));
+// --- Attendance & Task Management
+import userRoute from "./routes/AttendenceRoutes/UserRoute.js";
+import taskRoute from "./routes/TaskManagementRoutes/taskRoute.js";
+import reportRoutes from "./routes/TaskManagementRoutes/reportRoutes.js";
+import checklistRoute from "./routes/TaskManagementRoutes/checklistRoute.js";
+import attendanceRoutes from "./routes/AttendenceRoutes/attendanceRoutes.js";
+import leaveRoute from "./routes/AttendenceRoutes/leaveRoute.js";
 
-// =============== INVENTORY ROUTES ===================
-app.use("/api/stocks", require("./routes/InventoryRoutes/stockRouter"));
-app.use("/api/requests", require("./routes/InventoryRoutes/supplierRequests"));
-app.use("/api/alerts", require("./routes/InventoryRoutes/alerts"));
-app.use("/api/inventory-reports", require("./routes/InventoryRoutes/reports"));
+// --- Inventory
+import stockRouter from "./routes/InventoryRoutes/stockRouter.js";
+import supplierRequests from "./routes/InventoryRoutes/supplierRequests.js";
+import alertsRoute from "./routes/InventoryRoutes/alerts.js";
+import reportsRoute from "./routes/InventoryRoutes/reports.js";
+import supplierRoute from "./routes/InventoryRoutes/suppliers.js";
 
-// =============== COMPANY ROUTES ===================
-app.use("/admin-categories", require("./routes/CompanyManagementRoutes/Category"));
-app.use("/admin-services", require("./routes/CompanyManagementRoutes/Service"));
-app.use("/admin-lorry-models", require("./routes/CompanyManagementRoutes/lorryModel"));
-app.use("/admin-lorry-types", require("./routes/CompanyManagementRoutes/lorryType"));
-app.use("/admin-orders", require("./routes/CompanyManagementRoutes/order"));
-app.use("/admin-payments", require("./routes/CompanyManagementRoutes/payment"));
-app.use("/admin-repairs", require("./routes/CompanyManagementRoutes/repair"));
-app.use("/admin-attendance", require("./routes/CompanyManagementRoutes/attendance"));
-app.use("/admin-payrolls", require("./routes/CompanyManagementRoutes/payroll"));
+// --- Company Management
+import categoryRoute from "./routes/CompanyManagementRoutes/Category.js";
+import serviceRoute from "./routes/CompanyManagementRoutes/Service.js";
+import lorryModelAdmin from "./routes/CompanyManagementRoutes/lorryModel.js";
+import lorryTypeAdmin from "./routes/CompanyManagementRoutes/lorryType.js";
+import orderRoute from "./routes/CompanyManagementRoutes/order.js";
+import paymentAdmin from "./routes/CompanyManagementRoutes/payment.js";
+import repairRoute from "./routes/CompanyManagementRoutes/repair.js";
+import attendanceAdmin from "./routes/CompanyManagementRoutes/attendance.js";
+import payrollRoute from "./routes/CompanyManagementRoutes/payroll.js";
+
+// ---------------- Apply Routes ----------------
+app.use("/api/company", authRoute);
+app.use("/client", clientRoute);
+
+app.use("/lorryCategories", lorryCategoryRoute);
+app.use("/lorryType", lorryTypesRoute);
+app.use("/lorryBrands", lorryModelRoute);
+app.use("/serviceRequest", serviceRequestRoute);
+app.use("/service", servicesRoute);
+app.use("/orders", ordersRoute);
+app.use("/quotations", quotationRoute);
+app.use("/quotationRequest", quotationRequestsRoute);
+app.use("/client-payments", paymentRoute);
+app.use("/googleAuth", googleAuthRoute);
+
+app.use("/deliveries", deliveriesRoute);
+app.use("/drivers", driversRoute);
+app.use("/vehicles", vehiclesRoute);
+app.use("/assignments", assignmentRoute);
+app.use("/notifications", notificationsRoute);
+app.use("/tracking", trackingRoute);
+app.use("/dispatch-reports", dispatchReportsRoute);
+
+app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
+app.use("/api/tasks", taskRoute);
+app.use("/api/task-reports", reportRoutes);
+app.use("/api/templates", checklistRoute);
+app.use("/api/attendance", attendanceRoutes);
+app.use("/api/leaves", leaveRoute);
+
+app.use("/api/stocks", stockRouter);
+app.use("/api/requests", supplierRequests);
+app.use("/api/alerts", alertsRoute);
+app.use("/api/inventory-reports", reportsRoute);
+app.use("/api/suppliers", supplierRoute);
+
+app.use("/admin-categories", categoryRoute);
+app.use("/admin-services", serviceRoute);
+app.use("/admin-lorry-models", lorryModelAdmin);
+app.use("/admin-lorry-types", lorryTypeAdmin);
+app.use("/admin-orders", orderRoute);
+app.use("/admin-payments", paymentAdmin);
+app.use("/admin-repairs", repairRoute);
+app.use("/admin-attendance", attendanceAdmin);
+app.use("/admin-payrolls", payrollRoute);
 
 
-// Health check endpoint
+// ================= Health Check =================
 app.get("/health", (req, res) => {
-  res.json({ 
-    status: "OK", 
+  res.json({
+    status: "OK",
     message: "Server is running",
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
-// WebSocket status endpoint
+// ================= WebSocket Status =================
 app.get("/websocket-status", (req, res) => {
   const stats = websocketServer.getActiveConnections();
   res.json({
     status: "WebSocket server is running",
-    ...stats
+    ...stats,
   });
 });
 
-// Error handling middleware
+// ================= Error Handling =================
 app.use((err, req, res, next) => {
   console.error("Error:", err);
-  res.status(500).json({ message: "Internal server error" });
+  res.status(500).json({ message: err.message || "Internal server error" });
 });
 
-// 404 handler - MUST be the last route
+// 404 handler (last route)
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });
 });
 
-// Create HTTP server
+// ================= HTTP & WebSocket Setup =================
 const server = http.createServer(app);
 
-// Initialize WebSocket server
+// Init WebSocket server
 websocketServer.setupWebSocket(server);
 
-// Socket.IO setup
+// Init Socket.IO
 const io = new Server(server, {
   cors: {
     origin: "*",
-    methods: ["GET", "POST"]
-  }
+    methods: ["GET", "POST"],
+  },
 });
 
-// Socket.IO events
 io.on("connection", (socket) => {
   console.log("Socket.IO client connected:", socket.id);
 
-  // Client joins a room for their userId
   socket.on("joinRoom", (userId) => {
     socket.join(userId);
     console.log(`Socket ${socket.id} joined room: ${userId}`);
   });
 
-  // Handle delivery tracking subscription
   socket.on("subscribeToDelivery", (deliveryId) => {
     socket.join(`delivery:${deliveryId}`);
     console.log(`Socket ${socket.id} subscribed to delivery: ${deliveryId}`);
   });
 
-  // Handle delivery tracking unsubscription
   socket.on("unsubscribeFromDelivery", (deliveryId) => {
     socket.leave(`delivery:${deliveryId}`);
     console.log(`Socket ${socket.id} unsubscribed from delivery: ${deliveryId}`);
@@ -157,15 +206,13 @@ io.on("connection", (socket) => {
   });
 });
 
-// Make io accessible to controllers
+// Make io accessible in controllers
 app.set("io", io);
 
-
-
-// Start server
-app.listen(PORT, () => {
-    console.log(`Server is running on port: ${PORT}`);
+// ================= Start Server =================
+server.listen(PORT, () => {
+  console.log(` Server running on port ${PORT}`);
 });
 
-// Export for testing purposes
-module.exports = app;
+export default app;
+
