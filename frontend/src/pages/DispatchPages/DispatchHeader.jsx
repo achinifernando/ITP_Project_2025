@@ -2,7 +2,7 @@
 import React from 'react';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 
-export default function Header({ title = 'Dashboard', user = { name: 'John Doe' } }) {
+export default function Header({ title = 'Dashboard', user = { name: 'Dispatch Manager' } }) {
   return (
     <header style={{
       height: '60px',

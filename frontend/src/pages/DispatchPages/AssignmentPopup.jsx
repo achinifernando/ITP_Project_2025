@@ -21,11 +21,11 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
 
         // ✅ Correct endpoints
         const driversRes = await axiosInstance.get(`${BACKEND_URL}/drivers`);
-        const availableDrivers = driversRes.data.filter((d) => d.isAvailable);
+        const availableDrivers = driversRes.data.filter(d => d.isAvailable);
         setDrivers(availableDrivers);
 
         const vehiclesRes = await axiosInstance.get(`${BACKEND_URL}/vehicles`);
-        const availableVehicles = vehiclesRes.data.filter((v) => v.isAvailable);
+        const availableVehicles = vehiclesRes.data.filter(v => v.isAvailable);
         setVehicles(availableVehicles);
 
         setLoading(false);
@@ -122,13 +122,8 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
           </div>
 
           <div className="popup-buttons">
-            <button type="button" onClick={onClose}>
-              Cancel
-            </button>
-            <button
-              type="submit"
-              disabled={!selectedDriver || !selectedVehicle}
-            >
+            <button type="button" onClick={onClose}>Cancel</button>
+            <button type="submit" disabled={!selectedDriver || !selectedVehicle}>
               Assign Delivery
             </button>
           </div>
