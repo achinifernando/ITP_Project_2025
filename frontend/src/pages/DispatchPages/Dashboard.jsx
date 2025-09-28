@@ -26,14 +26,15 @@ export default function Dashboard() {
       setLoading(true);
 
       const [deliveriesRes, driversRes, vehiclesRes] = await Promise.all([
-        axiosInstance.get(`/deliveries`),
-        axiosInstance.get(`/drivers`),
-        axiosInstance.get(`/vehicles`),
+        axiosInstance.get(`${BACKEND_URL}/deliveries`),
+        axiosInstance.get(`${BACKEND_URL}/drivers`),
+        axiosInstance.get(`${BACKEND_URL}/vehicles`),
       ]);
 
       setDeliveries(deliveriesRes.data);
       setDrivers(driversRes.data);
       setVehicles(vehiclesRes.data);
+
 
       const totalDeliveries = deliveriesRes.data.length;
 
@@ -43,10 +44,13 @@ export default function Dashboard() {
         today.getMonth(),
         today.getDate()
       );
+
+      // Deliveries created today
       const todayDeliveries = deliveriesRes.data.filter(
         (d) => new Date(d.createdAt) >= todayStart
       ).length;
 
+      // Deliveries created in the past 7 days
       const weekStart = new Date(
         today.getFullYear(),
         today.getMonth(),
@@ -56,14 +60,17 @@ export default function Dashboard() {
         (d) => new Date(d.createdAt) >= weekStart
       ).length;
 
+      // Deliveries currently ongoing
       const ongoingDeliveries = deliveriesRes.data.filter(
         (d) => d.status === "Ongoing" || d.status === "ongoing"
       ).length;
 
+      // Deliveries that are still pending
       const pendingDeliveries = deliveriesRes.data.filter(
         (d) => d.status === "Pending" || d.status === "pending"
       ).length;
 
+      // Drivers and vehicles marked as available
       const availableDrivers = driversRes.data.filter(
         (d) => d.isAvailable
       ).length;
@@ -71,6 +78,7 @@ export default function Dashboard() {
         (v) => v.isAvailable
       ).length;
 
+      // Update the metrics state
       setMetrics({
         totalDeliveries,
         todayDeliveries,
@@ -88,18 +96,25 @@ export default function Dashboard() {
     }
   }, []);
 
+  // Fetch dashboard data on initial render
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+   // Switch between different dashboard tabs
   const handleTabChange = (tab) => {
     setActiveTab(tab);
   };
 
+  // Filter list of pending deliveries to display in a table
   const pendingDeliveries = deliveries.filter(
     (d) => d.status === "Pending" || d.status === "pending"
   );
 
+
+  // =======================
+  // Loading State
+  // =======================
   if (loading) {
     return (
       <div className="dashboard-container">
@@ -113,7 +128,9 @@ export default function Dashboard() {
     <div className="dashboard-container">
       <h2>Delivery Dashboard</h2>
 
-      {/* Navigation Tabs */}
+       {/* =======================
+          Navigation Tabs
+      ======================= */}
       <div className="dashboard-tabs">
         <button
           className={activeTab === "overview" ? "tab-active" : ""}
@@ -223,7 +240,9 @@ export default function Dashboard() {
         </>
       )}
 
-      {/* Drivers Tab */}
+       {/* =======================
+          Drivers Tab
+      ======================= */}
       {activeTab === "drivers" && (
         <div className="section">
           <h3>Driver List</h3>
@@ -266,7 +285,9 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Vehicles Tab */}
+       {/* =======================
+          Vehicles Tab
+      ======================= */}
       {activeTab === "vehicles" && (
         <div className="section">
           <h3>Vehicle List</h3>

@@ -172,8 +172,10 @@ export default function AssignedDeliveries() {
   if (loading) return <div className="loading">Loading...</div>;
   if (error) return <div className="error">{error}</div>;
 
+  // ---------- MAIN UI ----------
   return (
     <div className="assigned-deliveries-container">
+      {/* ----------- TAB SWITCHING ----------- */}
       <div className="tabs">
         <button 
           className={activeTab === "deliveries" ? "active" : ""} 
@@ -189,6 +191,7 @@ export default function AssignedDeliveries() {
         </button>
       </div>
 
+    {/* ----------- POPUPS ----------- */}
       {showAssignmentPopup && selectedDelivery && (
         <AssignmentPopup
           delivery={selectedDelivery}
@@ -205,6 +208,7 @@ export default function AssignedDeliveries() {
         />
       )}
 
+       {/* ----------- TAB CONTENT ----------- */}
       {activeTab === "deliveries" ? (
         <>
           <h2>All Deliveries</h2>
@@ -265,6 +269,7 @@ export default function AssignedDeliveries() {
           </table>
         </>
       ) : (
+        // When "Delivery Assignments" tab is active
         <AssignmentsTable assignments={assignments} onRefresh={fetchData} />
       )}
     </div>

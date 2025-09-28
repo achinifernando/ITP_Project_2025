@@ -20,7 +20,9 @@ export default function GpsTracking() {
   const [loading, setLoading] = useState(true);
   const [mapError, setMapError] = useState(null);
 
+  //==============================================
   // Replace with your actual Google Maps API key
+  //===============================================
   const apiKey =
     process.env.REACT_APP_GOOGLE_MAPS_API_KEY || "YOUR_GOOGLE_MAPS_API_KEY";
 

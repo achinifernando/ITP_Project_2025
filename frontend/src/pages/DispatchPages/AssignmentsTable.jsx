@@ -9,10 +9,15 @@ export default function AssignmentsTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+   // Fetch assignments on first render (component mount)
   useEffect(() => {
     fetchAssignments();
   }, []);
 
+  /**
+   * Fetch all delivery assignments from backend
+   * Uses our axiosInstance to call GET /assignments
+   */
   const fetchAssignments = async () => {
     try {
       setLoading(true);
@@ -27,6 +32,11 @@ export default function AssignmentsTable() {
     }
   };
 
+
+  /**
+   * Remove driver/vehicle assignment but keep the delivery record
+   * Backend route: DELETE /assignments/remove/:deliveryId
+   */
   const handleRemoveAssignment = async (deliveryId) => {
     if (!window.confirm("Are you sure you want to remove this assignment?")) return;
     
@@ -41,6 +51,11 @@ export default function AssignmentsTable() {
     }
   };
 
+
+  /**
+   * Permanently delete the assignment record from database
+   * Backend route: DELETE /assignments/:assignmentId
+   */
   const handleDeleteAssignment = async (assignmentId) => {
     if (!window.confirm("Are you sure you want to delete this assignment?")) return;
     

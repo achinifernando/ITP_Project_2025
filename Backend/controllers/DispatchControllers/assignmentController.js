@@ -6,7 +6,7 @@ const Assignment = require("../../models/DispatchModels/Assignment");
 const mongoose = require("mongoose");
 
 
-// ✅ Get pending deliveries
+// Get pending deliveries
 const getPendingDeliveries = async (req, res) => {
   try {
     const deliveries = await Delivery.find({ status: "Pending" })
@@ -18,7 +18,7 @@ const getPendingDeliveries = async (req, res) => {
   }
 };
 
-// ✅ Get all deliveries
+//Get all deliveries
 const getAllDeliveries = async (req, res) => {
   try {
     const deliveries = await Delivery.find()
@@ -30,7 +30,7 @@ const getAllDeliveries = async (req, res) => {
   }
 };
 
-// ✅ Get all assignments
+//Get all assignments
 const getAllAssignments = async (req, res) => {
   try {
     const assignments = await Assignment.find()
@@ -44,7 +44,7 @@ const getAllAssignments = async (req, res) => {
   }
 };
 
-// ✅ Get assignments by status
+//Get assignments by status
 const getAssignmentsByStatus = async (req, res) => {
   try {
     const { status } = req.params;
@@ -59,13 +59,13 @@ const getAssignmentsByStatus = async (req, res) => {
   }
 };
 
-// ✅ Assign driver + vehicle
+//Assign driver + vehicle
 const assignDelivery = async (req, res) => {
   try {
     const { driverId, vehicleId } = req.body;
     const { id: deliveryId } = req.params;
 
-    // ✅ Validate ObjectId
+    //Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(deliveryId)) {
       return res.status(400).json({ message: "Invalid delivery ID" });
     }
@@ -156,12 +156,12 @@ const assignDelivery = async (req, res) => {
   }
 };
 
-// ✅ Start delivery
+//Start delivery
 const startDelivery = async (req, res) => {
   try {
     const { id: deliveryId } = req.params;
 
-    // ✅ Validate ObjectId
+    //Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(deliveryId)) {
       return res.status(400).json({ message: "Invalid delivery ID" });
     }
@@ -191,13 +191,13 @@ const startDelivery = async (req, res) => {
   }
 };
 
-// ✅ Update delivery status
+//Update delivery status
 const updateDeliveryStatus = async (req, res) => {
   try {
     const { status } = req.body;
     const { id: deliveryId } = req.params;
 
-    // ✅ Validate ObjectId
+    //Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(deliveryId)) {
       return res.status(400).json({ message: "Invalid delivery ID" });
     }
@@ -238,13 +238,13 @@ const updateDeliveryStatus = async (req, res) => {
   }
 };
 
-// ✅ Update assignment (edit driver/vehicle)
+//Update assignment (edit driver/vehicle)
 const updateAssignment = async (req, res) => {
   try {
     const { driverId, vehicleId } = req.body;
     const { id: assignmentId } = req.params;
 
-    // ✅ Validate ObjectId
+    //Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
       return res.status(400).json({ message: "Invalid assignment ID" });
     }
@@ -296,7 +296,7 @@ const updateAssignment = async (req, res) => {
   }
 };
 
-// ✅ Get assignment by ID
+//Get assignment by ID
 const getAssignmentById = async (req, res) => {
   try {
     const { id } = req.params;
@@ -312,12 +312,12 @@ const getAssignmentById = async (req, res) => {
   }
 };
 
-// ✅ Remove assignment (unassign but keep record deleted)
+//Remove assignment (unassign but keep record deleted)
 const removeAssignment = async (req, res) => {
   try {
     const { id: deliveryId } = req.params;
 
-    // ✅ Validate ObjectId
+    //Validate ObjectId
     if (!mongoose.Types.ObjectId.isValid(deliveryId)) {
       return res.status(400).json({ message: "Invalid delivery ID" });
     }
@@ -342,7 +342,7 @@ const removeAssignment = async (req, res) => {
   }
 };
 
-// ✅ Delete assignment completely
+//Delete assignment completely
 const deleteAssignment = async (req, res) => {
   try {
     const { id } = req.params;

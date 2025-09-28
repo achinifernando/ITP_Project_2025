@@ -19,7 +19,7 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
       try {
         setLoading(true);
 
-        // ✅ Correct endpoints
+        //Correct endpoints
         const driversRes = await axiosInstance.get(`${BACKEND_URL}/drivers`);
         const availableDrivers = driversRes.data.filter(d => d.isAvailable);
         setDrivers(availableDrivers);
@@ -48,7 +48,7 @@ export default function AssignmentPopup({ delivery, onClose, onAssign }) {
     }
 
     try {
-      // ✅ Correct endpoint
+      //Correct endpoint
       const response = await axiosInstance.post(
         `${BACKEND_URL}/assignments/assign/${delivery._id}`,
         {
