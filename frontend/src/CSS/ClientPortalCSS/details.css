@@ -356,7 +356,6 @@ details p::before {
 }
 
 .service-btn::after {
-  content: '🚛';
   margin-left: 12px;
   font-size: 1.3rem;
   transition: transform 0.3s ease;

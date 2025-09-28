@@ -31,7 +31,7 @@ export default function ServicesPage() {
             <article key={service._id} className="service-card">
               <img
                 className="card-image"
-                src={`http://localhost:5000/files/${service.image}`} // ✅ Matches uploads path
+                src={`http://localhost:5000/files/${service.image}`} 
                 alt={service.serviceType}
               />
               <h2>{service.serviceType}</h2>
