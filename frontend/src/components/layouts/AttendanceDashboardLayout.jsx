@@ -1,17 +1,11 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { UserContext } from "../../components/context/userContext";
 import { Navigate } from "react-router-dom";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
-import NavBar from "../layouts/Navbar";
 import AttendanceSideMenu from "../layouts/attendanceSidebar";
 
 const AttendanceDashboardLayout = ({ children, activeMenu, requiredRole }) => {
     const { user, loading } = useContext(UserContext);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-
-    const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
-    };
 
     if (loading) {
         return (
@@ -27,13 +21,12 @@ const AttendanceDashboardLayout = ({ children, activeMenu, requiredRole }) => {
     }
 
     if (requiredRole && user.role !== requiredRole) {
-        // Redirect using Navigate component
-        switch(user.role) {
-            case 'admin':
+        switch (user.role) {
+            case "admin":
                 return <Navigate to="/admin/dashboard" replace />;
-            case 'hr_manager':
+            case "hr_manager":
                 return <Navigate to="/attendance/dashboard" replace />;
-            case 'member':
+            case "member":
                 return <Navigate to="/user/dashboard" replace />;
             default:
                 return <Navigate to="/login" replace />;
@@ -42,23 +35,12 @@ const AttendanceDashboardLayout = ({ children, activeMenu, requiredRole }) => {
 
     return (
         <div className="dashboard-layout">
-            <NavBar 
-                activeMenu={activeMenu} 
-                onMenuToggle={toggleSidebar}
-                user={user}
-            />
-            
             <div className="dashboard-content">
-                <div className={`side-menu-container ${isSidebarOpen ? 'open' : ''}`}>
-                    <AttendanceSideMenu 
-                        activeMenu={activeMenu}
-                    />
+                <div className="side-menu-container">
+                    <AttendanceSideMenu activeMenu={activeMenu} />
                 </div>
-                
-                <div 
-                    className={`main-content ${isSidebarOpen ? 'sidebar-open' : ''}`}
-                    onClick={() => isSidebarOpen && setIsSidebarOpen(false)}
-                >
+
+                <div className="main-content">
                     {children}
                 </div>
             </div>

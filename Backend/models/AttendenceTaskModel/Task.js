@@ -13,7 +13,7 @@ const checklistItemSchema = new mongoose.Schema({
 });
 
 const taskSchema = new mongoose.Schema({
-  orderID: {type: mongoose.Schema.Types.ObjectId, ref: "order"},
+  orderID: {type: String, ref: "order"},
   title: { type: String, required: true },
   description: { type: String },
   bodyType: {type: mongoose.Schema.Types.ObjectId, ref: "lorrytypes"},

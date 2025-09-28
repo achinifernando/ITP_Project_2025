@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import { UserContext } from "../../components/context/userContext";
+import { UserContext } from "../context/userContext";
 import { useNavigate } from "react-router-dom";
 import { SIDE_MENU_HR_DATA } from "../../utils/data";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
@@ -9,25 +9,30 @@ const AttendanceSideMenu = ({ activeMenu }) => {
   const [sideMenuData, setSideMenuData] = useState([]);
   const navigate = useNavigate();
 
-  const handleClick = (route) => {
-    if (route === "logout") {
-      handleLogout();
-      return;
+  const handleMenuClick = (route) => {
+    if (route && route !== "/logout" && route !== "logout") {
+      navigate(route);
     }
-    navigate(route);
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    clearUser();
-    navigate("/login");
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    sessionStorage.clear();
+    
+    if (clearUser) clearUser();
+    
+    navigate("/login", { replace: true });
+    setTimeout(() => window.location.reload(), 100);
   };
 
   useEffect(() => {
-    if (user && user.role === 'hr_manager') {
-      setSideMenuData(SIDE_MENU_HR_DATA);
+    if (user?.role === 'hr_manager') {
+      const menuWithoutLogout = SIDE_MENU_HR_DATA.filter(item => 
+        !["/logout", "logout"].includes(item.path)
+      );
+      setSideMenuData(menuWithoutLogout);
     } else {
-      // If user is not HR manager, set empty menu data
       setSideMenuData([]);
     }
   }, [user]);
@@ -46,11 +51,8 @@ const AttendanceSideMenu = ({ activeMenu }) => {
           />
         </div>
 
-        {user?.role === "admin" && (
-          <div className="admin-badge">Admin</div>
-        )}
-
-        <h5 className="user-name">{user?.name || ""}</h5>
+        {user?.role === "admin" && <div className="admin-badge">Admin</div>}
+        <h5 className="user-name">{user?.name || "User"}</h5>
         <p className="user-email">{user?.email || ""}</p>
       </div>
       
@@ -59,12 +61,18 @@ const AttendanceSideMenu = ({ activeMenu }) => {
           <button
             key={item.id}
             className={`menu-item ${activeMenu === item.path ? 'active' : ''}`}
-            onClick={() => handleClick(item.path)}
+            onClick={() => handleMenuClick(item.path)}
           >
             <span className="menu-icon">{item.icon}</span>
             <span className="menu-label">{item.label}</span>
           </button>
         ))}
+        
+        <div className="menu-footer">
+          <button className="menu-item logout-button" onClick={handleLogout}>
+            <span className="menu-label">Logout</span>
+          </button>
+        </div>
       </nav>
     </div>
   );

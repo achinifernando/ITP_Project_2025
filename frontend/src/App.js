@@ -43,7 +43,7 @@ import Employees from "./pages/AttendancePages/Employees";
 import Leaves from "./pages/AttendancePages/Leaves";
 import Salary from "./pages/AttendancePages/Salary";
 import Attendance from "./pages/AttendancePages/Attendance";
-import AttendanceReports from "./pages/AttendancePages/AttendanceReports";
+import AttendanceReports from "./pages/AttendancePages/Reports";
 import { UserContext } from "./components/context/userContext";
 
 // Inventory components

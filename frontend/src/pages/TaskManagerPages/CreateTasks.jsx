@@ -126,22 +126,45 @@ const CreateTask = () => {
   };
 
   const updateTask = async () => {
-    setLoading(true);
-    try {
-      await axiosInstance.put(API_PATHS.TASKS.UPDATE_TASK(taskId), {
-        ...taskData,
-        dueDate: new Date(taskData.dueDate).toISOString(),
-      });
+  setLoading(true);
 
-      toast.success("Task updated successfully");
-      navigate("/admin/tasks"); // Redirect to tasks page
-    } catch (error) {
-      console.error("Error updating task:", error);
-      toast.error("Failed to update task");
-    } finally {
-      setLoading(false);
+  try {
+    const payload = {
+      ...taskData,
+      dueDate: new Date(taskData.dueDate).toISOString(),
+    };
+
+    console.log("🔄 Updating task:", { taskId, payload });
+
+    const { data } = await axiosInstance.put(
+      API_PATHS.TASKS.UPDATE_TASK(taskId),
+      payload
+    );
+
+    if (!data) {
+      throw new Error("Empty response from server");
     }
-  };
+
+    toast.success("✅ Task updated successfully");
+    navigate("/admin/tasks");
+  } catch (error) {
+    console.error("❌ Update error:", error);
+
+    if (error.response) {
+      const { status, data } = error.response;
+      console.error("📡 Server response:", data);
+      toast.error(`Failed to update task: ${data.message || status}`);
+    } else if (error.request) {
+      console.error("📭 No response received:", error.request);
+      toast.error("No response from server. Please check your connection.");
+    } else {
+      toast.error(`Unexpected error: ${error.message}`);
+    }
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   const deleteTask = async () => {
     setLoading(true);

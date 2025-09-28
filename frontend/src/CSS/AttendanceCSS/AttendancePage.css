@@ -1,7 +1,7 @@
 /* AttendancePage.css */
 .attendance-page {
-  max-width: 1200px;
-  margin: 0 auto;
+  width: 90rem;
+  margin-left: 15rem;
   padding: 20px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -266,9 +266,9 @@
 
 .summary-cards {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 15px;
+  margin-bottom: 2rem;
 }
 
 .summary-card {
@@ -287,12 +287,14 @@
   margin: 0 0 0.5rem 0;
   font-size: 0.9rem;
   opacity: 0.9;
+   color: white;
 }
 
 .summary-card p {
   margin: 0;
   font-size: 2rem;
   font-weight: bold;
+   color: white;
 }
 
 .records-header {
@@ -352,7 +354,7 @@
 .no-records {
   text-align: center;
   padding: 2rem;
-  color: #7f8c8d;
+  color: #f6fafa;
 }
 
 .status {

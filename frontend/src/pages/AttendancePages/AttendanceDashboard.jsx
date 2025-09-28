@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import SummaryCard from "../../components/layouts/SummaryCard";
 import AttendanceDashboardLayout from "../../components/layouts/AttendanceDashboardLayout";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
 import axiosInstance from "../../utils/axiosInstance";
@@ -47,13 +46,7 @@ const AttendanceDashboard = () => {
           <h1>Attendance Dashboard</h1>
         </header>
 
-        {/* Summary Cards */}
-        <div className="summary-cards">
-          <SummaryCard title="Total Employees" value={stats.total} isLoading={isLoading} />
-          <SummaryCard title="Present" value={stats.present} isLoading={isLoading} />
-          <SummaryCard title="Absent" value={stats.absent} isLoading={isLoading} />
-          <SummaryCard title="Late" value={stats.late} isLoading={isLoading} />
-        </div>
+      
 
         {/* Attendance Pie Chart */}
         <div className="chart-section">

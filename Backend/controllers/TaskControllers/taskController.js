@@ -36,19 +36,29 @@ const getUserDashboardData = async (req, res) => {
 };
 
 // ================= Tasks =================
+// ================= Get Tasks =================
 const getTasks = async (req, res) => {
   try {
-    let tasks;
-    if (req.user.role === "admin") {
-      tasks = await Task.find().populate("assignedTo", "name email");
-    } else {
-      tasks = await Task.find({ assignedTo: req.user._id });
+    // Defensive check: ensure req.user exists
+    if (!req.user || !req.user.role || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: Missing user context" });
     }
-    res.json(tasks);
-  } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+
+    const isAdmin = req.user.role === "admin";
+    const query = isAdmin ? {} : { assignedTo: req.user._id };
+
+    const tasks = await Task.find(query).populate("assignedTo", "name email");
+
+    res.status(200).json(tasks);
+  } catch (error) {
+    console.error("Error fetching tasks:", error);
+    res.status(500).json({
+      message: "Server error while retrieving tasks",
+      error: error.message,
+    });
   }
 };
+
 
 const getTaskById = async (req, res) => {
   try {
@@ -103,16 +113,39 @@ const createTask = async (req, res) => {
 
 const updateTask = async (req, res) => {
   try {
+    const { templateId,...updateData } = req.body;
+    
+    // If templateId is provided, fetch and update checklist
+    if (templateId) {
+      const template = await ChecklistTemplate.findById(templateId);
+      if (template) {
+        updateData.todoChecklist = template.items.map(item => ({
+          title: item.text,
+          completed: false
+        }));
+      }
+    }
+
     const updatedTask = await Task.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedTask)
+      updateData,
+      { 
+        new: true,
+        runValidators: true 
+      }
+    ).populate("assignedTo", "name email");
+    
+    if (!updatedTask) {
       return res.status(404).json({ message: "Task not found" });
+    }
+    
     res.json(updatedTask);
   } catch (err) {
-    res.status(500).json({ message: "Server error", error: err.message });
+    console.error("Update task error:", err);
+    res.status(500).json({ 
+      message: "Server error", 
+      error: err.message 
+    });
   }
 };
 

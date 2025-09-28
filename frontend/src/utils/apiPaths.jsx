@@ -17,15 +17,15 @@ export const API_PATHS = {
   },
 
   TASKS: {
-    GET_DASHBOARD_DATA: "/api/tasks/dashboard-data", // Get dashboard data
-    GET_USER_DASHBOARD_DATA: "/api/tasks/user-dashboard-data", // Get user dashboard data
-    GET_ALL_TASKS: "/api/tasks", // GET ALL TASKS (ADMIN: ALL, USER: ONLY ASSIGNED TASKS)
-    GET_TASK_BY_ID: (taskId) => `/api/tasks/${taskId}`, // Get task by ID
-    CREATE_TASK: "/api/tasks", // Create a new task
-    UPDATE_TASK: (taskId) => `/api/tasks/${taskId}`, // Update task details
-    DELETE_TASK: (taskId) => `/api/tasks/${taskId}`, // Delete task (admin only)
-    UPDATE_TASK_STATUS: (taskId) => `/api/tasks/${taskId}/status`, // Update task status
-    UPDATE_TODO_CHECKLIST: (taskId) => `/api/tasks/${taskId}/todo`, // Update todo checklist
+    GET_DASHBOARD_DATA: "/api/tasks/dashboard-data",
+    GET_USER_DASHBOARD_DATA: "/api/tasks/user-dashboard-data",
+    GET_ALL_TASKS: "/api/tasks",
+    GET_TASK_BY_ID: (taskId) => `/api/tasks/${taskId}`,
+    CREATE_TASK: "/api/tasks",
+    UPDATE_TASK: (taskId) => `/api/tasks/${taskId}`, // Make sure this matches your route
+    DELETE_TASK: (taskId) => `/api/tasks/${taskId}`,
+    UPDATE_TASK_STATUS: (taskId) => `/api/tasks/${taskId}/status`,
+    UPDATE_TODO_CHECKLIST: (taskId) => `/api/tasks/${taskId}/todo`,
   },
 
   CHECKLIST_TEMPLATES: {
@@ -43,16 +43,19 @@ export const API_PATHS = {
 // },
 
   REPORTS: {
-    EXPORT_TASKS: "/api/reports/export/tasks", // Download all tasks as an excel/pdf report
-    EXPORT_USERS: "/api/reports/export/users", // Download user-task report
-  },
+   EXPORT_TASKS: "/api/reports/export/tasks",
+   EXPORT_USERS: "/api/reports/export/users",
+   EXPORT_ATTENDANCE: "/api/reports/export/attendance", // Added missing slash
+   EXPORT_EMPLOYEES: "/api/reports/export/employees",
+ },
 
-  ATTENDANCE: {
-    SEND_OTP: "/api/attendance/send-otp",
-    VERIFY_OTP: "/api/attendance/verify-otp",
-    CREATE_ATTENDANCE: "/api/attendance",
-  },
-
+   ATTENDANCE: {
+   SEND_OTP: "/api/attendance/send-otp",
+   VERIFY_OTP: "/api/attendance/verify-otp",
+   CREATE_ATTENDANCE: "/api/attendance",
+   GET_TODAY: "/api/attendance/today", //display attendance of that day
+   GET_ALL: "/api/attendance/all",
+ },
   LEAVES: {
     GET_MY_LEAVES: "/api/leaves/my",
     GET_ALL_LEAVES: "/api/leaves/all", 

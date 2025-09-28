@@ -34,7 +34,7 @@ useEffect(() => {
       <div className="user-info">
         <div className="profile-image-container">
           <img 
-            src={user?.profileImageUrl || "/default-avatar.png"} 
+            src={user?.profileImageUrl} 
             alt="Profile" 
             className="profile-image" 
             onError={(e) => {
