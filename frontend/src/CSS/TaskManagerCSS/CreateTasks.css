@@ -266,9 +266,9 @@ input[type="date"] {
 }
 
 /* Checklist Styles */
-.checklist-items {
+/* .checklist-items {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); /* ✅ auto grid */
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); 
   gap: 12px;
   margin-top: 10px;
 }
@@ -286,7 +286,7 @@ input[type="date"] {
 }
 
 .checklist-item:hover {
-  background-color: #edf2f7; /* subtle hover effect like members */
+  background-color: #edf2f7; 
 }
 
 .checklist-checkbox {
@@ -304,7 +304,7 @@ input[type="date"] {
 .checklist-text.completed {
   text-decoration: line-through;
   color: #718096;
-}
+} */
 
 
 

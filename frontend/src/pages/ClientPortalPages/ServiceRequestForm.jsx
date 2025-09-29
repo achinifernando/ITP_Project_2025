@@ -24,9 +24,11 @@ function RepairMaintenanceForm() {
   const [services, setServices] = useState([]);
   const [images, setImages] = useState([]);
   const [errors, setErrors] = useState({
-    lorryNumber: ""
+    lorryNumber: "",
+    preferredDate: ""
   });
   const [isCheckingLorry, setIsCheckingLorry] = useState(false);
+  const [minDate, setMinDate] = useState("");
 
   // Notification state
   const [notification, setNotification] = useState({
@@ -36,6 +38,16 @@ function RepairMaintenanceForm() {
   });
 
   const navigate = useNavigate();
+
+  // Set minimum date to tomorrow on component mount
+  useEffect(() => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    const formattedDate = tomorrow.toISOString().split('T')[0];
+    setMinDate(formattedDate);
+  }, []);
 
   // Auto-hide notification after 3s
   useEffect(() => {
@@ -91,12 +103,36 @@ function RepairMaintenanceForm() {
     }
     
     // Sri Lankan lorry number format: LL-NNNN 
-    
     const lorryNumberRegex = /^L[A-Z]-[0-9]{4}$/;
     if (!lorryNumberRegex.test(value)) {
       return 'Lorry number must be in format LL-NNNN  (e.g., LP-1234)';
     }
     
+    return '';
+  };
+
+  // Date Validation Function
+  const validateDate = (value) => {
+    if (!value) {
+      return ''; // Date is optional, no error if empty
+    }
+
+    const selectedDate = new Date(value);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time part for accurate comparison
+
+    if (selectedDate < today) {
+      return 'Preferred date cannot be in the past';
+    }
+
+    // Optional: Set maximum date (e.g., 1 year from now)
+    const maxDate = new Date();
+    maxDate.setFullYear(maxDate.getFullYear() + 1);
+    
+    if (selectedDate > maxDate) {
+      return 'Preferred date cannot be more than 1 year from now';
+    }
+
     return '';
   };
 
@@ -146,6 +182,12 @@ function RepairMaintenanceForm() {
       if (!error) {
         debouncedLorryCheck(upperValue);
       }
+    } else if (name === 'preferredDate') {
+      setFormData(prev => ({ ...prev, [name]: value }));
+      
+      // Validate date in real-time
+      const dateError = validateDate(value);
+      setErrors(prev => ({ ...prev, preferredDate: dateError }));
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -172,8 +214,15 @@ function RepairMaintenanceForm() {
   // Form validation before submission
   const validateForm = () => {
     const lorryError = validateLorryNumber(formData.lorryNumber);
+    const dateError = validateDate(formData.preferredDate);
+
     if (lorryError) {
       setErrors(prev => ({ ...prev, lorryNumber: lorryError }));
+      return false;
+    }
+
+    if (dateError) {
+      setErrors(prev => ({ ...prev, preferredDate: dateError }));
       return false;
     }
 
@@ -206,6 +255,13 @@ function RepairMaintenanceForm() {
     }
 
     return true;
+  };
+
+  // Format date for display
+  const formatDate = (dateString) => {
+    if (!dateString) return '';
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return new Date(dateString).toLocaleDateString('en-US', options);
   };
 
   const sendData = (e) => {
@@ -384,14 +440,28 @@ function RepairMaintenanceForm() {
                 ></textarea>
               </div>
 
-              <div className="form-group">
+              {/* Preferred Date with Validation */}
+              <div className={`form-group ${errors.preferredDate ? 'error' : ''}`}>
                 <label>Preferred Date</label>
                 <input 
                   type="date" 
                   name="preferredDate" 
                   value={formData.preferredDate} 
-                  onChange={handleChange} 
+                  onChange={handleChange}
+                  min={minDate}
+                  className={errors.preferredDate ? 'error-input' : ''}
                 />
+                {errors.preferredDate && (
+                  <div className="error-message">{errors.preferredDate}</div>
+                )}
+                {formData.preferredDate && !errors.preferredDate && (
+                  <div className="date-preview">
+                    Selected: <strong>{formatDate(formData.preferredDate)}</strong>
+                  </div>
+                )}
+                <div className="input-hint">
+                  Please select a date from tomorrow onwards
+                </div>
               </div>
 
               {/* Multiple Images Upload */}
@@ -406,7 +476,12 @@ function RepairMaintenanceForm() {
                 />
               </div>
 
-              <button type="submit">Submit & Proceed to Payment</button>
+              <button 
+                type="submit" 
+                disabled={Object.values(errors).some(error => error !== '')}
+              >
+                Submit & Proceed to Payment
+              </button>
 
             </form>
           </div>

@@ -28,11 +28,12 @@ export default function VehicleList() {
     const newErrors = {};
 
     // Vehicle Number validation
-    if (!vehicleData.vehicleNumber.trim()) {
-      newErrors.vehicleNumber = "Vehicle number is required";
-    } else if (!/^[A-Za-z0-9\s-]{3,20}$/.test(vehicleData.vehicleNumber)) {
-      newErrors.vehicleNumber = "Vehicle number must be 3-20 characters (letters, numbers, spaces, hyphens)";
-    }
+if (!vehicleData.vehicleNumber.trim()) {
+  newErrors.vehicleNumber = "Vehicle number is required";
+} else if (!/^L[A-Z]\d{4}$/.test(vehicleData.vehicleNumber)) {
+  newErrors.vehicleNumber =
+    "Vehicle number must start with 'L', followed by one uppercase letter and 4 digits (e.g., LA1234)";
+}
 
     // Type validation
     if (!vehicleData.type) {
