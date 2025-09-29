@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 
 export default function AllServices() {
   const [services, setServices] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // 🔍 search state
+  const [searchTerm, setSearchTerm] = useState(""); // <-- search state
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function AllServices() {
 
   const fetchServices = () => {
     axiosInstance
-      .get("http://localhost:5000/admin-services/") // ✅ keep original backend path
+      .get("http://localhost:5000/admin-services/")
       .then((res) => setServices(res.data))
       .catch((err) => {
         console.error("fetchServices error:", err);
@@ -25,7 +25,7 @@ export default function AllServices() {
   const deleteService = (id) => {
     if (!window.confirm("Are you sure you want to delete this service?")) return;
     axiosInstance
-      .delete(`http://localhost:5000/admin-services/delete/${id}`) // ✅ keep original delete path
+      .delete(`http://localhost:5000/admin-services/delete/${id}`)
       .then(() => {
         alert("Service deleted");
         fetchServices();
@@ -38,7 +38,7 @@ export default function AllServices() {
 
   const updateService = (id) => navigate(`/admin-services/update/${id}`);
   const addService = () => navigate("/admin-services/add");
-  const viewServiceDetails = (id) => navigate(`/services/${id}`);
+  const viewServiceDetails = (id) => navigate(`/service/${id}`);
 
   // Filter services by search term
   const filteredServices = services.filter((srv) =>
@@ -46,22 +46,14 @@ export default function AllServices() {
   );
 
   return (
-    <div
-      className="min-vh-100 py-5"
-      style={{ background: "linear-gradient(135deg, #f2f2f2, #e0e0e0)" }}
-    >
+    <div className="min-vh-100 py-5" style={{ background: "linear-gradient(135deg, #f2f2f2, #e0e0e0)" }}>
       <div className="container">
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
-          <h1 className="fw-bold display-6" style={{ color: "#222" }}>
-            All Services
-          </h1>
+          <h1 className="fw-bold display-6" style={{ color: "#222" }}>All Services</h1>
           <button
             className="btn btn-primary rounded-pill px-4 shadow-lg"
-            style={{
-              background: "linear-gradient(90deg, #4facfe, #00f2fe)",
-              border: "none",
-            }}
+            style={{ background: "linear-gradient(90deg, #4facfe, #00f2fe)", border: "none" }}
             onClick={addService}
           >
             + Add Service
@@ -87,9 +79,7 @@ export default function AllServices() {
 
         {/* Service Grid */}
         <div className="row g-4 justify-content-center">
-          {filteredServices.length === 0 && (
-            <p className="text-dark">No services found</p>
-          )}
+          {filteredServices.length === 0 && <p className="text-dark">No services found</p>}
 
           {filteredServices.map((srv) => (
             <div
@@ -101,10 +91,7 @@ export default function AllServices() {
               <div className="service-card d-flex flex-column">
                 {srv.image && (
                   <div className="service-img">
-                    <img
-                      src={`http://localhost:5000/files/${srv.image}`} // ✅ keep original image path
-                      alt={srv.serviceType}
-                    />
+                    <img src={`http://localhost:5000/files/${srv.image}`} alt={srv.serviceType} />
                   </div>
                 )}
 
@@ -147,7 +134,7 @@ export default function AllServices() {
         </div>
       </div>
 
-      {/* Modern CSS */}
+      {/* Existing CSS */}
       <style>{`
         .service-card {
           background: rgba(255, 255, 255, 0.95);

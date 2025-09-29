@@ -91,7 +91,7 @@ export default function AllLorryTypes() {
                 {type.images?.length > 0 ? (
                   <div className="type-img">
                     <img
-                      src={`http://localhost:5000/files/${type.images[0]}`}
+                      src={`http://localhost:5000/uploads/${type.images[0]}`}
                       alt={type.typeName}
                     />
                   </div>
@@ -117,17 +117,16 @@ export default function AllLorryTypes() {
                     </div>
                   </div>
 
-                  <p className="text-muted mb-2">
-                    {type.category?.categoryName || "No Category"}
-                  </p>
+                  {type.category?.name && (
+                    <p className="text-muted mb-2">{type.category.name}</p>
+                  )}
 
-                  {/* extra images */}
                   {type.images?.length > 1 && (
                     <div className="d-flex flex-wrap gap-2 mt-2">
                       {type.images.slice(1).map((img, i) => (
                         <img
                           key={i}
-                          src={`http://localhost:5000/uploads/${img}`}
+                          src={`http://localhost:5000/files/${img}`}
                           alt="extra"
                           width="60"
                           className="border rounded"

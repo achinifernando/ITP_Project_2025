@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Bell, Search } from "react-bootstrap-icons"; // for icons
 import "../../CSS/CompanyCSS/repair.css"; // custom CSS file
 
 const AdminRepairs = () => {
@@ -7,10 +6,11 @@ const AdminRepairs = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/admin-repairs/")
+    // Fetch only service requests with payments
+    fetch("http://localhost:5000/admin-payments/paid-data")
       .then((res) => res.json())
-      .then((data) => setRepairs(data))
-      .catch((err) => console.error(err))
+      .then((data) => setRepairs(Array.isArray(data.serviceRequests) ? data.serviceRequests : []))
+      .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
@@ -28,145 +28,83 @@ const AdminRepairs = () => {
     }
   };
 
-  if (loading)
-    return <p className="text-center text-muted p-4">Loading repair requests...</p>;
-  if (!repairs.length)
-    return <p className="text-center text-muted p-4">No repair requests found.</p>;
+  const groupedByDate = repairs.reduce((acc, repair) => {
+    const dateKey = repair.createdAt ? new Date(repair.createdAt).toLocaleDateString() : "Unknown Date";
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(repair);
+    return acc;
+  }, {});
+
+  if (loading) return <div className="page-center"><p className="loading-text">Loading repair requests...</p></div>;
+  if (!repairs.length) return <div className="page-center"><p className="loading-text">No paid service requests found.</p></div>;
 
   return (
-    <div className="p-4 bg-light min-vh-100">
-      {/* 🔹 Top Bar */}
-      <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="fw-bold text-dark mb-0">Repair & Maintenance Requests</h4>
-        <div className="d-flex align-items-center gap-3">
-          {/* Notification Icon */}
-          <button className="btn btn-light position-relative">
-            <Bell size={20} />
-            <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-              3
-            </span>
-          </button>
+    <div className="page-background">
+      <div className="payments-container">
+        <h1 className="payments-title">Paid Service Requests</h1>
 
-          {/* Search Bar */}
-          <div className="input-group">
-            <span className="input-group-text bg-white">
-              <Search size={16} className="text-muted" />
-            </span>
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Search..."
-            />
+        {Object.entries(groupedByDate).map(([date, dateRepairs]) => (
+          <div key={date} className="date-group">
+            <div className="payments-card">
+              <div className="table-wrapper">
+                <table className="payments-table">
+                  <thead>
+                    <tr>
+                      <th className="date-header" colSpan="13">{date}</th>
+                    </tr>
+                    <tr>
+                      <th>User Name</th>
+                      <th>Email</th>
+                      <th>Phone</th>
+                      <th>Company</th>
+                      <th>City</th>
+                      <th>Lorry Model</th>
+                      <th>Lorry Number</th>
+                      <th>Service Type</th>
+                      <th>Issue Description</th>
+                      <th>Preferred Date</th>
+                      <th>Status</th>
+                      <th>Payment Status</th>
+                      <th>Created At</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dateRepairs.map((repair) => (
+                      <tr key={repair._id}>
+                        <td>{repair.userName || "-"}</td>
+                        <td>{repair.email || "-"}</td>
+                        <td>{repair.phoneNumber || "-"}</td>
+                        <td>{repair.companyName || "-"}</td>
+                        <td>{repair.city || "-"}</td>
+                        <td>{repair.lorryModel || "-"}</td>
+                        <td>{repair.lorryNumber || "-"}</td>
+                        <td>{repair.serviceType || "-"}</td>
+                        <td>{repair.issueDescription || "-"}</td>
+                        <td>{repair.preferredDate ? new Date(repair.preferredDate).toLocaleDateString() : "-"}</td>
+                        <td>
+                          <select
+                            className={`status-select ${(repair.status || "pending").replace(/\s/g, "").toLowerCase()}`}
+                            value={repair.status || "Pending"}
+                            onChange={(e) => updateStatus(repair._id, e.target.value)}
+                          >
+                            <option value="Pending">Pending</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Cancelled">Cancelled</option>
+                          </select>
+                        </td>
+                        <td>{repair.paymentStatus || "-"}</td>
+                        <td>{repair.createdAt ? new Date(repair.createdAt).toLocaleString() : "-"}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
       </div>
-
-      {/* 🔹 Status Summary Cards */}
-      <div className="row g-3 mb-4">
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm border-0">
-            <div className="card-body">
-              <h6 className="text-muted">All Orders</h6>
-              <h4 className="fw-bold">{repairs.length}</h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm border-0">
-            <div className="card-body">
-              <h6 className="text-muted">New Orders</h6>
-              <h4 className="fw-bold">
-                {repairs.filter((r) => r.status === "Pending").length}
-              </h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm border-0">
-            <div className="card-body">
-              <h6 className="text-muted">In Progress</h6>
-              <h4 className="fw-bold">
-                {repairs.filter((r) => r.status === "In Progress").length}
-              </h4>
-            </div>
-          </div>
-        </div>
-        <div className="col-md-3">
-          <div className="card text-center shadow-sm border-0">
-            <div className="card-body">
-              <h6 className="text-muted">Completed</h6>
-              <h4 className="fw-bold">
-                {repairs.filter((r) => r.status === "Completed").length}
-              </h4>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 🔹 Table Section */}
-      <div className="table-responsive shadow rounded bg-white p-3">
-        <table className="table table-hover align-middle mb-0 table-sm">
-          <thead className="table-light">
-            <tr>
-              {[
-                "User Name",
-                "Email",
-                "Phone",
-                "Company",
-                "City",
-                "Lorry Model",
-                "Service Type",
-                "Preferred Date",
-                "Status",
-                "Created At",
-              ].map((heading, idx) => (
-                <th
-                  key={idx}
-                  className="text-uppercase small fw-semibold text-secondary"
-                >
-                  {heading}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {repairs.map((repair) => (
-              <tr key={repair._id}>
-                <td className="text-nowrap">{repair.userName || repair.userId?.name}</td>
-                <td>{repair.email || repair.userId?.email}</td>
-                <td className="text-muted">{repair.phoneNumber}</td>
-                <td>{repair.companyName}</td>
-                <td className="text-muted">{repair.city}</td>
-                <td>{repair.lorryModel}</td>
-                <td className="text-muted">{repair.serviceType}</td>
-                <td>
-                  {repair.preferredDate
-                    ? new Date(repair.preferredDate).toLocaleDateString()
-                    : "-"}
-                </td>
-                <td>
-                  <select
-                    className={`form-select form-select-sm fw-semibold status-${repair.status.replace(
-                      " ",
-                      ""
-                    ).toLowerCase()}`}
-                    value={repair.status}
-                    onChange={(e) => updateStatus(repair._id, e.target.value)}
-                  >
-                    <option value="Pending">Pending</option>
-                    <option value="In Progress">In Progress</option>
-                    <option value="Completed">Completed</option>
-                    <option value="Cancelled">Cancelled</option>
-                  </select>
-                </td>
-                <td className="text-muted small">
-                  {new Date(repair.createdAt).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Include your CSS styles here as before */}
     </div>
   );
 };

@@ -4,9 +4,9 @@ import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
 
 export default function AllModels() {
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const [models, setModels] = useState([]);
-  const [searchTerm, setSearchTerm] = useState(""); // search state
+  const [searchTerm, setSearchTerm] = useState(""); // <-- search state
 
   useEffect(() => {
     fetchModels();
@@ -20,26 +20,27 @@ export default function AllModels() {
   };
 
   const deleteModel = (id) => {
-    if (window.confirm("Are you sure you want to delete this model?")) {
-      axiosInstance
-        .delete(`http://localhost:5000/admin-models/delete/${id}`)
-        .then(() => {
-          alert("Model deleted");
-          fetchModels();
-        })
-        .catch((err) => alert(err.response?.data?.message || err.message));
-    }
-  };
+  if (window.confirm("Are you sure you want to delete this model?")) {
+    axiosInstance
+      .delete(`http://localhost:5000/admin-lorry-models/delete/${id}`)
+      .then(() => {
+        alert("Model deleted");
+        fetchModels();
+      })
+      .catch((err) => alert(err.response?.data?.message || err.message));
+  }
+};
+
 
   const updateModel = (id) => {
     navigate(`/update-model/${id}`);
   };
 
   const addModel = () => {
-    navigate("/model/add");
+    window.location.href = "/model/add";
   };
 
-  // Filter models
+  // Filter models based on search term
   const filteredModels = models.filter((m) =>
     m.model.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -53,7 +54,7 @@ export default function AllModels() {
         {/* Header */}
         <div className="d-flex justify-content-between align-items-center mb-4">
           <h1 className="fw-bold display-6" style={{ color: "#222" }}>
-            All Models
+            All Lorry Models
           </h1>
           <button
             className="btn btn-primary rounded-pill px-4 shadow-lg"

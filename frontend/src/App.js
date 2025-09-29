@@ -80,6 +80,10 @@ import AddModel from "./pages/CompanyManagementPages/addModel";
 import AddLorryType from "./pages/CompanyManagementPages/addLorryType";
 import DashboardLayout from "./pages/CompanyManagementPages/dashboard";
 import UpdateCategory from "./pages/CompanyManagementPages/updateCategory";
+import CategoryDetails from "./pages/CompanyManagementPages/categoryDetails";
+import ServiceDetails from "./pages/CompanyManagementPages/serviceDetails";
+import DashboardHome from "./pages/CompanyManagementPages/dashboardHome";
+
 
 // Layout components for different sections
 import { Outlet } from "react-router-dom";
@@ -382,24 +386,27 @@ function App() {
           </Route>
 
           {/* Company Management Routes */}
-          <Route element={<CompanyManagementLayout />}>
-            <Route element={<PrivateRoute allowedRoles={["company_manager"]} />}>
-              <Route path="/company-manager-dashboard" element={<Outlet />} />
-              <Route path="/categories" element={<AllCategories />} />
-              <Route path="/addCategory" element={<AddCategory />} />
-              <Route path="/update/:id" element={<UpdateCategory />} />
-              <Route path="/admin-services" element={<AllServices />} />
-              <Route path="/admin-services/add" element={<AddService />} />
-              <Route path="/models" element={<AllModels />} />
-              <Route path="/types" element={<AllLorryTypes />} />
-              <Route path="/type/add" element={<AddLorryType />} />
-              <Route path="/orders" element={<AdminOrders />} />
-              <Route path="/payments" element={<AdminPayments />} />
-              <Route path="/repairs" element={<AdminRepairs />} />
-              <Route path="/payroll" element={<PayrollDashboard />} />
-              <Route path="/model/add" element={<AddModel />} />
-            </Route>
-          </Route>
+          {/* Company Management Routes */}
+<Route element={<CompanyManagementLayout />}>
+  <Route element={<PrivateRoute allowedRoles={["company_manager"]} />}>
+    <Route path="/company-manager-dashboard" element={<DashboardHome />} />
+    <Route path="/categories" element={<AllCategories />} />
+    <Route path="/addCategory" element={<AddCategory />} />
+    <Route path="/update/:id" element={<UpdateCategory />} />
+    <Route path="/admin-services" element={<AllServices />} />
+    <Route path="/admin-services/add" element={<AddService />} />
+    <Route path="/models" element={<AllModels />} />
+    <Route path="/types" element={<AllLorryTypes />} />
+    <Route path="/type/add" element={<AddLorryType />} />
+    <Route path="/orders" element={<AdminOrders />} />
+    <Route path="/payments" element={<AdminPayments />} />
+    <Route path="/repairs" element={<AdminRepairs />} />
+    <Route path="/payroll" element={<PayrollDashboard />} />
+    <Route path="/model/add" element={<AddModel />} />
+    <Route path="/category/details/:id" element={<CategoryDetails />} />
+    <Route path="/service/:id" element={<ServiceDetails />} />
+  </Route>
+</Route>
 
           {/* Root redirect based on user role */}
           <Route path="/root-redirect" element={<Root />} />

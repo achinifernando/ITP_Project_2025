@@ -93,6 +93,9 @@ import paymentAdmin from "./routes/CompanyManagementRoutes/payment.js";
 import repairRoute from "./routes/CompanyManagementRoutes/repair.js";
 import attendanceAdmin from "./routes/CompanyManagementRoutes/attendance.js";
 import payrollRoute from "./routes/CompanyManagementRoutes/payroll.js";
+import allowanceRoute from "./routes/CompanyManagementRoutes/allowance.js";
+import deductionRoute from "./routes/CompanyManagementRoutes/deduction.js";
+import salaryInfo from "./models/CompanyManagerModels/salaryInfo.js";
 
 // ---------------- Apply Routes ----------------
 app.use("/api/company", authRoute);
@@ -141,6 +144,9 @@ app.use("/admin-payments", paymentAdmin);
 app.use("/admin-repairs", repairRoute);
 app.use("/admin-attendance", attendanceAdmin);
 app.use("/admin-payrolls", payrollRoute);
+app.use("/admin-allowances", allowanceRoute);
+app.use("/admin-deductions", deductionRoute);
+app.use("/admin-salary-info", salaryInfo);
 
 
 // ================= Health Check =================

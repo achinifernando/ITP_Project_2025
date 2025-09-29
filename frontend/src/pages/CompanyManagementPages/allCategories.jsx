@@ -13,7 +13,7 @@ export default function AllCategories() {
 
   const fetchCategories = () => {
     axiosInstance
-      .get("http://localhost:5000/admin-categories/") // ✅ keep your backend path
+      .get("http://localhost:5000/admin-categories/")
       .then((res) => setCategories(res.data))
       .catch((err) => alert(err.message));
   };
@@ -21,7 +21,7 @@ export default function AllCategories() {
   const deleteCategory = (id) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
       axiosInstance
-        .delete(`http://localhost:5000/admin-categories/delete/${id}`) // ✅ keep original delete route
+        .delete(`http://localhost:5000/admin-categories/delete/${id}`)
         .then(() => {
           alert("Category deleted");
           fetchCategories();
@@ -39,7 +39,7 @@ export default function AllCategories() {
   };
 
   const viewCategoryDetails = (id) => {
-    navigate(`/categories/${id}`);
+    navigate(`/category/details/${id}`);
   };
 
   // Filter categories based on search term
@@ -68,7 +68,7 @@ export default function AllCategories() {
             }}
             onClick={addCategory}
           >
-            + Add Lorry Category
+            + Add Category
           </button>
         </div>
 
@@ -107,7 +107,7 @@ export default function AllCategories() {
                 {cat.image && (
                   <div className="category-img">
                     <img
-                      src={`http://localhost:5000/files/${cat.image}`} // ✅ keep original file path
+                      src={`http://localhost:5000/files/${cat.image}`}
                       alt={cat.category}
                     />
                   </div>
@@ -151,7 +151,7 @@ export default function AllCategories() {
         </div>
       </div>
 
-      {/* CSS */}
+      {/* Existing CSS */}
       <style>{`
         .category-card {
           background: rgba(255, 255, 255, 0.9);
