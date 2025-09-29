@@ -23,13 +23,13 @@ router.get("/deliveries",protectUser, getAllDeliveries);
 router.get("/",protectUser, getAllAssignments);
 router.get("/status/:status",protectUser, getAssignmentsByStatus);
 
-// ✅ FIXED: Put specific routes BEFORE parameterized routes
+//Put specific routes BEFORE parameterized routes
 router.post("/assign/:id",protectUser, assignDelivery);
 router.post("/start/:id",protectUser, startDelivery);
 router.put("/status/:id",protectUser, updateDeliveryStatus);
 router.delete("/remove/:id",protectUser, removeAssignment);
 
-// ✅ FIXED: These should come after all specific routes
+//These should come after all specific routes
 router.get("/:id",protectUser, getAssignmentById);
 router.put("/:id",protectUser, updateAssignment);
 router.delete("/:id",protectUser, deleteAssignment);

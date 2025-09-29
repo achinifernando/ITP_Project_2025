@@ -3,7 +3,7 @@
 const express = require("express");
 const router = express.Router();
 
-// ✅ FIX 1: Add the missing functions to the import list
+//Add the missing functions to the import list
 const {
   addTrackingUpdate,
   getTrackingByDelivery,
@@ -13,7 +13,7 @@ const {
 } = require("../../controllers/DispatchControllers/trackingController");
 const { protectUser, dispatchManager } = require("../../middleware/authMiddleware");
 
-// ✅ FIX 2: Use the functions directly, without "trackingController."
+//Use the functions directly, without "trackingController."
 router.post("/start", startTrackingDelivery);
 router.post("/stop/:deliveryId", stopTrackingDelivery);
 
