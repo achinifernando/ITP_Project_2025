@@ -125,7 +125,7 @@ useEffect(() => {
       : [...prev.items, {
           _id: stockItem._id,
           name: stockItem.itemName,
-          unit: stockItem.unit,   // ✅ include unit
+          unit: stockItem.unit,   
           quantity: 1,
           price: stockItem.price,
         }],
@@ -133,11 +133,11 @@ useEffect(() => {
 };
 
 
-  // Update or delete items
-  const updateItem = (index, field, value) => {
+  // Update items
+  const updateItem = (id, field, value) => {
     setFormData((prev) => {
       const updated = prev.items.map((item, i) =>
-        i === index
+        i === id
           ? { ...item, [field]: ["quantity", "price"].includes(field) ? Number(value) || 0 : value }
           : item
       );
@@ -145,10 +145,10 @@ useEffect(() => {
     });
   };
 
-  const deleteItem = (index) => {
+  const deleteItem = (id) => {
     setFormData((prev) => ({
       ...prev,
-      items: prev.items.filter((_, i) => i !== index),
+      items: prev.items.filter((_, i) => i !== id),
     }));
   };
 
@@ -211,11 +211,11 @@ useEffect(() => {
           <input name="userName" placeholder="Name" value={formData.userName} onChange={handleChange} required />
           <input name="phoneNumber" placeholder="Phone Number" value={formData.phoneNumber} onChange={handleChange} />
           <input name="email" type="email" placeholder="Email" value={formData.email} onChange={handleChange} required />
-          <input name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleChange} />
-          <input name="companyAddress" placeholder="Address" value={formData.companyAddress} onChange={handleChange} />
-          <input name="lorryCategory" placeholder="Lorry Category" value={formData.lorryCategory} onChange={handleChange} />
-          <input name="lorryType" placeholder="Lorry Type" value={formData.lorryType} onChange={handleChange} />
-          <input name="lorryModel" placeholder="Lorry Model" value={formData.lorryModel} onChange={handleChange} />
+          <input name="companyName" placeholder="Company Name" value={formData.companyName} onChange={handleChange} required/>
+          <input name="companyAddress" placeholder="Address" value={formData.companyAddress} onChange={handleChange} required/>
+          <input name="lorryCategory" placeholder="Lorry Category" value={formData.lorryCategory} onChange={handleChange}required />
+          <input name="lorryType" placeholder="Lorry Type" value={formData.lorryType} onChange={handleChange} required />
+          <input name="lorryModel" placeholder="Lorry Model" value={formData.lorryModel} onChange={handleChange} required/>
 
           {/* Items Section */}
           <div className="items-section">
@@ -231,7 +231,7 @@ useEffect(() => {
 
 
             {formData.items.map((item, index) => (
-              <div key={index} className="item-row">
+              <div key={item._id} className="item-row">
                 <input type="text" value={`${item.name} (${item.unit || ""})`} readOnly />
                 <input type="number" value={item.quantity} min="1" placeholder="Qty" onChange={(e) => updateItem(index, "quantity", e.target.value)} />
                 <input type="number" value={item.price} placeholder="Price" onChange={(e) => updateItem(index, "price", e.target.value)} />

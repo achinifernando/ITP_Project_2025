@@ -73,9 +73,16 @@ function CompanyManagerDashboard() {
         return `${baseClass} status-completed`;
       case 'rejected':
         return `${baseClass} status-rejected`;
+      case 'accepted':
+        return `${baseClass} status-completed`; // You can create a separate style for 'accepted' if needed
       default:
         return baseClass;
     }
+  };
+
+  // Check if quotation generation is disabled
+  const isGenerateQuotationDisabled = (status) => {
+    return status?.toLowerCase() === 'accepted';
   };
 
   // Fetch Payments
@@ -115,8 +122,6 @@ function CompanyManagerDashboard() {
     }
   };
 
- 
-
   return (
     <div className="dashboard-container">
       {/* Quotation Requests */}
@@ -142,31 +147,44 @@ function CompanyManagerDashboard() {
             </tr>
           </thead>
           <tbody>
-            {requests.map((req) => (
-              <tr key={req._id}>
-                <td>{req._id}</td>
-                <td>{req.clientID}</td>
-                <td>{req.lorryCategory}</td>
-                <td>{req.lorryType}</td>
-                <td>{req.lorryModel}</td>
-                <td>{req.customFeatures || 'None'}</td>
-                <td>{req.quantity}</td>
-                <td>{new Date(req.expectedDeliveryDate).toLocaleDateString()}</td>
-                <td>
-                  <span className={getStatusBadgeClass(req.status)}>
-                    {req.status}
-                  </span>
-                </td>
-                <td>
-                  <Link
-                    to={`/quotationgeneratorform/${req._id}`}
-                    className="btn btn-primary"
-                  >
-                    Generate Quotation
-                  </Link>
-                </td>
-              </tr>
-            ))}
+            {requests.map((req) => {
+              const isDisabled = isGenerateQuotationDisabled(req.status);
+              return (
+                <tr key={req._id}>
+                  <td>{req._id}</td>
+                  <td>{req.clientID}</td>
+                  <td>{req.lorryCategory}</td>
+                  <td>{req.lorryType}</td>
+                  <td>{req.lorryModel}</td>
+                  <td>{req.customFeatures || 'None'}</td>
+                  <td>{req.quantity}</td>
+                  <td>{new Date(req.expectedDeliveryDate).toLocaleDateString()}</td>
+                  <td>
+                    <span className={getStatusBadgeClass(req.status)}>
+                      {req.status}
+                    </span>
+                  </td>
+                  <td>
+                    {isDisabled ? (
+                      <button
+                        disabled
+                        className="btn btn-disabled"
+                        title="Quotation already accepted"
+                      >
+                        Generate Quotation
+                      </button>
+                    ) : (
+                      <Link
+                        to={`/quotationgeneratorform/${req._id}`}
+                        className="btn btn-primary"
+                      >
+                        Generate Quotation
+                      </Link>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       )}
@@ -252,7 +270,6 @@ function CompanyManagerDashboard() {
         </table>
       )}
 
-     
       {/* Notification */}
       {notification.show && (
         <div
