@@ -286,9 +286,9 @@ function App() {
             path="/companyManagerDashbord"
             element={
               <>
-                <Header />
+                
                 <CompanyManagerDashbord />
-                <Footer />
+                
               </>
             }
           />

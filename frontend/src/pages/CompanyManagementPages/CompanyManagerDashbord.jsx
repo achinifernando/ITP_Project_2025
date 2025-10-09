@@ -191,8 +191,8 @@ function CompanyManagerDashboard() {
 
       {/* Google Calendar Button */}
       <div className="calendar-section">
-        <h3 style={{ margin: '0 0 0.5rem 0', color: '#0f172a' }}>Calendar Management</h3>
-        <p style={{ margin: '0 0 1rem 0', color: '#64748b', fontSize: '0.875rem' }}>
+        <h3 style={{ margin: '0 0 0.5rem 0', color: '#d3d8e3ff' }}>Calendar Management</h3>
+        <p style={{ margin: '0 0 1rem 0', color: '#5e7aa0ff', fontSize: '0.875rem' }}>
           Access your Google Calendar to manage meeting schedules
         </p>
         <button
