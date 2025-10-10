@@ -1,16 +1,84 @@
 // controllers/taskController.js
 const Task = require("../../models/AttendenceTaskModel/Task");
 const ChecklistTemplate = require("../../models/AttendenceTaskModel/ChecklistTemplate");
+const User = require("../../models/AttendenceTaskModel/User");
 
 // ================= Dashboard =================
 const getDashboardData = async (req, res) => {
   try {
+    // Task counts by status
     const totalTasks = await Task.countDocuments();
     const completedTasks = await Task.countDocuments({ status: "Completed" });
     const pendingTasks = await Task.countDocuments({ status: "Pending" });
+    const inProgress = await Task.countDocuments({ status: "In Progress" });
 
-    res.json({ totalTasks, completedTasks, pendingTasks });
+    // Priority distribution
+    const lowPriority = await Task.countDocuments({ priority: "Low" });
+    const mediumPriority = await Task.countDocuments({ priority: "Medium" });
+    const highPriority = await Task.countDocuments({ priority: "High" });
+    
+    console.log("Priority counts:", { lowPriority, mediumPriority, highPriority });
+
+    // Recent tasks (last 5 tasks, sorted by creation date)
+    const recentTasks = await Task.find()
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("assignedTo", "name email");
+
+    // Monthly completion data (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyCompletion = await Task.aggregate([
+      {
+        $match: {
+          status: "Completed",
+          updatedAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$updatedAt" },
+            month: { $month: "$updatedAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 }
+      }
+    ]);
+
+    // Format monthly data
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthlyData = {};
+    monthlyCompletion.forEach(item => {
+      const monthName = monthNames[item._id.month - 1];
+      monthlyData[monthName] = item.count;
+    });
+
+    res.json({
+      totalTasks,
+      completedTasks,
+      pendingTasks,
+      inProgress,
+      taskStats: {
+        totalTasks,
+        completedTasks,
+        pendingTasks,
+        inProgress
+      },
+      priorityDistribution: {
+        Low: lowPriority,
+        Medium: mediumPriority,
+        High: highPriority
+      },
+      recentTasks,
+      monthlyCompletion: monthlyData
+    });
   } catch (err) {
+    console.error("Dashboard data error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
@@ -19,18 +87,142 @@ const getUserDashboardData = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const totalTasks = await Task.countDocuments({ assignedTo: userId });
+    // assignedTo is an array, so we need to use $in operator
+    const totalTasks = await Task.countDocuments({ assignedTo: { $in: [userId] } });
     const completedTasks = await Task.countDocuments({
-      assignedTo: userId,
+      assignedTo: { $in: [userId] },
       status: "Completed",
     });
     const pendingTasks = await Task.countDocuments({
-      assignedTo: userId,
+      assignedTo: { $in: [userId] },
       status: "Pending",
     });
+    const inProgress = await Task.countDocuments({
+      assignedTo: { $in: [userId] },
+      status: "In Progress",
+    });
 
-    res.json({ totalTasks, completedTasks, pendingTasks });
+    // Priority distribution
+    const lowPriority = await Task.countDocuments({ 
+      assignedTo: { $in: [userId] },
+      priority: "Low" 
+    });
+    const mediumPriority = await Task.countDocuments({ 
+      assignedTo: { $in: [userId] },
+      priority: "Medium" 
+    });
+    const highPriority = await Task.countDocuments({ 
+      assignedTo: { $in: [userId] },
+      priority: "High" 
+    });
+
+    // Recent tasks (last 5 tasks, sorted by creation date)
+    const recentTasks = await Task.find({ assignedTo: { $in: [userId] } })
+      .sort({ createdAt: -1 })
+      .limit(5)
+      .populate("assignedTo", "name email");
+
+    // Monthly completion data (last 6 months)
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+    const monthlyCompletion = await Task.aggregate([
+      {
+        $match: {
+          assignedTo: { $in: [userId] },
+          status: "Completed",
+          updatedAt: { $gte: sixMonthsAgo }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            year: { $year: "$updatedAt" },
+            month: { $month: "$updatedAt" }
+          },
+          count: { $sum: 1 }
+        }
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 }
+      }
+    ]);
+
+    // Format monthly data
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const monthlyData = {};
+    monthlyCompletion.forEach(item => {
+      const monthName = monthNames[item._id.month - 1];
+      monthlyData[monthName] = item.count;
+    });
+
+    res.json({ 
+      totalTasks, 
+      completedTasks, 
+      pendingTasks,
+      inProgress,
+      charts: {
+        taskDistribution: {
+          All: totalTasks,
+          Pending: pendingTasks,
+          InProgress: inProgress,
+          Completed: completedTasks
+        },
+        taskPriorityLevels: {
+          Low: lowPriority,
+          Medium: mediumPriority,
+          High: highPriority
+        }
+      },
+      recentTasks,
+      monthlyCompletion: monthlyData
+    });
   } catch (err) {
+    console.error("User dashboard data error:", err);
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+
+// ================= Team Members =================
+const getTeamMembersWithTasks = async (req, res) => {
+  try {
+    // Get only users with member role
+    const users = await User.find({ role: 'member' }).select('name email role _id');
+
+    // Get all tasks with populated assignedTo
+    const tasks = await Task.find({}).populate('assignedTo', 'name email _id');
+
+    // Group tasks by assigned users
+    const teamMembersWithTasks = users.map(user => {
+      const userTasks = tasks.filter(task =>
+        task.assignedTo && task.assignedTo.some(assigned => assigned._id.toString() === user._id.toString())
+      );
+
+      return {
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role
+        },
+        tasks: userTasks.map(task => ({
+          _id: task._id,
+          title: task.title,
+          description: task.description,
+          status: task.status,
+          priority: task.priority,
+          dueDate: task.dueDate,
+          createdAt: task.createdAt,
+          orderID: task.orderID,
+          bodyType: task.bodyType,
+          todoChecklist: task.todoChecklist
+        }))
+      };
+    });
+
+    res.json(teamMembersWithTasks);
+  } catch (err) {
+    console.error("Team members with tasks error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
@@ -45,7 +237,8 @@ const getTasks = async (req, res) => {
     }
 
     const isAdmin = req.user.role === "admin";
-    const query = isAdmin ? {} : { assignedTo: req.user._id };
+    // assignedTo is an array, so we need to use $in operator for non-admin users
+    const query = isAdmin ? {} : { assignedTo: { $in: [req.user._id] } };
 
     const tasks = await Task.find(query).populate("assignedTo", "name email");
 
@@ -205,6 +398,7 @@ const updateTaskChecklist = async (req, res) => {
 module.exports = {
   getDashboardData,
   getUserDashboardData,
+  getTeamMembersWithTasks,
   getTasks,
   getTaskById,
   createTask,

@@ -6,6 +6,7 @@ import { API_PATHS } from "../../utils/apiPaths";
 
 function Employees() {
   const [employees, setEmployees] = useState([]);
+  const [drivers, setDrivers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -24,8 +25,18 @@ function Employees() {
   const getAllUsers = useCallback(async () => {
     try {
       setIsLoading(true);
+      // Fetch regular employees
       const response = await axiosInstance.get(API_PATHS.USERS.GET_ALL_USERS);
       setEmployees(response.data?.length ? response.data : []);
+      
+      // Fetch drivers
+      try {
+        const driversResponse = await axiosInstance.get('/drivers');
+        setDrivers(driversResponse.data?.length ? driversResponse.data : []);
+      } catch (driverError) {
+        console.error("Error fetching drivers:", driverError);
+        setDrivers([]);
+      }
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
@@ -93,13 +104,15 @@ function Employees() {
         role: "member" 
       });
       setShowAddModal(false);
-      setSuccessMessage("Employee added successfully!");
+      setSuccessMessage(`Employee added successfully! Login credentials have been sent to ${newUser.email}`);
 
-      setTimeout(() => setSuccessMessage(""), 3000);
+      setTimeout(() => setSuccessMessage(""), 5000);
       getAllUsers();
     } catch (err) {
       console.error("Error adding user:", err);
-      setSuccessMessage("Error adding employee. Please try again.");
+      const errorMessage = err.response?.data?.message || err.message || "Error adding employee. Please try again.";
+      setSuccessMessage(`Error: ${errorMessage}`);
+      setTimeout(() => setSuccessMessage(""), 5000);
     }
   };
 
@@ -198,19 +211,20 @@ function Employees() {
             <table className="data-table">
               <thead>
                 <tr>
-                  <th>User ID</th>
+                  <th>Employee ID</th>
                   <th>Name</th>
-                  <th>Contact Number</th>
-                  <th>Address</th>
+                  <th>Contact</th>
+                  <th>Address / License</th>
                   <th>Email</th>
-                  <th>Role</th>
+                  <th>Type</th>
+                  <th>Status</th>
                   <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {employees.map((emp) => (
                   <tr key={emp._id}>
-                    <td className="user-id">{emp._id}</td>
+                    <td className="user-id">{emp.employeeId || emp._id}</td>
                     <td>
                       <div className="employee-info">
                         <div className="avatar">
@@ -228,6 +242,9 @@ function Employees() {
                       </span>
                     </td>
                     <td>
+                      <span className="status-badge status-employee">Employee</span>
+                    </td>
+                    <td>
                       <div className="action-buttons">
                         <button 
                           className="edit-btn"
@@ -240,6 +257,41 @@ function Employees() {
                           onClick={() => handleDelete(emp._id)}
                         >
                           <span className="icon">🗑️</span> Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                
+                {/* Drivers Section */}
+                {drivers.map((driver) => (
+                  <tr key={`driver-${driver._id}`}>
+                    <td className="user-id">{driver._id}</td>
+                    <td>
+                      <div className="employee-info">
+                        <div className="avatar driver-avatar">
+                          🚗
+                        </div>
+                        <div className="name">{driver.name}</div>
+                      </div>
+                    </td>
+                    <td>{driver.phone}</td>
+                    <td className="address-cell">
+                      <span className="license-badge">📋 {driver.licenseNumber}</span>
+                    </td>
+                    <td>-</td>
+                    <td>
+                      <span className="role-badge role-driver">Driver</span>
+                    </td>
+                    <td>
+                      <span className={`status-badge ${driver.isAvailable ? 'status-available' : 'status-unavailable'}`}>
+                        {driver.isAvailable ? '✓ Available' : '✗ Unavailable'}
+                      </span>
+                    </td>
+                    <td>
+                      <div className="action-buttons">
+                        <button className="view-btn" title="View driver details">
+                          <span className="icon">👁️</span> View
                         </button>
                       </div>
                     </td>

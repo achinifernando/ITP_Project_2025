@@ -4,6 +4,7 @@ const {
   createTemplate,
   getTemplates,
   getTemplateById,
+  updateTemplate,
   deleteTemplate,
 } = require("../../controllers/TaskControllers/checklistController");
 
@@ -17,6 +18,9 @@ router.get("/", protectUser, getTemplates);
 
 // Get one template by ID
 router.get("/:id", protectUser, getTemplateById);
+
+// Update a template (Admin only)
+router.put("/:id", protectUser, adminOnly, updateTemplate);
 
 // Delete a template (Admin only)
 router.delete("/:id", protectUser, adminOnly, deleteTemplate);

@@ -58,10 +58,12 @@ const Dashboard = () => {
     ];
 
     const priorityDistribution = [
-      { priority: "Low", tasks: taskStats?.priorityDistribution?.Low || taskStats?.taskPriorityLevels?.Low || 0 },
-      { priority: "Medium", tasks: taskStats?.priorityDistribution?.Medium || taskStats?.taskPriorityLevels?.Medium || 0 },
-      { priority: "High", tasks: taskStats?.priorityDistribution?.High || taskStats?.taskPriorityLevels?.High || 0 }
+      { priority: "Low", tasks: data?.priorityDistribution?.Low || 0 },
+      { priority: "Medium", tasks: data?.priorityDistribution?.Medium || 0 },
+      { priority: "High", tasks: data?.priorityDistribution?.High || 0 }
     ];
+
+    console.log("Priority distribution data:", priorityDistribution);
 
     const monthlyData = Object.entries(data?.monthlyCompletion || data?.monthlyData || {}).map(
       ([month, count]) => ({ month, completed: count })
@@ -201,11 +203,11 @@ const Dashboard = () => {
           )}
 
            {/* Bar Chart */}
-          {chartData.priorityDistribution?.length > 0 && (
+          {chartData.priorityDistribution?.some(item => item.tasks > 0) && (
             <div className="chart-container">
               <h4 className="chart-title">Task Priority Distribution</h4>
               <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={chartData.priorityDistribution}>
+                <BarChart data={chartData.priorityDistribution.filter(item => item.tasks > 0)}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="priority" />
                   <YAxis />
@@ -220,7 +222,6 @@ const Dashboard = () => {
           {/* Monthly Chart */}
           {chartData.monthlyData.length > 0 && (
             <div className="chart-container full-width">
-              <h4 className="chart-title">Monthly Completion Trend</h4>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData.monthlyData}>
                   <CartesianGrid strokeDasharray="3 3" />

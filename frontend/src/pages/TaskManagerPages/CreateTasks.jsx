@@ -8,7 +8,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { PRIORITY_DATA } from "../../utils/data";
 import SelectDropdown from "../../components/inputs/SelectDropdown";
-import SelectUsers from "../../components/inputs/SelectUsers";
+import SelectUsersImproved from "../../components/inputs/SelectUsersImproved";
 import "../../CSS/TaskManagerCSS/CreateTasks.css";
 
 const CreateTask = () => {
@@ -29,10 +29,13 @@ const CreateTask = () => {
   });
 
   const [templates, setTemplates] = useState([]); // State for templates
+  const [orders, setOrders] = useState([]); // State for orders
+  const [selectedOrder, setSelectedOrder] = useState(null); // Selected order details
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState(false);
   const [fetchingTemplates, setFetchingTemplates] = useState(false);
+  const [fetchingOrders, setFetchingOrders] = useState(false);
 
   /** ----------------------------
    * Helpers
@@ -56,6 +59,7 @@ const CreateTask = () => {
       templateId: "",
       todoChecklist: [],
     });
+    setSelectedOrder(null);
   };
 
   /** ----------------------------
@@ -73,6 +77,48 @@ const CreateTask = () => {
       setFetchingTemplates(false);
     }
   }, []);
+
+  /** ----------------------------
+   * Fetch Orders
+   * ---------------------------- */
+  const fetchOrders = useCallback(async () => {
+    try {
+      setFetchingOrders(true);
+      const response = await axiosInstance.get("http://localhost:5000/admin-orders");
+      setOrders(Array.isArray(response.data) ? response.data : []);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("Failed to load orders");
+    } finally {
+      setFetchingOrders(false);
+    }
+  }, []);
+
+  /** ----------------------------
+   * Handle Order Selection
+   * ---------------------------- */
+  const handleOrderSelect = (orderId) => {
+    if (!orderId) {
+      setSelectedOrder(null);
+      setTaskData(prev => ({
+        ...prev,
+        orderID: "",
+      }));
+      return;
+    }
+
+    const order = orders.find(o => o._id === orderId);
+    if (order) {
+      setSelectedOrder(order);
+      setTaskData(prev => ({
+        ...prev,
+        orderID: order._id,
+        title: `Order ${order._id} - ${order.lorryType?.typeName || order.lorryType?.name || 'Task'}`,
+        description: `Process order for ${order.companyName}\nLorry Category: ${order.lorryCategory?.typeName || order.lorryCategory?.category || 'N/A'}\nLorry Type: ${order.lorryType?.typeName || order.lorryType?.name || 'N/A'}\nQuantity: ${order.quantity}`,
+        bodyType: order.lorryType?._id || "",
+      }));
+    }
+  };
 
   /** ----------------------------
    * API Calls
@@ -202,8 +248,9 @@ const CreateTask = () => {
    * ---------------------------- */
   useEffect(() => {
     fetchTemplates(); // Fetch templates on component mount
+    fetchOrders(); // Fetch orders on component mount
     if (taskId) getTaskDetailsByID();
-  }, [taskId, getTaskDetailsByID, fetchTemplates]);
+  }, [taskId, getTaskDetailsByID, fetchTemplates, fetchOrders]);
 
   /** ----------------------------
    * JSX
@@ -258,17 +305,36 @@ const CreateTask = () => {
             )}
           </div>
 
-          {/* Order ID */}
+          {/* Order Selection */}
           <div className="form-group">
-            <label className="form-label">Order ID</label>
-            <input
-              placeholder="123456789"
+            <label className="form-label">Select Order (Optional)</label>
+            <select
               className="form-input"
               value={taskData.orderID}
-              onChange={({ target }) =>
-                handleValueChange("orderID", target.value)
-              }
-            />
+              onChange={({ target }) => handleOrderSelect(target.value)}
+              disabled={fetchingOrders}
+            >
+              <option value="">Select an order (optional)</option>
+              {orders.map((order) => (
+                <option key={order._id} value={order._id}>
+                  {order._id} - {order.companyName} - {order.lorryType?.typeName || order.lorryType?.name || 'N/A'} (Qty: {order.quantity})
+                </option>
+              ))}
+            </select>
+            {fetchingOrders && (
+              <small>Loading orders...</small>
+            )}
+            {selectedOrder && (
+              <div className="order-details-preview">
+                <small>
+                  <strong>Order Details:</strong><br/>
+                  Company: {selectedOrder.companyName}<br/>
+                  Contact: {selectedOrder.userName} - {selectedOrder.phoneNumber}<br/>
+                  Lorry: {selectedOrder.lorryCategory?.typeName || selectedOrder.lorryCategory?.category} - {selectedOrder.lorryType?.typeName || selectedOrder.lorryType?.name}<br/>
+                  Status: {selectedOrder.status}
+                </small>
+              </div>
+            )}
           </div>
 
           {/* Title */}
@@ -367,7 +433,7 @@ const CreateTask = () => {
           {/* Assign Users */}
           <div className="form-group assign-users-wrapper">
             <label className="form-label">Assign Team Members</label>
-            <SelectUsers
+            <SelectUsersImproved
               selectedUsers={taskData.assignedTo}
               setSelectedUsers={(users) =>
                 handleValueChange("assignedTo", users)

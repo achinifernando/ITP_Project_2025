@@ -7,23 +7,14 @@ const payrollSchema = new mongoose.Schema({
     required: true 
   },
 
-  month: { type: Number, required: true },  // e.g. 9 for September
-  year: { type: Number, required: true },   // e.g. 2025
+  month: { type: String, required: true },  // Format: "YYYY-MM" e.g. "2025-10"
 
   // Salary breakdown
-  basicSalary: { type: Number, default: 0 },    // from User model (for office workers)
-  hourlyRate: { type: Number, default: 0 },     // from User model (for workshop workers)
-  overtimeRate: { type: Number, default: 0 },   // from User model (common)
-
-  totalHours: { type: Number, default: 0 },     // from attendance
-  overtimeHours: { type: Number, default: 0 },  // from attendance
-  daysPresent: { type: Number, default: 0 },
-  daysAbsent: { type: Number, default: 0 },
-  daysLate: { type: Number, default: 0 },
-
-  grossPay: { type: Number, default: 0 },       // before deductions
-  deductions: { type: Number, default: 0 },     // (optional: tax, leaves, etc.)
-  netPay: { type: Number, default: 0 },         // final salary
+  basicSalary: { type: Number, default: 0 },
+  totalAllowances: { type: Number, default: 0 },
+  totalDeductions: { type: Number, default: 0 },
+  overtimePay: { type: Number, default: 0 },
+  netSalary: { type: Number, default: 0 },
 
 }, { timestamps: true });
 

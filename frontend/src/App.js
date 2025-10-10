@@ -36,6 +36,9 @@ import ManageUsers from "./pages/TaskManagerPages/ManageUsers";
 import UserDashboard from "./pages/TaskManagerPages/UserDashboard";
 import MyTasks from "./pages/TaskManagerPages/MyTasks";
 import ViewTaskDetails from "./pages/TaskManagerPages/ViewTaskDetails";
+import ManageTemplates from "./pages/TaskManagerPages/ManageTemplates";
+import UserPayroll from "./pages/TaskManagerPages/UserPayroll";
+import TeamMembers from "./pages/TaskManagerPages/TeamMembers";
 
 // Attendance Components
 import AttendanceDashboard from "./pages/AttendancePages/AttendanceDashboard";
@@ -341,6 +344,8 @@ function App() {
             <Route path="/admin/tasks" element={<ManageTasks />} />
             <Route path="/admin/create-task" element={<CreateTask />} />
             <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/team-members" element={<TeamMembers />} />
+            <Route path="/admin/templates" element={<ManageTemplates />} />
           </Route>
 
           {/* Task Management Member Routes */}
@@ -348,6 +353,7 @@ function App() {
             <Route path="/user/dashboard" element={<UserDashboard />} />
             <Route path="/user/tasks" element={<MyTasks />} />
             <Route path="/user/task-details" element={<ViewTaskDetails />} />
+            <Route path="/user/payroll" element={<UserPayroll />} />
           </Route>
 
           {/* HR Manager Routes - Attendance System */}

@@ -28,6 +28,7 @@ const UserDashboard = () => {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [currentDate, setCurrentDate] = useState("");
+  const [loading, setLoading] = useState(true);
   const [chartData, setChartData] = useState({
     taskDistribution: [],
     priorityDistribution: [],
@@ -75,21 +76,28 @@ const UserDashboard = () => {
   // ✅ Fetch dashboard data
   const getDashboardData = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await axiosInstance.get(API_PATHS.TASKS.GET_USER_DASHBOARD_DATA);
 
       console.log("Full API response:", response.data);
 
       if (response.data) {
+        console.log("Dashboard data received:", response.data);
         setDashboardData(response.data);
         prepareChartData(response.data);
+      } else {
+        console.warn("No data received from API");
+        setDashboardData({});
       }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
     }
   }, [prepareChartData]);
 
   // ✅ Navigation
-  const onSeeMore = () => navigate("/admin/tasks");
+  const onSeeMore = () => navigate("/user/tasks");
 
   // ✅ Colors for charts
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#8884D8", "#82CA9D"];
@@ -105,102 +113,227 @@ const UserDashboard = () => {
     setCurrentDate(date.toLocaleDateString("en-US", options));
   }, [user, getDashboardData]);
 
+  if (loading) {
+    return (
+      <DashboardLayout activeMenu="Dashboard">
+        <div className="dashboard-loading">
+          <div className="spinner"></div>
+          <p>Loading dashboard data...</p>
+        </div>
+      </DashboardLayout>
+    );
+  }
+
   return (
     <DashboardLayout activeMenu="Dashboard">
       <div className="dashboard-container">
         <h1 className="dashboard-title">Welcome! {user?.name || user?.email}!</h1>
         <p className="date-display">{currentDate}</p>
 
-        {/* ✅ Dashboard Stats */}
-        <div className="dashboard-stats">
-          <InfoCard
-            label="Total Tasks"
-            value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.All || 0)}
-          />
-          <InfoCard
-            label="Pending Tasks"
-            value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.Pending || 0)}
-          />
-          <InfoCard
-            label="In Progress Tasks"
-            value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.InProgress || 0)}
-          />
-          <InfoCard
-            label="Completed Tasks"
-            value={addThousandSeparator(dashboardData?.charts?.taskDistribution?.Completed || 0)}
-          />
+        {/* ✅ Dashboard Stats in 2 columns */}
+        <div className="dashboard-stats-grid">
+          <div className="stats-column">
+            <InfoCard
+              label="Total Tasks"
+              value={addThousandSeparator(dashboardData?.totalTasks || 0)}
+              icon="📋"
+            />
+            <InfoCard
+              label="Pending Tasks"
+              value={addThousandSeparator(dashboardData?.pendingTasks || 0)}
+              icon="⏳"
+            />
+          </div>
+          <div className="stats-column">
+            <InfoCard
+              label="In Progress Tasks"
+              value={addThousandSeparator(dashboardData?.inProgress || 0)}
+              icon="🚀"
+            />
+            <InfoCard
+              label="Completed Tasks"
+              value={addThousandSeparator(dashboardData?.completedTasks || 0)}
+              icon="✅"
+            />
+          </div>
         </div>
 
         {/* ✅ Charts Section */}
         <div className="charts-section">
-          {/* Pie Chart */}
-          <div className="chart-container">
-            <h4 className="chart-title">Task Status Distribution</h4>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={chartData.taskDistribution}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={130}
-                  innerRadius={100}
-                >
-                  {chartData.taskDistribution.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value} tasks`, "Count"]} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
+          <style>{`
+            .charts-grid {
+              display: grid;
+              grid-template-columns: 1fr 1fr;
+              gap: 30px;
+              margin-bottom: 30px;
+            }
 
-          {/* Bar Chart */}
-          <div className="chart-container">
-            <h4 className="chart-title">Task Priority Distribution</h4>
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={chartData.priorityDistribution}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="priority" />
-                <YAxis />
-                <Tooltip formatter={(value) => [`${value} tasks`, "Count"]} />
-                <Legend />
-                <Bar dataKey="tasks" fill="#8884d8" />
-              </BarChart>
-            </ResponsiveContainer>
+            .chart-container {
+              background: white;
+              padding: 20px;
+              border-radius: 12px;
+              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+              border: 1px solid #e1e5e9;
+              min-height: 350px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+
+            .chart-title {
+              font-size: 16px;
+              font-weight: 600;
+              color: #2c3e50;
+              margin: 0 0 20px 0;
+              text-align: center;
+            }
+
+            .no-data-message {
+              text-align: center;
+              color: #7f8c8d;
+              font-style: italic;
+              padding: 20px;
+            }
+
+            .full-width {
+              grid-column: 1 / -1;
+            }
+
+            @media (max-width: 768px) {
+              .charts-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+              }
+            }
+          `}</style>
+          <div className="charts-grid">
+            {/* Pie Chart */}
+            {chartData.taskDistribution.length > 0 && chartData.taskDistribution.some(item => item.value > 0) ? (
+              <div className="chart-container">
+                <h4 className="chart-title">🥧 Task Status Distribution</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={chartData.taskDistribution.filter(item => item.value > 0)}
+                      dataKey="value"
+                      nameKey="name"
+                      cx="50%"
+                      cy="50%"
+                      outerRadius={100}
+                      innerRadius={60}
+                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      labelLine={false}
+                    >
+                      {chartData.taskDistribution.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      formatter={(value, name) => [`${value} tasks`, name]}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="chart-container">
+                <div className="no-data-message">
+                  <p>📊 No task status data available</p>
+                  <small>Complete some tasks to see the distribution</small>
+                </div>
+              </div>
+            )}
+
+            {/* Bar Chart */}
+            {chartData.priorityDistribution.length > 0 && chartData.priorityDistribution.some(item => item.tasks > 0) ? (
+              <div className="chart-container">
+                <h4 className="chart-title">📊 Task Priority Distribution</h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData.priorityDistribution.filter(item => item.tasks > 0)}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis
+                      dataKey="priority"
+                      tick={{ fontSize: 12, fill: '#666' }}
+                      axisLine={{ stroke: '#ccc' }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 12, fill: '#666' }}
+                      axisLine={{ stroke: '#ccc' }}
+                    />
+                    <Tooltip
+                      formatter={(v) => [`${v} tasks`, "Count"]}
+                      contentStyle={{
+                        backgroundColor: 'white',
+                        border: '1px solid #ccc',
+                        borderRadius: '8px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                      }}
+                    />
+                    <Legend />
+                    <Bar
+                      dataKey="tasks"
+                      fill="#8884d8"
+                      radius={[4, 4, 0, 0]}
+                      name="Tasks"
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div className="chart-container">
+                <div className="no-data-message">
+                  <p>📊 No priority data available</p>
+                  <small>Set task priorities to see the distribution</small>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Monthly Completion Trend */}
-          {chartData.monthlyData.length > 0 && (
+          {chartData.monthlyData.length > 0 ? (
             <div className="chart-container full-width">
-              <h4 className="chart-title">Monthly Completion Trend</h4>
+              <h4 className="chart-title">📈 Monthly Completion Trend</h4>
               <ResponsiveContainer width="100%" height={300}>
                 <BarChart data={chartData.monthlyData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="month" />
-                  <YAxis />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#666' }} />
+                  <YAxis tick={{ fontSize: 12, fill: '#666' }} />
                   <Tooltip formatter={(value) => [`${value} tasks`, "Completed"]} />
                   <Legend />
-                  <Bar dataKey="completed" fill="#00C49F" />
+                  <Bar dataKey="completed" fill="#00C49F" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          ) : (
+            <div className="chart-container full-width">
+              <div className="no-data-message">
+                <p>📈 No monthly data available</p>
+                <small>Complete tasks over time to see trends</small>
+              </div>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* ✅ Recent Tasks */}
-      <div className="recent-tasks-section">
-        <div className="recent-tasks-header">
-          <h5>Recent Tasks</h5>
-          <button className="see-all-btn" onClick={onSeeMore}>
-            See All
-          </button>
+        {/* ✅ Recent Tasks */}
+        <div className="recent-tasks-section">
+          <div className="recent-tasks-header">
+            <h5>Recent Tasks</h5>
+            <button className="see-all-btn" onClick={onSeeMore}>
+              See All
+            </button>
+          </div>
+          <TaskListTable 
+            tableData={dashboardData?.recentTasks || []} 
+            loading={loading}
+            maxItems={5}
+          />
         </div>
-        <TaskListTable tableData={dashboardData?.recentTasks || []} />
       </div>
     </DashboardLayout>
   );

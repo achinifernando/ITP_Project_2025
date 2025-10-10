@@ -104,4 +104,76 @@ router.post("/generate",protectUser, async (req, res) => {
   }
 });
 
+// Get logged-in user's payroll data
+router.get("/my-payroll", protectUser, async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // Get current month payroll
+    const currentDate = new Date();
+    const currentMonthString = `${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, "0")}`;
+
+    // Get salary info
+    const salaryInfo = await SalaryInfo.findOne({ employeeId: userId });
+
+    console.log("🔍 Fetching payroll for user:", userId);
+    console.log("📅 Current month:", currentMonthString);
+    console.log("💵 Salary info found:", salaryInfo ? "Yes" : "No");
+
+    // Get current month payroll
+    const currentPayroll = await Payroll.findOne({ 
+      employeeId: userId, 
+      month: currentMonthString 
+    });
+
+    console.log("📊 Current payroll found:", currentPayroll ? "Yes" : "No");
+
+    // Get payroll history (last 6 months)
+    const payrollHistory = await Payroll.find({ employeeId: userId })
+      .sort({ month: -1 })
+      .limit(6);
+
+    console.log("📜 Payroll history records:", payrollHistory.length);
+
+    // Get current month attendance data
+    const start = new Date(`${currentMonthString}-01`);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59);
+
+    const attendances = await Attendance.find({
+      employeeId: userId,
+      date: { $gte: start, $lte: end },
+    });
+
+    const totalHours = attendances.reduce((acc, a) => acc + (a.hoursWorked || 0), 0);
+    const overtimeHours = attendances.reduce((acc, a) => acc + (a.overtimeHours || 0), 0);
+    const daysPresent = attendances.filter(a => a.status === "present").length;
+    const daysLate = attendances.filter(a => a.status === "late").length;
+    const daysAbsent = attendances.filter(a => a.status === "absent").length;
+
+    console.log("📋 Attendance stats:", { totalHours, daysPresent, daysLate, daysAbsent });
+
+    // Get current month allowances and deductions
+    const allowances = await Allowance.find({ employeeId: userId, month: currentMonthString });
+    const deductions = await Deduction.find({ employeeId: userId, month: currentMonthString });
+
+    res.json({
+      salaryInfo: salaryInfo || null,
+      currentPayroll: currentPayroll || null,
+      payrollHistory: payrollHistory || [],
+      currentMonthStats: {
+        totalHours,
+        overtimeHours,
+        daysPresent,
+        daysLate,
+        daysAbsent,
+      },
+      allowances: allowances || [],
+      deductions: deductions || [],
+    });
+  } catch (err) {
+    console.error("❌ Error fetching payroll:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 module.exports = router;
