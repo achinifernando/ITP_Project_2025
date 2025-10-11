@@ -18,6 +18,12 @@ function HomePage() {
   const [categories, setCategories] = useState([]);
   const [types, setTypes] = useState([]);
   const [models, setModels] = useState([]);
+  const [errors, setErrors] = useState({
+    quantity: "",
+    lorryModel: "",
+    lorryCategory: "",
+    lorryType: ""
+  });
 
   const [notification, setNotification] = useState({
     show: false,
@@ -69,26 +75,119 @@ function HomePage() {
   }, [formData.lorryCategory]);
 
   // Fetch models
-    useEffect(() => {
-      axios
-        .get(`http://localhost:5000/lorryBrands/models`)
-        .then((res) => setModels(res.data))
-        .catch(console.error);
-    }, []);
+  useEffect(() => {
+    axios
+      .get(`http://localhost:5000/lorryBrands/models`)
+      .then((res) => setModels(res.data))
+      .catch(console.error);
+  }, []);
 
+  // Validation functions
+  const validateQuantity = (value) => {
+    if (!value) {
+      return 'Quantity is required';
+    }
+    
+    const numValue = Number(value);
+    
+    if (isNaN(numValue)) {
+      return 'Quantity must be a number';
+    }
+    
+    if (!Number.isInteger(numValue)) {
+      return 'Quantity must be a whole number';
+    }
+    
+    if (numValue <= 0) {
+      return 'Quantity must be greater than 0';
+    }
+    
+    if (numValue > 1000) {
+      return 'Quantity cannot exceed 1000';
+    }
+    
+    return '';
+  };
+
+  const validateLorryModel = (value) => {
+    if (!value) {
+      return 'Lorry model is required';
+    }
+    return '';
+  };
+
+  const validateLorryCategory = (value) => {
+    if (!value) {
+      return 'Lorry category is required';
+    }
+    return '';
+  };
+
+  const validateLorryType = (value) => {
+    if (!value) {
+      return 'Lorry type is required';
+    }
+    return '';
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setFormData((prev) => ({
       ...prev,
       [name]: value,
       ...(name === "lorryCategory" && { lorryType: "" }), // reset type on category change
     }));
+
+    // Real-time validation for quantity
+    if (name === "quantity") {
+      const error = validateQuantity(value);
+      setErrors(prev => ({ ...prev, quantity: error }));
+    }
+    
+    if (name === "lorryModel") {
+      const error = validateLorryModel(value);
+      setErrors(prev => ({ ...prev, lorryModel: error }));
+    }
+    
+    if (name === "lorryCategory") {
+      const error = validateLorryCategory(value);
+      setErrors(prev => ({ ...prev, lorryCategory: error }));
+    }
+    
+    if (name === "lorryType") {
+      const error = validateLorryType(value);
+      setErrors(prev => ({ ...prev, lorryType: error }));
+    }
   };
 
- 
+  // Form validation before submission
+  const validateForm = () => {
+    const newErrors = {
+      quantity: validateQuantity(formData.quantity),
+      lorryModel: validateLorryModel(formData.lorryModel),
+      lorryCategory: validateLorryCategory(formData.lorryCategory),
+      lorryType: validateLorryType(formData.lorryType)
+    };
+
+    setErrors(newErrors);
+
+    return !Object.values(newErrors).some(error => error !== '');
+  };
+
   const sendData = (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      setNotification({
+        show: true,
+        type: "error",
+        message: "Please fix the validation errors before submitting",
+      });
+      return;
+    }
+
     const token = localStorage.getItem("token");
 
     axios
@@ -105,16 +204,23 @@ function HomePage() {
           message: res.data.message || "Quotation submitted successfully!",
         });
 
+        // Reset form
         setFormData({
           clientId: formData.clientId,
           lorryModel: "",
-    lorryCategory: "",
-    lorryType: "",
-    quantity: "",
-    customFeatures: "",
-    expectedDeliveryDate: "",
+          lorryCategory: "",
+          lorryType: "",
+          quantity: "",
+          customFeatures: "",
+          expectedDeliveryDate: "",
         });
         setTypes([]);
+        setErrors({
+          quantity: "",
+          lorryModel: "",
+          lorryCategory: "",
+          lorryType: ""
+        });
       })
       .catch((err) => {
         setNotification({
@@ -125,7 +231,6 @@ function HomePage() {
       });
   };
 
- 
   return (
     <>
       {/* Hero Section */}
@@ -137,25 +242,24 @@ function HomePage() {
             manufacturing of top-quality full and half lorry bodies with the best
             Japanese technology.
           </p>
-              <div className="hero-stats">
-              <div className="stat-item">
-                <span className="stat-number">22</span>
-                <span className="stat-label">Years Experience</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">25+</span>
-                <span className="stat-label">Expert Team</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">100+</span>
-                <span className="stat-label">Projects Completed</span>
-              </div>
+          <div className="hero-stats">
+            <div className="stat-item">
+              <span className="stat-number">22</span>
+              <span className="stat-label">Years Experience</span>
             </div>
+            <div className="stat-item">
+              <span className="stat-number">25+</span>
+              <span className="stat-label">Expert Team</span>
+            </div>
+            <div className="stat-item">
+              <span className="stat-number">100+</span>
+              <span className="stat-label">Projects Completed</span>
+            </div>
+          </div>
         </div>
-
       </div>
 
-          {/* Services Grid */}
+      {/* Services Grid */}
       <section className="services-grid">
         <div className="container">
           <div className="grid-4">
@@ -267,7 +371,6 @@ function HomePage() {
         </div>
       </section>
 
-      
       {/* Process Section */}
       <section className="process-section">
         <div className="container">
@@ -299,7 +402,6 @@ function HomePage() {
         </div>
       </section>
 
-      
       {/* Quote Form Section */}
       <section className="quote-section">
         <div className="quote-container">
@@ -310,25 +412,35 @@ function HomePage() {
                 Get a customized quote for your truck body manufacturing needs.
                 Our experts will provide you with the best solution.
               </p>
-
-          </div>
             </div>
             <div className="quote-form-container">
               <form onSubmit={sendData} className="quote-form">
-
-                <div className="form-raw">
-                  <label>Lorry Model</label>
-                  <select name="lorryModel" value={formData.lorryModel} onChange={handleChange} >
-        <option value="">Select lorry model</option>
-        {models.map((m) => (
-          <option key={m._id} value={m._id}>{m.model}</option>
-        ))}
-      </select>
+                <div className={`form-raw ${errors.lorryModel ? 'error' : ''}`}>
+                  <label>Lorry Model *</label>
+                  <select 
+                    name="lorryModel" 
+                    value={formData.lorryModel} 
+                    onChange={handleChange}
+                    className={errors.lorryModel ? 'error-input' : ''}
+                  >
+                    <option value="">Select lorry model</option>
+                    {models.map((m) => (
+                      <option key={m._id} value={m._id}>{m.model}</option>
+                    ))}
+                  </select>
+                  {errors.lorryModel && (
+                    <div className="error-message">{errors.lorryModel}</div>
+                  )}
                 </div>
 
-                <div className="form-raw">
-                  <label>Lorry Category</label>
-                  <select name="lorryCategory" value={formData.lorryCategory} onChange={handleChange} >
+                <div className={`form-raw ${errors.lorryCategory ? 'error' : ''}`}>
+                  <label>Lorry Category *</label>
+                  <select 
+                    name="lorryCategory" 
+                    value={formData.lorryCategory} 
+                    onChange={handleChange}
+                    className={errors.lorryCategory ? 'error-input' : ''}
+                  >
                     <option value="">Select lorry category</option>
                     {categories.map((cat) => (
                       <option key={cat._id} value={cat._id}>
@@ -336,15 +448,19 @@ function HomePage() {
                       </option>
                     ))}
                   </select>
+                  {errors.lorryCategory && (
+                    <div className="error-message">{errors.lorryCategory}</div>
+                  )}
                 </div>
 
-                <div className="form-raw">
-                  <label>Lorry Type</label>
+                <div className={`form-raw ${errors.lorryType ? 'error' : ''}`}>
+                  <label>Lorry Type *</label>
                   <select
                     name="lorryType"
                     value={formData.lorryType}
                     onChange={handleChange}
                     disabled={!formData.lorryCategory}
+                    className={errors.lorryType ? 'error-input' : ''}
                   >
                     <option value="">Select lorry type</option>
                     {types.map((type) => (
@@ -353,17 +469,28 @@ function HomePage() {
                       </option>
                     ))}
                   </select>
+                  {errors.lorryType && (
+                    <div className="error-message">{errors.lorryType}</div>
+                  )}
                 </div>
 
-                <div className="form-raw">
-                  <label>Quantity</label>
+                <div className={`form-raw ${errors.quantity ? 'error' : ''}`}>
+                  <label>Quantity *</label>
                   <input
                     type="number"
                     name="quantity"
                     placeholder="50"
                     value={formData.quantity}
                     onChange={handleChange}
+                    min="1"
+                    max="1000"
+                    step="1"
+                    className={errors.quantity ? 'error-input' : ''}
                   />
+                  {errors.quantity && (
+                    <div className="error-message">{errors.quantity}</div>
+                  )}
+                  <div className="input-hint">Must be a positive whole number (1-1000)</div>
                 </div>
 
                 <div className="form-raw">
@@ -386,73 +513,65 @@ function HomePage() {
                   />
                 </div>
 
-                <button type="submit" className="form-submit">
+                <button 
+                  type="submit" 
+                  className="form-submit"
+                  disabled={Object.values(errors).some(error => error !== '')}
+                >
                   Get Quote Now
                 </button>
               </form>
             </div>
           </div>
-       
+        </div>
       </section>
 
       {/* Book Meeting Section */}
-<section className="booking-section">
-  <div className="booking-container">
-    <div className="booking-grid">
-      <div className="booking-content">
-        <h2>Ready to Get Started?</h2>
-        <p>
-          Book a consultation with our expert team to discuss your truck body 
-          manufacturing needs. We'll provide personalized recommendations and 
-          detailed project planning.
-        </p>
-        
-        <ul className="booking-features">
-          <li>
-            <span className="feature-icon">✓</span>
-            Free Consultation & Project Assessment
-          </li>
-          <li>
-            <span className="feature-icon">✓</span>
-            Expert Technical Recommendations
-          </li>
-          <li>
-            <span className="feature-icon">✓</span>
-            Detailed Cost Estimation
-          </li>
-          <li>
-            <span className="feature-icon">✓</span>
-            Timeline & Delivery Planning
-          </li>
-        </ul>
+      <section className="booking-section">
+        <div className="booking-container">
+          <div className="booking-grid">
+            <div className="booking-content">
+              <h2>Ready to Get Started?</h2>
+              <p>
+                Book a consultation with our expert team to discuss your truck body 
+                manufacturing needs. We'll provide personalized recommendations and 
+                detailed project planning.
+              </p>
+              
+              <ul className="booking-features">
+                <li>
+                  <span className="feature-icon">✓</span>
+                  Free Consultation & Project Assessment
+                </li>
+                <li>
+                  <span className="feature-icon">✓</span>
+                  Expert Technical Recommendations
+                </li>
+                <li>
+                  <span className="feature-icon">✓</span>
+                  Detailed Cost Estimation
+                </li>
+                <li>
+                  <span className="feature-icon">✓</span>
+                  Timeline & Delivery Planning
+                </li>
+              </ul>
+            </div>
 
-        
-      </div>
-
-      <div className="booking-cta">
-        <h3>Schedule Your Meeting</h3>
-        <p>
-          Connect with our team to discuss your requirements and get 
-          professional guidance for your project.
-        </p>
-        
-        <Link to="/schedule-meeting" className="book-meeting-btn">
-          Book Meeting Now
-        </Link>
-        
+            <div className="booking-cta">
+              <h3>Schedule Your Meeting</h3>
+              <p>
+                Connect with our team to discuss your requirements and get 
+                professional guidance for your project.
+              </p>
+              
+              <Link to="/schedule-meeting" className="book-meeting-btn">
+                Book Meeting Now
+              </Link>
+            </div>
+          </div>
         </div>
-    </div>
-  </div>
-</section>
-
-
-
-      
-
-  
-      
-
-
+      </section>
 
       {/* Notification */}
       {notification.show && (

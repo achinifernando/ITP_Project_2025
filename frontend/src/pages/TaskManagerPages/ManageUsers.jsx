@@ -7,10 +7,10 @@ import "../../CSS/TaskManagerCSS/ManageUsers.css";
 import toast from "react-hot-toast";
 
 const ManageUsers = () => {
-    const [members, setMembers] = useState([]);
+    const [users, setUsers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
 
-    const getMembersWithTasks = async () => {
+    const getUsersWithTasks = async () => {
         try {
             setIsLoading(true);
             const response = await axiosInstance.get(API_PATHS.USERS.GET_ALL_USERS);
@@ -18,10 +18,9 @@ const ManageUsers = () => {
             if (response.data?.length > 0) {
                 // Filter to get only members
                 const memberUsers = response.data.filter(user => user.role === "member");
-                
-                setMembers(memberUsers);
+                setUsers(memberUsers);
             } else {
-                setMembers([]);
+                setUsers([]);
             }
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -31,7 +30,7 @@ const ManageUsers = () => {
         }
     };
 
-    // Download task report for members only
+    // Download task report
     const handleDownloadReport = async () => {
         try {
             const response = await axiosInstance.get(API_PATHS.REPORTS.EXPORT_USERS, {
@@ -54,17 +53,17 @@ const ManageUsers = () => {
     };
 
     useEffect(() => {
-        getMembersWithTasks();
+        getUsersWithTasks();
     }, []);
 
     return (
         <DashboardLayout activeMenu="Team Members">
             <div className="manage-users-container">
                 <div className="manage-users-header">
-                    <h2 className="manage-users-title">Team Members</h2>
+                    <h2 className="manage-users-title">Team Members & Assigned Tasks</h2>
                     <div className="header-actions">
                         <span className="members-count">
-                            {members.length} {members.length === 1 ? 'Member' : 'Members'}
+                            {users.length} {users.length === 1 ? 'Member' : 'Members'}
                         </span>
                         <button className="download-report-btn" onClick={handleDownloadReport}>
                             Download Report
@@ -77,9 +76,9 @@ const ManageUsers = () => {
                         <div className="loading-spinner"></div>
                         <p>Loading team members...</p>
                     </div>
-                ) : members.length > 0 ? (
+                ) : users.length > 0 ? (
                     <div className="users-grid">
-                        {members.map((user) => (
+                        {users.map((user) => (
                             <UserCard key={user._id} userInfo={user} />
                         ))}
                     </div>

@@ -27,6 +27,4 @@ const payrollSchema = new mongoose.Schema({
 
 }, { timestamps: true });
 
-const Payroll = mongoose.model("payrolls", payrollSchema);
-
-module.exports = Payroll;
+module.exports = mongoose.model("Payroll", payrollSchema);

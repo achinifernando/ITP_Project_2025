@@ -21,6 +21,20 @@ function OrderForm() {
 
   const [categories, setCategories] = useState([]);
   const [types, setTypes] = useState([]);
+  const [errors, setErrors] = useState({
+    quantity: "",
+    userName: "",
+    phoneNumber: "",
+    lorryCategory: "",
+    lorryType: ""
+  });
+  const [touched, setTouched] = useState({
+    quantity: false,
+    userName: false,
+    phoneNumber: false,
+    lorryCategory: false,
+    lorryType: false
+  });
 
   const [notification, setNotification] = useState({
     show: false,
@@ -39,6 +53,103 @@ function OrderForm() {
       return () => clearTimeout(timer);
     }
   }, [notification]);
+
+  // Validation functions
+  const validateQuantity = (value) => {
+    if (!value) {
+      return 'Quantity is required';
+    }
+    
+    const numValue = Number(value);
+    
+    if (isNaN(numValue) || !Number.isInteger(numValue)) {
+      return 'Quantity must be a whole number';
+    }
+    
+    if (numValue <= 0) {
+      return 'Quantity must be greater than 0';
+    }
+    
+    if (numValue > 1000) {
+      return 'Quantity cannot exceed 1000';
+    }
+    
+    return '';
+  };
+
+  const validateUserName = (value) => {
+    if (!value?.trim()) {
+      return 'Name is required';
+    }
+    
+    if (value.trim().length < 2) {
+      return 'Name must be at least 2 characters long';
+    }
+    
+    if (!/^[a-zA-Z\s]+$/.test(value.trim())) {
+      return 'Name can only contain letters and spaces';
+    }
+    
+    return '';
+  };
+
+  const validatePhoneNumber = (value) => {
+    if (!value?.trim()) {
+      return 'Phone number is required';
+    }
+    
+    // Sri Lankan phone number format: +94 XX XXX XXXX or 0XX XXX XXXX
+    const phoneRegex = /^(\+94|0)[1-9][0-9]{8}$/;
+    const cleanedPhone = value.replace(/\s+/g, '');
+    
+    if (!phoneRegex.test(cleanedPhone)) {
+      return 'Please enter a valid Sri Lankan phone number (e.g., +94 XX XXX XXXX or 0XX XXX XXXX)';
+    }
+    
+    return '';
+  };
+
+  const validateLorryCategory = (value) => {
+    if (!value) {
+      return 'Lorry category is required';
+    }
+    return '';
+  };
+
+  const validateLorryType = (value) => {
+    if (!value) {
+      return 'Lorry type is required';
+    }
+    return '';
+  };
+
+  // Real-time validation for specific fields
+  useEffect(() => {
+    if (touched.quantity) {
+      const quantityError = validateQuantity(formData.quantity);
+      setErrors(prev => ({ ...prev, quantity: quantityError }));
+    }
+    
+    if (touched.userName) {
+      const userNameError = validateUserName(formData.userName);
+      setErrors(prev => ({ ...prev, userName: userNameError }));
+    }
+    
+    if (touched.phoneNumber) {
+      const phoneError = validatePhoneNumber(formData.phoneNumber);
+      setErrors(prev => ({ ...prev, phoneNumber: phoneError }));
+    }
+    
+    if (touched.lorryCategory) {
+      const categoryError = validateLorryCategory(formData.lorryCategory);
+      setErrors(prev => ({ ...prev, lorryCategory: categoryError }));
+    }
+    
+    if (touched.lorryType) {
+      const typeError = validateLorryType(formData.lorryType);
+      setErrors(prev => ({ ...prev, lorryType: typeError }));
+    }
+  }, [formData, touched]);
 
   // Prefill user data from profile
   useEffect(() => {
@@ -85,16 +196,61 @@ function OrderForm() {
   // Handle form input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
+    
     setFormData({
       ...formData,
       [name]: value,
       ...(name === "lorryCategory" && { lorryType: "" }), // reset type if category changes
     });
+
+    // Mark field as touched when user starts typing
+    if (!touched[name]) {
+      setTouched(prev => ({ ...prev, [name]: true }));
+    }
+  };
+
+  // Handle blur events for validation
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+  };
+
+  // Form validation before submission
+  const validateForm = () => {
+    const newErrors = {
+      quantity: validateQuantity(formData.quantity),
+      userName: validateUserName(formData.userName),
+      phoneNumber: validatePhoneNumber(formData.phoneNumber),
+      lorryCategory: validateLorryCategory(formData.lorryCategory),
+      lorryType: validateLorryType(formData.lorryType)
+    };
+
+    setErrors(newErrors);
+    setTouched({
+      quantity: true,
+      userName: true,
+      phoneNumber: true,
+      lorryCategory: true,
+      lorryType: true
+    });
+
+    return !Object.values(newErrors).some(error => error !== '');
   };
 
   // Submit order
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate form before submission
+    if (!validateForm()) {
+      setNotification({
+        show: true,
+        type: "error",
+        message: "Please fix the validation errors before submitting",
+      });
+      return;
+    }
+
     const token = localStorage.getItem("token");
 
     try {
@@ -141,23 +297,33 @@ function OrderForm() {
           <h2>Place New Order</h2>
           <form onSubmit={handleSubmit}>
             <div className="form-group">
-              <label>Name</label>
+              <label>Name *</label>
               <input
                 name="userName"
                 placeholder="Name"
                 value={formData.userName}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.userName ? 'error' : ''}
               />
+              {errors.userName && (
+                <div className="error-message">{errors.userName}</div>
+              )}
             </div>
 
             <div className="form-group">
-              <label>Phone Number</label>
+              <label>Phone Number *</label>
               <input
                 name="phoneNumber"
-                placeholder="+94 #########"
+                placeholder="+94 XX XXX XXXX or 0XX XXX XXXX"
                 value={formData.phoneNumber}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.phoneNumber ? 'error' : ''}
               />
+              {errors.phoneNumber && (
+                <div className="error-message">{errors.phoneNumber}</div>
+              )}
             </div>
 
             <div className="form-group">
@@ -202,11 +368,13 @@ function OrderForm() {
             </div>
 
             <div className="form-group">
-              <label>Lorry Category</label>
+              <label>Lorry Category *</label>
               <select
                 name="lorryCategory"
                 value={formData.lorryCategory}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                className={errors.lorryCategory ? 'error' : ''}
               >
                 <option value="">Select lorry category</option>
                 {categories.map((cat) => (
@@ -215,15 +383,20 @@ function OrderForm() {
                   </option>
                 ))}
               </select>
+              {errors.lorryCategory && (
+                <div className="error-message">{errors.lorryCategory}</div>
+              )}
             </div>
 
             <div className="form-group">
-              <label>Lorry Type</label>
+              <label>Lorry Type *</label>
               <select
                 name="lorryType"
                 value={formData.lorryType}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 disabled={!formData.lorryCategory}
+                className={errors.lorryType ? 'error' : ''}
               >
                 <option value="">Select lorry type</option>
                 {types.map((type) => (
@@ -232,17 +405,28 @@ function OrderForm() {
                   </option>
                 ))}
               </select>
+              {errors.lorryType && (
+                <div className="error-message">{errors.lorryType}</div>
+              )}
             </div>
 
             <div className="form-group">
-              <label>Quantity</label>
+              <label>Quantity *</label>
               <input
                 type="number"
                 name="quantity"
                 placeholder="50"
                 value={formData.quantity}
                 onChange={handleChange}
+                onBlur={handleBlur}
+                min="1"
+                max="1000"
+                step="1"
+                className={errors.quantity ? 'error' : ''}
               />
+              {errors.quantity && (
+                <div className="error-message">{errors.quantity}</div>
+              )}
             </div>
 
             <div className="form-group">

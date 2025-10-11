@@ -241,34 +241,7 @@ const styles = StyleSheet.create({
     textAlign: "center"
   },
   
-  // Signature Section
-  signatureSection: {
-    marginTop: 20,
-    flexDirection: "row",
-    justifyContent: "space-between"
-  },
-  
-  signatureBox: {
-    width: 200,
-    height: 60,
-    borderWidth: 1,
-    borderColor: "#000000",
-    padding: 5
-  },
-  
-  signatureLabel: {
-    fontSize: 9,
-    textAlign: "center",
-    marginTop: 5
-  },
-  
-  preparedBy: {
-    fontSize: 12,
-    fontStyle: "italic",
-    textAlign: "right",
-    marginTop: 10,
-    marginBottom: 20
-  }
+
 });
 
 const QuotationPDF = ({ data, company }) => {
@@ -328,7 +301,7 @@ const QuotationPDF = ({ data, company }) => {
             </View>
             {data?.items?.map((item, index) => (
               <View style={styles.tableRow} key={index}>
-                <Text style={styles.tableCellDescription}>{item.itemName}</Text>
+                <Text style={styles.tableCellDescription}>{item.name}</Text>
                 <Text style={styles.tableCellQty}>{item.quantity}</Text>
                 <Text style={styles.tableCellPrice}>{Number(item.price).toFixed(2)}</Text>
                 <Text style={styles.tableCellAmount}>{(Number(item.quantity) * Number(item.price)).toFixed(2)}</Text>
@@ -358,19 +331,7 @@ const QuotationPDF = ({ data, company }) => {
           </Text>
         </View>
 
-        {/* Signature */}
-        <View style={styles.signatureSection}>
-          <View>
-            <Text style={{ fontSize: 11, fontWeight: "bold", marginBottom: 5 }}>Customer Acceptance</Text>
-            <View style={styles.signatureBox}></View>
-            <Text style={styles.signatureLabel}>Printed Name</Text>
-          </View>
-          <View>
-            <Text style={{ fontSize: 11, fontWeight: "bold", marginBottom: 5 }}>&nbsp;</Text>
-            <View style={styles.signatureBox}></View>
-            <Text style={styles.signatureLabel}>Date</Text>
-          </View>
-        </View>
+      
       </Page>
     </Document>
   );

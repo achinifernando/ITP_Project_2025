@@ -44,14 +44,20 @@ export const UserProvider = ({ children }) => {
     //     setLoading(false);
     // };
 
-    // const clearUser = () => {
-    //     setUser(null);
-    //     localStorage.removeItem("token");
-    //     setLoading(false);
-    // };
+    const clearUser = () => {
+        setUser(null);
+        localStorage.removeItem("token");
+        setLoading(false);
+    };
 
      return (
-        <UserContext.Provider value={{ user, loading, updateUser, logout }}>
+        <UserContext.Provider value={{ 
+            user, 
+            loading, 
+            updateUser, 
+            logout,
+            clearUser 
+        }}>
             {children}
         </UserContext.Provider>
     );

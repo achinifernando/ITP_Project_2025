@@ -391,3 +391,15 @@
 .drivers-table-container::-webkit-scrollbar-thumb:hover {
   background: #a8a8a8;
 }
+
+.search-container {
+  margin: 10px 0;
+  text-align: right;
+}
+
+.search-input {
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 220px;
+}

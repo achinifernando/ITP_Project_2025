@@ -67,7 +67,7 @@ router.get("/", protectUser, async (req, res) => {
 // Get single type by ID
 router.get("/:lorryId", protectUser, async (req, res) => {
   try {
-    const type = await LorryType.findById(req.params.lorryId);
+    const type = await LorryType.findById(req.params.lorryId).populate("category");
     if (!type) return res.status(404).json({ message: "Type not found" });
     res.json(type);
   } catch (err) {

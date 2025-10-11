@@ -12,7 +12,22 @@ function ProfilePage() {
   const [quotations, setQuotations] = useState([]);
   const [acceptedQuotations, setAcceptedQuotations] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [notification, setNotification] = useState({
+    show: false,
+    type: "success",
+    message: "",
+  });
   const token = localStorage.getItem("token");
+
+  // Auto-hide notification after 3 seconds
+  useEffect(() => {
+    if (notification.show) {
+      const timer = setTimeout(() => {
+        setNotification((prev) => ({ ...prev, show: false }));
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [notification]);
 
   // Fetch user profile
   useEffect(() => {
@@ -33,27 +48,39 @@ function ProfilePage() {
   }, [token]);
 
   // Fetch orders
-  useEffect(() => {
+  const fetchOrders = async () => {
     if (token) {
-      axios
-        .get("http://localhost:5000/orders/my-orders", {
+      try {
+        const res = await axios.get("http://localhost:5000/orders/my-orders", {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => setOrders(res.data))
-        .catch((err) => console.error("Orders fetch error:", err));
+        });
+        setOrders(res.data);
+      } catch (err) {
+        console.error("Orders fetch error:", err);
+      }
     }
+  };
+
+  useEffect(() => {
+    fetchOrders();
   }, [token]);
 
   // Fetch service requests
-  useEffect(() => {
+  const fetchServices = async () => {
     if (token) {
-      axios
-        .get("http://localhost:5000/serviceRequest/my_services", {
+      try {
+        const res = await axios.get("http://localhost:5000/serviceRequest/my_services", {
           headers: { Authorization: `Bearer ${token}` },
-        })
-        .then((res) => setServices(res.data))
-        .catch((err) => console.error("Service fetch error:", err));
+        });
+        setServices(res.data);
+      } catch (err) {
+        console.error("Service fetch error:", err);
+      }
     }
+  };
+
+  useEffect(() => {
+    fetchServices();
   }, [token]);
 
   // Fetch quotations
@@ -101,7 +128,7 @@ function ProfilePage() {
     fetchPayments();
   }, [token]);
 
-  //handle quotation acception
+  // Handle quotation acceptance
   const handleAcceptQuotation = async (quotationId) => {
     try {
       await axios.put(
@@ -109,15 +136,27 @@ function ProfilePage() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("Quotation accepted successfully!");
-      window.location.reload();
+      setNotification({
+        show: true,
+        type: "success",
+        message: "Quotation accepted successfully!"
+      });
+      // Refresh quotations list
+      const res = await axios.get("http://localhost:5000/quotations/my_quotations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuotations(res.data);
     } catch (error) {
       console.error("Accept error:", error);
-      alert(error.response?.data?.message || "Error accepting quotation");
+      setNotification({
+        show: true,
+        type: "error",
+        message: error.response?.data?.message || "Error accepting quotation"
+      });
     }
   };
 
-  //handle quotation rejection
+  // Handle quotation rejection
   const handleRejectQuotation = async (quotationId) => {
     try {
       await axios.put(
@@ -125,17 +164,121 @@ function ProfilePage() {
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      alert("Quotation rejected successfully!");
-      window.location.reload();
+      setNotification({
+        show: true,
+        type: "success",
+        message: "Quotation rejected successfully!"
+      });
+      // Refresh quotations list
+      const res = await axios.get("http://localhost:5000/quotations/my_quotations", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setQuotations(res.data);
     } catch (error) {
       console.error("Reject error:", error);
-      alert(error.response?.data?.message || "Error rejecting quotation");
+      setNotification({
+        show: true,
+        type: "error",
+        message: error.response?.data?.message || "Error rejecting quotation"
+      });
     }
+  };
+
+  // Handle cancel order
+  const handleCancelOrder = async (orderId) => {
+    if (!window.confirm("Are you sure you want to cancel this order?")) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `http://localhost:5000/orders/delete/${orderId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNotification({
+        show: true,
+        type: "success",
+        message: "Order cancelled successfully!"
+      });
+      // Refresh orders list
+      fetchOrders();
+    } catch (error) {
+      console.error("Cancel order error:", error);
+      setNotification({
+        show: true,
+        type: "error",
+        message: error.response?.data?.message || "Error cancelling order"
+      });
+    }
+  };
+
+  // Handle cancel service request
+  const handleCancelService = async (serviceId) => {
+    if (!window.confirm("Are you sure you want to cancel this service request?")) {
+      return;
+    }
+
+    try {
+      await axios.delete(
+        `http://localhost:5000/serviceRequest/delete/${serviceId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNotification({
+        show: true,
+        type: "success",
+        message: "Service request cancelled successfully!"
+      });
+      // Refresh services list
+      fetchServices();
+    } catch (error) {
+      console.error("Cancel service error:", error);
+      setNotification({
+        show: true,
+        type: "error",
+        message: error.response?.data?.message || "Error cancelling service request"
+      });
+    }
+  };
+
+  // Check if order can be cancelled (only pending orders)
+  const canCancelOrder = (order) => {
+    return order.status === 'pending' || order.paymentStatus === 'pending';
+  };
+
+  // Check if service request can be cancelled (only pending services)
+  const canCancelService = (service) => {
+    return service.status === 'pending';
   };
 
   return (
     <>
       <div className="profile-container">
+        {/* Notification */}
+        {notification.show && (
+          <div
+            className={`notification ${notification.type}`}
+            role="alert"
+            aria-live="assertive"
+          >
+            <div className="notification__body">
+              <h2 className="notification__header">
+                {notification.type === "success" ? "Success" : "Error"}
+              </h2>
+              <p className="notification__text">{notification.message}</p>
+            </div>
+            <div className="notification__action">
+              <button
+                className="notification_button"
+                onClick={() =>
+                  setNotification((prev) => ({ ...prev, show: false }))
+                }
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="profile-row">
           {/* Sidebar */}
           <div className="profile-sidebar">
@@ -209,7 +352,9 @@ function ProfilePage() {
                             <th>Lorry Category</th>
                             <th>Lorry Type</th>
                             <th>Quantity</th>
+                            <th>Status</th>
                             <th>Payment Status</th>
+                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -219,7 +364,21 @@ function ProfilePage() {
                               <td>{order.lorryCategory?.category}</td>
                               <td>{order.lorryType?.typeName}</td>
                               <td>{order.quantity}</td>
+                              <td>{order.status}</td>
                               <td>{order.paymentStatus}</td>
+                              <td>
+                                {canCancelOrder(order) && (
+                                  <button
+                                    onClick={() => handleCancelOrder(order._id)}
+                                    className="btn-cancel"
+                                  >
+                                    Cancel Order
+                                  </button>
+                                )}
+                                {!canCancelOrder(order) && (
+                                  <span className="text-muted">Cannot cancel</span>
+                                )}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -229,10 +388,10 @@ function ProfilePage() {
                 </div>
               )}
 
-              {/* Requests */}
+              {/* Service Requests */}
               {activeTab === "service-requests" && (
                 <div className="tab-pane active">
-                  <h3> Service Requests</h3>
+                  <h3>Service Requests</h3>
                   {services.length === 0 ? (
                     <p>No Service Requests Yet.</p>
                   ) : (
@@ -247,6 +406,7 @@ function ProfilePage() {
                             <th>Preferred Date</th>
                             <th>Issue Description</th>
                             <th>Status</th>
+                            <th>Actions</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -259,6 +419,19 @@ function ProfilePage() {
                               <td>{service.preferredDate}</td>
                               <td>{service.issueDescription}</td>
                               <td>{service.status}</td>
+                              <td>
+                                {canCancelService(service) && (
+                                  <button
+                                    onClick={() => handleCancelService(service._id)}
+                                    className="btn-cancel"
+                                  >
+                                    Cancel Request
+                                  </button>
+                                )}
+                                {!canCancelService(service) && (
+                                  <span className="text-muted">Cannot cancel</span>
+                                )}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
@@ -325,6 +498,7 @@ function ProfilePage() {
                             <th>Quotation ID</th>
                             <th>Total Price</th>
                             <th>Valid Until</th>
+                            <th>Status</th>
                             <th>Action</th>
                           </tr>
                         </thead>
@@ -340,6 +514,7 @@ function ProfilePage() {
                                     ).toLocaleDateString()
                                   : "N/A"}
                               </td>
+                              <td>{quotation.status}</td>
                               <td>
                                 <div className="action-buttons">
                                   {quotation.status === "Quote_Sent" && (
@@ -353,7 +528,7 @@ function ProfilePage() {
                                         Accept
                                       </button>
                                       <button
-                                        className="btn-save"
+                                        className="btn-cancel"
                                         onClick={() =>
                                           handleRejectQuotation(quotation._id)
                                         }
@@ -361,6 +536,9 @@ function ProfilePage() {
                                         Reject
                                       </button>
                                     </>
+                                  )}
+                                  {quotation.status !== "Quote_Sent" && (
+                                    <span className="text-muted">No actions available</span>
                                   )}
                                 </div>
                               </td>
@@ -407,7 +585,7 @@ function ProfilePage() {
                                     {acceptedQuotation.items.map(
                                       (item, index) => (
                                         <li key={index}>
-                                          {item.name} - {item.quantity} x $
+                                          {item.name} - {item.quantity} x Rs.
                                           {item.price}
                                         </li>
                                       )
@@ -415,7 +593,6 @@ function ProfilePage() {
                                   </ul>
                                 )}
                               </td>
-
                               <td>
                                 <Link to="/orderform">
                                   <button className="btn-save">

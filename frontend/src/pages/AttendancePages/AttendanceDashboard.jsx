@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import SummaryCard from "../../components/layouts/SummaryCard";
+import { 
+  BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, 
+  Tooltip, Legend, ResponsiveContainer, Cell 
+} from "recharts";
 import AttendanceDashboardLayout from "../../components/layouts/AttendanceDashboardLayout";
 import "../../CSS/AttendanceCSS/AttendanceDashboard.css";
 import axiosInstance from "../../utils/axiosInstance";
 
 // Define API paths if not already imported
 const API_PATHS = {
-  TASKS: {
-    GET_DASHBOARD_DATA: "/api/dashboard",
+  ATTENDANCE: {
+    GET_DASHBOARD_DATA: "/api/attendance/today",
+    GET_TRENDS_DATA: "/api/attendance/trends",
   },
 };
 
@@ -16,13 +19,15 @@ const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
 const AttendanceDashboard = () => {
   const [stats, setStats] = useState({ total: 0, present: 0, absent: 0, late: 0 });
+  const [trends, setTrends] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isTrendsLoading, setIsTrendsLoading] = useState(true);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
-        const res = await axiosInstance.get(API_PATHS.TASKS.GET_DASHBOARD_DATA);
+        const res = await axiosInstance.get(API_PATHS.ATTENDANCE.GET_DASHBOARD_DATA);
         setStats(res.data);
       } catch (err) {
         console.error("Error fetching dashboard data:", err);
@@ -30,7 +35,21 @@ const AttendanceDashboard = () => {
         setIsLoading(false);
       }
     };
+
+    const fetchTrendsData = async () => {
+      try {
+        setIsTrendsLoading(true);
+        const res = await axiosInstance.get(API_PATHS.ATTENDANCE.GET_TRENDS_DATA + "?days=7");
+        setTrends(res.data);
+      } catch (err) {
+        console.error("Error fetching trends data:", err);
+      } finally {
+        setIsTrendsLoading(false);
+      }
+    };
+
     fetchDashboardData();
+    fetchTrendsData();
   }, []);
 
   const chartData = [
@@ -47,40 +66,77 @@ const AttendanceDashboard = () => {
           <h1>Attendance Dashboard</h1>
         </header>
 
-        {/* Summary Cards */}
-        <div className="summary-cards">
-          <SummaryCard title="Total Employees" value={stats.total} isLoading={isLoading} />
-          <SummaryCard title="Present" value={stats.present} isLoading={isLoading} />
-          <SummaryCard title="Absent" value={stats.absent} isLoading={isLoading} />
-          <SummaryCard title="Late" value={stats.late} isLoading={isLoading} />
-        </div>
+      
 
-        {/* Attendance Pie Chart */}
+        {/* Attendance Bar Chart */}
         <div className="chart-section">
           <h2>Attendance Summary</h2>
           {isLoading ? (
             <div className="chart-placeholder">Loading chart data...</div>
           ) : (
             <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={70}
-                  outerRadius={120}
-                  fill="#8884d8"
-                  paddingAngle={5}
-                  dataKey="value"
-                  label={({ name, value }) => `${name}: ${value}`}
-                >
+              <BarChart data={chartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="value" fill="#8884d8">
                   {chartData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                   ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value}`, name]} />
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </div>
+
+        {/* Attendance Trends Line Chart */}
+        <div className="chart-section">
+          <h2>Attendance Trends (Last 7 Days)</h2>
+          {isTrendsLoading ? (
+            <div className="chart-placeholder">Loading trends data...</div>
+          ) : (
+            <ResponsiveContainer width="100%" height={350}>
+              <LineChart data={trends}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="date" 
+                  tickFormatter={(date) => {
+                    const d = new Date(date);
+                    return `${d.getMonth() + 1}/${d.getDate()}`;
+                  }}
+                />
+                <YAxis />
+                <Tooltip 
+                  labelFormatter={(date) => {
+                    const d = new Date(date);
+                    return d.toLocaleDateString();
+                  }}
+                />
                 <Legend />
-              </PieChart>
+                <Line 
+                  type="monotone" 
+                  dataKey="present" 
+                  stroke="#00C49F" 
+                  strokeWidth={2}
+                  name="Present"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="absent" 
+                  stroke="#FF8042" 
+                  strokeWidth={2}
+                  name="Absent"
+                />
+                <Line 
+                  type="monotone" 
+                  dataKey="late" 
+                  stroke="#FFBB28" 
+                  strokeWidth={2}
+                  name="Late"
+                />
+              </LineChart>
             </ResponsiveContainer>
           )}
         </div>

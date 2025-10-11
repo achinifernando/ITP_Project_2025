@@ -24,7 +24,7 @@ router.get("/:id", protectUser, getUsersById);
 // Update a user (Admin, HR Manager, or the user themselves for their own profile)
 router.put("/:id", protectUser, updateUser);
 
-// Delete a user (Admin only)
-router.delete("/:id", protectUser, adminOnly, deleteUser);
+// Delete a user (Admin or HR Manager only)
+router.delete("/:id", protectUser, hrManagerOrAdmin, deleteUser);
 
 module.exports = router;

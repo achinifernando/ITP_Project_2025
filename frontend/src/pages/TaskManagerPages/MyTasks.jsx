@@ -5,13 +5,14 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import "../../CSS/TaskManagerCSS/ManageTasks.css";
 import TaskCard from "../../components/Cards/TaskCard";
+import SelectChecklist from "../../components/inputs/SelectCheckList";
 
 const MyTasks = () => {
   const [allTasks, setAllTasks] = useState([]);
   const [loading, setLoading] = useState(false);
   const [tabs, setTabs] = useState([]);
   const [filterStatus, setFilterStatus] = useState("All");
-
+  const [openChecklistTaskId, setOpenChecklistTaskId] = useState(null);
   const navigate = useNavigate();
 
   // ✅ Memoized fetch function
@@ -19,20 +20,38 @@ const MyTasks = () => {
     try {
       setLoading(true);
 
-      const response = await axiosInstance.get(API_PATHS.TASKS.GET_ALL_TASKS, {
-        params: { status: filterStatus === "All" ? "" : filterStatus },
+      console.log("Current user context:", {
+        userId: localStorage.getItem('userId'),
+        token: localStorage.getItem('token') ? 'Token exists' : 'No token',
+        userRole: localStorage.getItem('userRole')
       });
 
-      setAllTasks(response.data?.tasks?.length > 0 ? response.data.tasks : []);
+      const response = await axiosInstance.get(API_PATHS.TASKS.GET_ALL_TASKS);
 
-      // Map statusSummary data with fixed labels and order
-      const statusSummary = response.data?.statusSummary || {};
+      console.log("My Tasks API Response:", response.data);
+      console.log("Response status:", response.status);
+      console.log("Response data type:", typeof response.data);
+      console.log("Is array?", Array.isArray(response.data));
+      console.log("Response data length:", response.data?.length);
+
+      // Backend returns array of tasks directly
+      const tasks = Array.isArray(response.data) ? response.data : [];
+      console.log("Processed tasks:", tasks);
+      console.log("Tasks length:", tasks.length);
+
+      setAllTasks(tasks);
+
+      // Calculate status counts from the tasks
+      const allCount = tasks.length;
+      const pendingCount = tasks.filter(t => t.status === "Pending").length;
+      const inProgressCount = tasks.filter(t => t.status === "In Progress").length;
+      const completedCount = tasks.filter(t => t.status === "Completed").length;
 
       const statusArray = [
-        { label: "All", count: statusSummary.all || 0 },
-        { label: "Pending", count: statusSummary.pendingTasks || 0 },
-        { label: "In Progress", count: statusSummary.inProgress || 0 },
-        { label: "Completed", count: statusSummary.completed || 0 },
+        { label: "All", count: allCount },
+        { label: "Pending", count: pendingCount },
+        { label: "In Progress", count: inProgressCount },
+        { label: "Completed", count: completedCount },
       ];
 
       setTabs(statusArray);
@@ -41,16 +60,29 @@ const MyTasks = () => {
     } finally {
       setLoading(false);
     }
-  }, [filterStatus]);
+  }, []);
 
-  const handleClick = (taskId) => {
-    navigate(`/user/task-details/${taskId}`);
+  const handleClick = (taskData) => {
+    navigate(`/user/task-details`, { state: { taskId: taskData._id } });
+  };
+
+  const refreshTasks = () => {
+    getAllTasks();
   };
 
   // ✅ useEffect depends on getAllTasks (not filterStatus directly)
   useEffect(() => {
     getAllTasks();
   }, [getAllTasks]);
+
+  const toggleChecklist = (taskId) => {
+    setOpenChecklistTaskId((prev) => (prev === taskId ? null : taskId));
+  };
+
+  // Filter tasks based on selected status
+  const filteredTasks = filterStatus === "All" 
+    ? allTasks 
+    : allTasks.filter(task => task.status === filterStatus);
 
   return (
     <DashboardLayout activeMenu="My Tasks">
@@ -75,53 +107,40 @@ const MyTasks = () => {
           )}
         </div>
 
-        <div className="tasks-grid">
-          {allTasks?.map((item) => (
-            <TaskCard
-              key={item._id}
-              title={item.title}
-              description={item.description}
-              priority={item.priority}
-              status={item.status}
-              progress={item.progress}
-              createdAt={item.createdAt}
-              dueDate={item.dueDate}
-              assignedTo={item.assignedTo?.map((assignee) => assignee.profileImageUrl)}
-              attachmentCount={item.attachments?.length || 0}
-              completedTodoCount={item.completedTodoCount || 0}
-              todoChecklist={item.todoChecklist || []}
-              onClick={() => handleClick(item._id)}
-            />
-          ))}
-        </div>
-
         {loading ? (
           <div className="loading-state">
             <div className="spinner"></div>
             <p>Loading tasks...</p>
           </div>
-        ) : allTasks.length > 0 ? (
-          <ul className="tasks-list">
-            {allTasks.map((task) => (
-              <li
+        ) : filteredTasks.length > 0 ? (
+          <div className="tasks-grid">
+            {filteredTasks.map((task) => (
+              <TaskCard
                 key={task._id}
-                className={`task-item task-item-${task.status.toLowerCase().replace(" ", "-")}`}
-                onClick={() => handleClick(task._id)}
+                task={task}
+                onClick={() => handleClick(task)}
+                onToggleChecklist={() => toggleChecklist(task._id)}
+                isChecklistOpen={openChecklistTaskId === task._id}
+                refreshTasks={refreshTasks}
               >
-                <div className="task-title">{task.title}</div>
-                <span
-                  className={`task-status status-${task.status
-                    .toLowerCase()
-                    .replace(" ", "-")}`}
-                >
-                  {task.status}
-                </span>
-              </li>
+                {openChecklistTaskId === task._id && (
+                  <SelectChecklist
+                    task={task}
+                    refreshTasks={refreshTasks}
+                  />
+                )}
+              </TaskCard>
             ))}
-          </ul>
+          </div>
         ) : (
           <div className="empty-state">
-            <p>No tasks available</p>
+            <div className="empty-icon">📋</div>
+            <h3>No Tasks Found</h3>
+            <p>
+              {filterStatus === "All" 
+                ? "You don't have any tasks assigned yet." 
+                : `You don't have any ${filterStatus.toLowerCase()} tasks.`}
+            </p>
           </div>
         )}
       </div>

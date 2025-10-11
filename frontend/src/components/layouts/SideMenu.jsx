@@ -34,7 +34,7 @@ useEffect(() => {
       <div className="user-info">
         <div className="profile-image-container">
           <img 
-            src={user?.profileImageUrl || "/default-avatar.png"} 
+            src={user?.profileImageUrl} 
             alt="Profile" 
             className="profile-image" 
             onError={(e) => {
@@ -52,7 +52,7 @@ useEffect(() => {
       </div>
       
       <nav className="menu-items">
-        {sideMenuData.map((item) => (
+        {sideMenuData.filter(item => item.path !== "logout").map((item) => (
           <button
             key={item.id}
             className={`menu-item ${activeMenu === item.path ? 'active' : ''}`}
@@ -62,6 +62,13 @@ useEffect(() => {
             <span className="menu-label">{item.label}</span>
           </button>
         ))}
+        
+        <div className="menu-footer">
+          <button className="menu-item logout-button" onClick={handleLogout}>
+            <span className="menu-icon"><i className="fa-solid fa-arrow-right-from-bracket"></i></span>
+            <span className="menu-label">Logout</span>
+          </button>
+        </div>
       </nav>
     </div>
   );

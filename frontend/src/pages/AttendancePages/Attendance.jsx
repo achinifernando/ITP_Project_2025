@@ -14,17 +14,56 @@ const AttendancePage = () => {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedDate, setSelectedDate] = useState('');
 
-  const fetchAttendance = async (page = 1, date = '') => {
+  // Helper: Format time
+  const formatTime = (timeString) => {
+    if (!timeString) return "-";
     try {
-      setError(null);
-      setLoading(true);
+      return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return "Invalid Time";
+    }
+  };
+
+  // Helper: Format date
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      return new Date(dateString).toLocaleDateString();
+    } catch {
+      return "Invalid Date";
+    }
+  };
+
+  // Helper: Get employee name
+  const getEmployeeName = (record) => {
+    if (record.employeeId && typeof record.employeeId === "object" && record.employeeId.name) {
+      return record.employeeId.name;
+    }
+    if (record.employeeName) {
+      return record.employeeName;
+    }
+    return "N/A";
+  };
+
+  // Helper: Get employee ID
+  const getEmployeeId = (record) => {
+    if (record.employeeId && typeof record.employeeId === "object" && record.employeeId.employeeId) {
+      return record.employeeId.employeeId;
+    }
+    if (typeof record.employeeId === "string") {
+      return record.employeeId;
+    }
+    return "N/A";
+  };
+
+  const fetchAttendance = async (page = 1, date = '') => {
+    setLoading(true);
+     setError(null);
+    try {
       const params = new URLSearchParams({ page, limit: 10 });
       if (date) params.append('date', date);
       
-      console.log("Fetching attendance from:", `${BASE_URL}${API_PATHS.ATTENDANCE.GET_ALL}?${params}`);
-      
       const res = await axios.get(`${BASE_URL}${API_PATHS.ATTENDANCE.GET_ALL}?${params}`);
-      console.log("Attendance API response:", res.data);
       
       // Handle different response structures
       const responseData = res.data;
@@ -34,22 +73,12 @@ const AttendancePage = () => {
       let totalPagesCount = 1;
       let currentPageNum = 1;
       
-      if (Array.isArray(responseData)) {
-        // If response is directly an array
-        attendanceRecords = responseData;
-      } else if (responseData.records) {
-        // If response has records property
+      if (responseData.records) {
         attendanceRecords = responseData.records;
-        totalPagesCount = responseData.totalPages || responseData.pages || 1;
-        currentPageNum = responseData.currentPage || responseData.page || 1;
-      } else if (responseData.data) {
-        // If response has data property (common pattern)
-        attendanceRecords = responseData.data.records || responseData.data;
-        totalPagesCount = responseData.data.totalPages || responseData.data.pages || 1;
-        currentPageNum = responseData.data.currentPage || responseData.data.page || 1;
-      } else {
-        // If response is an object with attendance data
-        attendanceRecords = responseData.attendance || [];
+        totalPagesCount = responseData.totalPages || 1;
+        currentPageNum = responseData.currentPage || 1;
+      } else if (Array.isArray(responseData)) {
+        attendanceRecords = responseData;
       }
       
       setRecords(attendanceRecords);
@@ -57,9 +86,7 @@ const AttendancePage = () => {
       setCurrentPage(currentPageNum);
       
     } catch (err) {
-      console.error("Error fetching attendance:", err);
       let errorMessage = "Failed to load attendance records";
-      
       if (err.response) {
         errorMessage = `Server error: ${err.response.status} - ${err.response.data?.message || 'Unknown error'}`;
       } else if (err.request) {
@@ -73,18 +100,15 @@ const AttendancePage = () => {
     }
   };
 
+  // Fetch today's summary
   const fetchTodaySummary = async () => {
-    try {
-      console.log("Fetching summary from:", `${BASE_URL}${API_PATHS.ATTENDANCE.GET_TODAY}`);
-      const res = await axios.get(`${BASE_URL}${API_PATHS.ATTENDANCE.GET_TODAY}`);
-      console.log("Summary API response:", res.data);
-      setSummary(res.data);
-    } catch (err) {
-      console.error("Error fetching summary:", err);
-      // Set default summary on error
-      setSummary({ total: 0, present: 0, absent: 0, late: 0 });
-    }
-  };
+      try {
+        const res = await axios.get(`${BASE_URL}${API_PATHS.ATTENDANCE.GET_TODAY}`);
+        setSummary(res.data);
+      } catch {
+        setSummary({ total: 0, present: 0, absent: 0, late: 0 });
+      }
+    };
 
   useEffect(() => {
     fetchAttendance(1, selectedDate);
@@ -105,26 +129,6 @@ const AttendancePage = () => {
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
     fetchAttendance(newPage, selectedDate);
-  };
-
-  // Format time function
-  const formatTime = (timeString) => {
-    if (!timeString) return "-";
-    try {
-      return new Date(timeString).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } catch (error) {
-      return "Invalid Time";
-    }
-  };
-
-  // Format date function
-  const formatDate = (dateString) => {
-    if (!dateString) return "N/A";
-    try {
-      return new Date(dateString).toLocaleDateString();
-    } catch (error) {
-      return "Invalid Date";
-    }
   };
 
   if (loading && records.length === 0) {
@@ -230,18 +234,18 @@ const AttendancePage = () => {
                   <tbody>
                     {records.map((record, index) => (
                       <tr key={record._id || record.id || index}>
-                        <td>{record.employeeId?.name || record.employeeName || record.name || 'N/A'}</td>
-                        <td>{record.employeeId?.employeeId || record.employeeId || record.employeeCode || 'N/A'}</td>
-                        <td>{formatDate(record.date || record.attendanceDate)}</td>
-                        <td>{formatTime(record.timeIn)}</td>
-                        <td>{formatTime(record.timeOut)}</td>
-                        <td>{record.hoursWorked ? `${record.hoursWorked} hrs` : '0 hrs'}</td>
-                        <td>
-                          <span className={`status ${(record.status || 'absent').toLowerCase()}`}>
-                            {record.status || 'Absent'}
-                          </span>
-                        </td>
-                      </tr>
+                          <td>{getEmployeeName(record)}</td>
+                          <td>{getEmployeeId(record)}</td>
+                          <td>{formatDate(record.date)}</td>
+                          <td>{formatTime(record.timeIn)}</td>
+                          <td>{formatTime(record.timeOut)}</td>
+                          <td>{record.hoursWorked ? `${record.hoursWorked} hrs` : '0 hrs'}</td>
+                          <td>
+                            <span className={`status ${(record.status || 'absent').toLowerCase()}`}>
+                              {record.status || 'Absent'}
+                            </span>
+                          </td>
+                        </tr>
                     ))}
                   </tbody>
                 </table>

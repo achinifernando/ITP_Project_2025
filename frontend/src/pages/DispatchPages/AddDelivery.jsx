@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios"; // Added axios import
 import axiosInstance from "../../utils/axiosInstance";
 import {
   MapContainer,
@@ -263,7 +262,7 @@ export default function AddDelivery() {
   const geocodeAddress = async (address) => {
     try {
       const formattedAddress = address.replace(/\s+/g, '+');
-      const response = await axios.get(`https://nominatim.openstreetmap.org/search`, {
+      const response = await axiosInstance.get(`https://nominatim.openstreetmap.org/search`, {
         params: { 
           q: formattedAddress, 
           format: 'json', 
@@ -418,6 +417,13 @@ export default function AddDelivery() {
     setCustomerCoords(null);
   };
 
+
+    /* ==============================
+      UI Rendering
+     - Form with live validation.
+     - Buttons for calculating distance & tracking location.
+     - Interactive Leaflet map showing user & customer locations.
+  ================================= */
   return (
     <div className="add-delivery-container">
       <h2>Add New Delivery</h2>

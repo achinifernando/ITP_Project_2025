@@ -71,7 +71,7 @@ const deleteDriver = async (req, res) => {
     const { id } = req.params;
 
     // Check if driver has active assignments
-    const Assignment = require("../models/Assignment");
+    const Assignment = require("../../models/DispatchModels/Assignment");
     const activeAssignments = await Assignment.findOne({ 
       driver: id, 
       status: { $in: ["assigned", "in-progress"] } 

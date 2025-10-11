@@ -1,102 +1,133 @@
 const express = require("express");
 const router = express.Router();
-const Attendance = require("../../models/AttendenceTaskModel/Attendance");
 const User = require("../../models/AttendenceTaskModel/User");
+const Attendance = require("../../models/AttendenceTaskModel/Attendance");
+const Allowance = require("../../models/CompanyManagerModels/allowance");
+const Deduction = require("../../models/CompanyManagerModels/deduction");
 const Payroll = require("../../models/CompanyManagerModels/payroll");
+const SalaryInfo = require("../../models/CompanyManagerModels/salaryInfo");
 const { protectUser, companyManager } = require("../../middleware/authMiddleware");
 
-// Constants
-const STANDARD_WORK_HOURS = 8;
+// Helper: calculate total and stats
+const calculatePayrollData = (attendances) => {
+  const totalHours = attendances.reduce((sum, a) => sum + (a.hoursWorked || 0), 0);
+  const overtimeHours = attendances.reduce((sum, a) => sum + (a.overtimeHours || 0), 0);
+  const daysPresent = attendances.filter(a => a.status === "present").length;
+  const daysLate = attendances.filter(a => a.status === "late").length;
+  const daysAbsent = attendances.filter(a => a.status === "absent").length;
 
-// Helper: calculate working days in a month (excluding weekends)
-function getWorkingDays(year, month) {
-  const start = new Date(year, month - 1, 1);
-  const end = new Date(year, month, 0);
-  let workingDays = 0;
-  for (let d = start; d <= end; d.setDate(d.getDate() + 1)) {
-    const day = d.getDay();
-    if (day !== 0 && day !== 6) workingDays++; // skip Sunday(0) & Saturday(6)
+  return { totalHours, overtimeHours, daysPresent, daysLate, daysAbsent };
+};
+
+// Generate payroll for one user
+const generateUserPayroll = async (user, monthString) => {
+  const salaryInfo = await SalaryInfo.findOne({ employeeId: user._id });
+
+  const attendances = await Attendance.find({
+    employeeId: user._id,
+    date: {
+      $gte: new Date(`${monthString}-01`),
+      $lte: new Date(new Date(`${monthString}-01`).getFullYear(), new Date(`${monthString}-01`).getMonth() + 1, 0, 23, 59, 59),
+    },
+  });
+
+  const { totalHours, overtimeHours, daysPresent, daysLate, daysAbsent } = calculatePayrollData(attendances);
+
+  const allowances = await Allowance.find({ employeeId: user._id, month: monthString });
+  const deductions = await Deduction.find({ employeeId: user._id, month: monthString });
+
+  const totalAllowances = allowances.reduce((sum, a) => sum + a.amount, 0);
+  const totalDeductions = deductions.reduce((sum, d) => sum + d.amount, 0);
+
+  let basicSalary = 0, overtimePay = 0;
+
+  if (salaryInfo) {
+    if (user.role === "member") {
+      basicSalary = (salaryInfo.hourlyRate || 0) * totalHours;
+      overtimePay = (salaryInfo.overtimeRate || 0) * overtimeHours;
+    } else {
+      basicSalary = salaryInfo.basicSalary || 0;
+      overtimePay = (salaryInfo.overtimeRate || 0) * overtimeHours;
+    }
   }
-  return workingDays;
-}
 
-// Bulk Payroll Generation
-router.post("/generate-all", protectUser, async (req, res) => {
+  const grossPay = basicSalary + overtimePay + totalAllowances;
+  const netPay = grossPay - totalDeductions;
+
+  const payrollRecord = await Payroll.findOneAndUpdate(
+    { employeeId: user._id, month: monthString },
+    { employeeId: user._id, month: monthString, basicSalary, totalAllowances, totalDeductions, overtimePay, netSalary: netPay },
+    { upsert: true, new: true }
+  ).populate("employeeId", "name role");
+
+  return {
+    ...payrollRecord.toObject(),
+    daysPresent,
+    daysLate,
+    daysAbsent,
+    totalHours,
+    overtimeHours,
+    grossPay,
+    netPay,
+  };
+};
+
+// POST /generate
+router.post("/generate", protectUser, async (req, res) => {
   try {
-    const { month, year, deductions = 0, bonuses = 0 } = req.body; 
-    const users = await User.find({ role: { $in: ["office_worker", "member"] } });
+    const { employeeId, month, year } = req.body;
+    if (!month || !year) return res.status(400).json({ message: "Month and year are required" });
 
-    const workingDaysInMonth = getWorkingDays(year, month);
+    const monthString = `${year}-${String(month).padStart(2, "0")}`;
+    const users = employeeId ? [await User.findById(employeeId)] : await User.find();
+    if (!users.length) return res.status(404).json({ message: "No employees found" });
 
-    const payrollResults = await Promise.all(users.map(async (user) => {
-      // Skip if payroll already exists
-      const exists = await Payroll.findOne({ employeeId: user._id, month, year });
-      if (exists) return exists;
+    const payrolls = [];
+    for (const user of users) {
+      if (!user) continue;
+      const payroll = await generateUserPayroll(user, monthString);
+      payrolls.push(payroll);
+    }
 
-      // Fetch attendance
-      const startDate = new Date(year, month - 1, 1);
-      const endDate = new Date(year, month, 0);
-
-      const attendanceRecords = await Attendance.find({
-        employeeId: user._id,
-        date: { $gte: startDate, $lte: endDate }
-      });
-
-      const daysPresent = attendanceRecords.length;
-      const daysLate = attendanceRecords.filter(a => a.status === "late").length;
-      const totalHours = attendanceRecords.reduce((sum, a) => sum + (a.hoursWorked || 0), 0);
-      const overtimeHours = attendanceRecords.reduce((sum, a) => sum + (a.overtimeHours || 0), 0);
-
-      // Calculate gross pay
-      let grossPay = 0;
-      if (user.role === "office_worker") {
-        grossPay = user.basicSalary;
-        const absentDays = workingDaysInMonth - daysPresent;
-        grossPay -= (user.basicSalary / workingDaysInMonth) * absentDays;
-      } else if (user.role === "member") {
-        grossPay = (totalHours * user.hourlyRate) + (overtimeHours * user.overtimeRate);
-      }
-
-      // Apply optional deductions and bonuses
-      grossPay = parseFloat(grossPay.toFixed(2));
-      const netPay = parseFloat((grossPay - deductions + bonuses).toFixed(2));
-
-      // Save payroll
-      const payroll = await Payroll.create({
-        employeeId: user._id,
-        month,
-        year,
-        basicSalary: user.basicSalary,
-        hourlyRate: user.hourlyRate,
-        overtimeRate: user.overtimeRate,
-        totalHours: parseFloat(totalHours.toFixed(2)),
-        overtimeHours: parseFloat(overtimeHours.toFixed(2)),
-        daysPresent,
-        daysAbsent: workingDaysInMonth - daysPresent,
-        daysLate,
-        grossPay,
-        deductions,
-        netPay
-      });
-
-      return payroll;
-    }));
-
-    res.json({ message: "Payroll generated successfully", payrolls: payrollResults });
+    res.json({ message: "Payroll generated successfully", payrolls });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Get all payrolls
-router.get("/", protectUser, async (req, res) => {
+// GET /my-payroll
+router.get("/my-payroll", protectUser, async (req, res) => {
   try {
-    const payrolls = await Payroll.find()
-      .populate("employeeId", "name email role")
-      .sort({ year: -1, month: -1 });
-    res.json(payrolls);
+    const userId = req.user._id;
+    const currentMonthString = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, "0")}`;
+
+    const salaryInfo = await SalaryInfo.findOne({ employeeId: userId });
+    const currentPayroll = await Payroll.findOne({ employeeId: userId, month: currentMonthString });
+    const payrollHistory = await Payroll.find({ employeeId: userId }).sort({ month: -1 }).limit(6);
+
+    const attendances = await Attendance.find({
+      employeeId: userId,
+      date: {
+        $gte: new Date(`${currentMonthString}-01`),
+        $lte: new Date(new Date(`${currentMonthString}-01`).getFullYear(), new Date(`${currentMonthString}-01`).getMonth() + 1, 0, 23, 59, 59),
+      },
+    });
+    const currentMonthStats = calculatePayrollData(attendances);
+
+    const allowances = await Allowance.find({ employeeId: userId, month: currentMonthString });
+    const deductions = await Deduction.find({ employeeId: userId, month: currentMonthString });
+
+    res.json({
+      salaryInfo: salaryInfo || null,
+      currentPayroll: currentPayroll || null,
+      payrollHistory: payrollHistory || [],
+      currentMonthStats,
+      allowances: allowances || [],
+      deductions: deductions || [],
+    });
   } catch (err) {
+    console.error("❌ Error fetching payroll:", err);
     res.status(500).json({ error: err.message });
   }
 });

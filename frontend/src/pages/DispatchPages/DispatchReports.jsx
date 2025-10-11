@@ -13,19 +13,26 @@ import {
   Cell,
   Legend,
   CartesianGrid,
-} from "recharts";
-import * as XLSX from "xlsx";
+} from "recharts"; // Charting library
+import * as XLSX from "xlsx"; // For exporting Excel reports
 
 const BACKEND_URL = "http://localhost:5000";
 
 const Reports = () => {
-  const [selectedPeriod, setSelectedPeriod] = useState("week");
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
-  const [chartView, setChartView] = useState("bar");
-  const [reportType, setReportType] = useState("deliveries");
-  const [error, setError] = useState(null);
-  const [loading, setLoading] = useState(false);
+  // Filter selections
+  const [selectedPeriod, setSelectedPeriod] = useState("week"); // Time filter: week/month/quarter/year
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear()); // Year filter
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1); // Month filter (1–12)
+
+  // UI control
+  const [chartView, setChartView] = useState("bar");// Toggle between Bar or Pie chart
+  const [reportType, setReportType] = useState("deliveries"); // Choose which report to show
+  
+  // Data fetching state
+  const [error, setError] = useState(null);// Store API errors
+  const [loading, setLoading] = useState(false);// Show loader during API calls
+
+   // Report data structures
   const [reportData, setReportData] = useState({
     total: 0,
     completed: 0,
@@ -90,6 +97,7 @@ const Reports = () => {
         const availableDrivers = drivers.filter((d) => d.isAvailable).length;
         const availableVehicles = vehicles.filter((v) => v.isAvailable).length;
 
+        // Update state
         setReportData({
           total,
           completed,
@@ -109,6 +117,7 @@ const Reports = () => {
         const deliveries = deliveriesRes.data;
         const drivers = driversRes.data;
 
+        // Calculate driver completion rate
         const performance = drivers.map((driver) => {
           const driverDeliveries = deliveries.filter(
             (d) => d.driver && d.driver._id === driver._id
@@ -376,8 +385,8 @@ const Reports = () => {
               onChange={handleYearChange}
               style={{ padding: "5px", borderRadius: "4px" }}
             >
-              <option value={2023}>2023</option>
               <option value={2024}>2024</option>
+              <option value={2025}>2025</option>
             </select>
           </div>
 
