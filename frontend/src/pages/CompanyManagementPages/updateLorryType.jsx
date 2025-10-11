@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 import { Image } from "react-bootstrap-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
-export default function AddLorryType() {
-  const [categories, setCategories] = useState([]); // array of category objects
-  const [category, setCategory] = useState(""); // string storing selected _id
+export default function UpdateLorryType() {
+  const { id } = useParams();
+  const navigate = useNavigate();
+
+  const [categories, setCategories] = useState([]);
+  const [category, setCategory] = useState("");
   const [typeName, setTypeName] = useState("");
   const [frontEnd, setFrontEnd] = useState("");
   const [subFrame, setSubFrame] = useState("");
@@ -17,15 +20,13 @@ export default function AddLorryType() {
   const [wallConstruction, setWallConstruction] = useState("");
   const [images, setImages] = useState([]);
   const [previews, setPreviews] = useState([]);
-
-  const navigate = useNavigate();
+  const [existingImages, setExistingImages] = useState([]);
 
   // Fetch categories on mount
   useEffect(() => {
-    axios
+    axiosInstance
       .get("http://localhost:5000/admin-categories")
       .then((res) => {
-        console.log("Categories API response:", res.data);
         if (Array.isArray(res.data)) {
           setCategories(res.data);
         } else if (Array.isArray(res.data.categories)) {
@@ -34,6 +35,29 @@ export default function AddLorryType() {
       })
       .catch((err) => console.error("Error fetching categories:", err));
   }, []);
+
+  // Fetch existing lorry type data
+  useEffect(() => {
+    axiosInstance
+      .get(`http://localhost:5000/admin-lorry-types/${id}`)
+      .then((res) => {
+        const data = res.data;
+        setCategory(data.category?._id || data.category || "");
+        setTypeName(data.typeName || "");
+        setFrontEnd(data.frontEnd || "");
+        setSubFrame(data.subFrame || "");
+        setRearFrame(data.rearFrame || "");
+        setBumper(data.bumper || "");
+        setDoor(data.door || "");
+        setRoof(data.roof || "");
+        setFloor(data.floor || "");
+        setWallConstruction(data.wallConstuction || "");
+        setExistingImages(data.images || []);
+      })
+      .catch((err) => {
+        alert("Error loading lorry type: " + (err.response?.data?.message || err.message));
+      });
+  }, [id]);
 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
@@ -50,7 +74,7 @@ export default function AddLorryType() {
     }
 
     const formData = new FormData();
-    formData.append("category", category); // category _id as string
+    formData.append("category", category);
     formData.append("typeName", typeName);
     formData.append("frontEnd", frontEnd);
     formData.append("subFrame", subFrame);
@@ -59,21 +83,21 @@ export default function AddLorryType() {
     formData.append("door", door);
     formData.append("roof", roof);
     formData.append("floor", floor);
-    formData.append("wallConstruction", wallConstruction);
+    formData.append("wallConstuction", wallConstruction);
 
-    
-
-
-    images.forEach((img) => formData.append("image", img));
+    // Only append new images if user selected any
+    if (images.length > 0) {
+      images.forEach((img) => formData.append("images", img));
+    }
 
     try {
-      await axios.post("http://localhost:5000/admin-lorry-types/add", formData, {
+      await axiosInstance.put(`http://localhost:5000/admin-lorry-types/update/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      alert("Lorry type added successfully");
-      navigate("/types"); // smooth redirect
+      alert("Lorry type updated successfully");
+      navigate("/types");
     } catch (err) {
-      alert("Error adding: " + (err.response?.data?.message || err.message));
+      alert("Error updating: " + (err.response?.data?.message || err.message));
     }
   };
 
@@ -95,7 +119,7 @@ export default function AddLorryType() {
           className="fw-bold text-center mb-5"
           style={{ color: "#2c3e50", fontSize: "1.8rem" }}
         >
-          Add Lorry Type
+          Update Lorry Type
         </h2>
 
         <form onSubmit={handleSubmit} className="row g-4">
@@ -104,20 +128,18 @@ export default function AddLorryType() {
             <div className="mb-3">
               <label className="fw-semibold mb-2">Category </label>
               <select
-  value={category}
-  onChange={(e) => setCategory(e.target.value)}
-  required
->
-  <option value="">Select Category</option>
-  {categories.map((cat) => (
-    <option key={cat._id} value={cat._id}>
-      {cat.category} {/* this is the string name */}
-    </option>
-  ))}
-</select>
-
-
-
+                className="form-control p-3 rounded-3"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+              >
+                <option value="">Select Category</option>
+                {categories.map((cat) => (
+                  <option key={cat._id} value={cat._id}>
+                    {cat.category}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {[
@@ -152,13 +174,35 @@ export default function AddLorryType() {
                   border: "none",
                 }}
               >
-                + Add Lorry Type
+                Update Lorry Type
               </button>
             </div>
           </div>
 
           {/* Right side - Image Upload */}
           <div className="col-md-6">
+            {/* Show existing images */}
+            {existingImages.length > 0 && (
+              <div className="mb-3">
+                <label className="fw-semibold mb-2">Current Images</label>
+                <div className="d-flex flex-wrap gap-2">
+                  {existingImages.map((img, idx) => (
+                    <img
+                      key={idx}
+                      src={`http://localhost:5000/files/${img}`}
+                      alt={`existing-${idx}`}
+                      className="img-fluid rounded-3 shadow-sm"
+                      style={{
+                        width: "80px",
+                        height: "80px",
+                        objectFit: "cover",
+                      }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div
               className="border rounded-4 p-3 text-center d-flex flex-column justify-content-center"
               style={{
@@ -173,9 +217,10 @@ export default function AddLorryType() {
                 <>
                   <Image size={42} className="mb-2 text-secondary" />
                   <p className="mb-1 fw-semibold">
-                    Drop images here, or <span className="text-primary">Click to browse</span>
+                    Drop new images here, or <span className="text-primary">Click to browse</span>
                   </p>
                   <p className="small text-muted">JPG, PNG. Max 5MB each</p>
+                  <p className="small text-info">Leave empty to keep existing images</p>
                 </>
               ) : (
                 <div className="d-flex flex-wrap gap-2 justify-content-center">

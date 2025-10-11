@@ -48,18 +48,22 @@ router.get("/", protectUser, async (req, res) => {
   }
 });
 
+
 // Get single service by ID
 router.get("/:serviceId", protectUser, async (req, res) => {
   try {
-    const service = await service.findById(req.params.serviceId);
-    if (!service) {
+    const singleService = await service.findById(req.params.serviceId);
+
+    if (!singleService) {
       return res.status(404).json({ message: "Service not found" });
     }
-    res.status(200).json(service);
+
+    res.status(200).json(singleService);
   } catch (err) {
     res.status(500).json({ message: "Error fetching service", error: err.message });
   }
 });
+
 
 // Update service (with optional image update)
 router.put("/update/:serviceId", protectUser, upload.single("image"), async (req, res) => {

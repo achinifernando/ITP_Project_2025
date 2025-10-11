@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosInstance from "../../utils/axiosInstance";
 
 export default function UpdateCategory() {
   const { id } = useParams();
@@ -11,8 +11,8 @@ export default function UpdateCategory() {
   const [image, setImage] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`http://localhost:5000/admin-category/get/${id}`)
+    axiosInstance
+      .get(`http://localhost:5000/admin-categories/get/${id}`)
       .then((res) => {
         setCategory(res.data.category.category);
         setDescription(res.data.category.description);
@@ -28,8 +28,8 @@ export default function UpdateCategory() {
     formData.append("description", description);
     if (image) formData.append("image", image);
 
-    axios
-      .put(`http://localhost:5000/admin-category/update/${id}`, formData, {
+    axiosInstance
+      .put(`http://localhost:5000/admin-categories/update/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       })
       .then(() => {

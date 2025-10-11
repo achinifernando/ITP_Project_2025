@@ -33,7 +33,7 @@ export default function AllModels() {
 
 
   const updateModel = (id) => {
-    navigate(`/update-model/${id}`);
+    navigate(`/model/update/${id}`);
   };
 
   const addModel = () => {

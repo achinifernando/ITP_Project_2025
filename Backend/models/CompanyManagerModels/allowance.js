@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const allowanceSchema = new mongoose.Schema({
   employeeId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "users",
+    ref: "User",
     required: true,
   },
   type: {

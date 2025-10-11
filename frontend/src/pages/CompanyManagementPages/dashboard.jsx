@@ -21,7 +21,7 @@ export default function DashboardLayout() {
   const menuItems = [
     { icon: <House size={20} />, label: "Dashboard", to: "/company-manager-dashboard" },
     { icon: <Truck size={20} />, label: "Lorry Categories", to: "/categories" },
-    { icon: <Gear size={20} />, label: "Services", to: "/services" },
+    { icon: <Gear size={20} />, label: "Services", to: "admin-services" },
     { icon: <CarFront size={20} />, label: "Lorry Models", to: "/models" },
     { icon: <Tags size={20} />, label: "Lorry Types", to: "/types" },
     { icon: <Person size={20} />, label: "Payroll", to: "/payroll" },

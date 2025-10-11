@@ -82,7 +82,12 @@ import DashboardLayout from "./pages/CompanyManagementPages/dashboard";
 import UpdateCategory from "./pages/CompanyManagementPages/updateCategory";
 import CategoryDetails from "./pages/CompanyManagementPages/categoryDetails";
 import ServiceDetails from "./pages/CompanyManagementPages/serviceDetails";
+import UpdateService from "./pages/CompanyManagementPages/updateService";
 import DashboardHome from "./pages/CompanyManagementPages/dashboardHome";
+import UpdateModel from "./pages/CompanyManagementPages/updateModel";
+import TypeDetails from "./pages/CompanyManagementPages/typeDetails";
+import UpdateLorryType from "./pages/CompanyManagementPages/updateLorryType";
+import ManageSalary from "./pages/CompanyManagementPages/manageSalary";
 
 
 // Layout components for different sections
@@ -397,7 +402,9 @@ function App() {
     <Route path="/admin-services/add" element={<AddService />} />
     <Route path="/models" element={<AllModels />} />
     <Route path="/types" element={<AllLorryTypes />} />
+    <Route path="/type/details/:id" element={<TypeDetails />} />
     <Route path="/type/add" element={<AddLorryType />} />
+    <Route path="/type/update/:id" element={<UpdateLorryType />} />
     <Route path="/orders" element={<AdminOrders />} />
     <Route path="/payments" element={<AdminPayments />} />
     <Route path="/repairs" element={<AdminRepairs />} />
@@ -405,6 +412,11 @@ function App() {
     <Route path="/model/add" element={<AddModel />} />
     <Route path="/category/details/:id" element={<CategoryDetails />} />
     <Route path="/service/:id" element={<ServiceDetails />} />
+    <Route path="/service/update/:id" element={<UpdateService />} />
+    <Route path="/model/update/:id" element={<UpdateModel />} />
+    <Route path="/manage-salary" element={<ManageSalary />} />
+    
+
   </Route>
 </Route>
 

@@ -19,8 +19,13 @@ export default function ServiceDetails() {
         const res = await axiosInstance.get(`http://localhost:5000/admin-services/${id}`);
         setService(res.data);
       } catch (err) {
-        console.error("ServiceDetails fetch error:", err);
-        setErrorMsg(err.response?.data?.message || err.message || "Unknown error");
+        console.error("ServiceDetails fetch error:", err.response || err.message || err);
+  
+        // Display more detailed error info on the screen
+        const errorDetails =
+          JSON.stringify(err.response?.data || err.message || err, null, 2);
+
+          setErrorMsg(`Error fetching service: ${errorDetails}`);
       } finally {
         setLoading(false);
       }
@@ -64,7 +69,7 @@ export default function ServiceDetails() {
           {service.image && (
             <div className="mb-4 text-center">
               <img
-                src={`http://localhost:5000/uploads/${service.image}`}
+                src={`http://localhost:5000/files/${service.image}`}
                 alt={service.serviceType}
                 className="img-fluid rounded-3"
                 style={{ maxHeight: 360, objectFit: "cover" }}

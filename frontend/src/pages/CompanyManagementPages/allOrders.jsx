@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import axiosInstance from "../../utils/axiosInstance";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
@@ -75,23 +76,20 @@ const exportToPDF = () => {
 
 
   // Fetch orders
-  useEffect(() => {
-    fetch("http://localhost:5000/admin-orders")
-      .then((res) => res.json())
-      .then((data) => setOrders(Array.isArray(data) ? data : []))
+ useEffect(() => {
+    setLoading(true);
+    axiosInstance
+      .get("/admin-orders")
+      .then((res) => setOrders(Array.isArray(res.data) ? res.data : []))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
   // Update ORDER status
-  const updateOrderStatus = async (id, status) => {
+ const updateOrderStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/admin-orders/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      const updated = await res.json();
+      const res = await axiosInstance.put(`/admin-orders/${id}/status`, { status });
+      const updated = res.data;
       setOrders((prev) =>
         prev.map((o) => (o._id === updated._id ? { ...o, status: updated.status } : o))
       );
@@ -103,12 +101,8 @@ const exportToPDF = () => {
   // Update PAYMENT status
   const updatePaymentStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/admin-payments/${id}/status`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-      const updated = await res.json();
+      const res = await axiosInstance.put(`/admin-payments/${id}/status`, { status });
+      const updated = res.data;
       setOrders((prev) =>
         prev.map((o) =>
           o.payment?._id === updated.payment._id ? { ...o, payment: updated.payment } : o

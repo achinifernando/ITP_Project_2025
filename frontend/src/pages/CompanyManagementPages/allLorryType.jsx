@@ -30,7 +30,7 @@ export default function AllLorryTypes() {
   };
 
   const updateType = (id) => {
-    window.location.href = `/update-lorry-type/${id}`;
+    window.location.href = `/type/update/${id}`;
   };
 
   const addType = () => {
@@ -91,7 +91,7 @@ export default function AllLorryTypes() {
                 {type.images?.length > 0 ? (
                   <div className="type-img">
                     <img
-                      src={`http://localhost:5000/uploads/${type.images[0]}`}
+                      src={`http://localhost:5000/files/${type.images[0]}`}
                       alt={type.typeName}
                     />
                   </div>
@@ -135,7 +135,7 @@ export default function AllLorryTypes() {
                     </div>
                   )}
 
-                  <Link to={`/types/${type._id}`} className="view-details-link mt-2">
+                  <Link to={`/type/details/${type._id}`} className="view-details-link mt-2">
                     View Details →
                   </Link>
                 </div>
