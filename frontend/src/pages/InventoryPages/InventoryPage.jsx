@@ -100,7 +100,7 @@ function BarChart({
                 textAnchor="middle"
                 className="bar-chart-label"
               >
-                {b.label.length > 8 ? b.label.slice(0, 7) + '26' : b.label}
+                {b.label.length > 8 ? b.label.slice(0, 7) + ' ' : b.label}
               </text>
               <text
                 x={barW / 2}
@@ -177,10 +177,10 @@ function PieChart({
 
         <div className="pie-chart-legend">
           {data.map((s) => (
-            <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
-              <span style={{ width: '14px', height: '14px', borderRadius: '2px', background: s.color }} />
-              <span className="pie-chart-legend-label">{s.label}</span>
-              <span className="pie-chart-legend-value">{s.value}</span>
+            <div key={s.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px', marginBottom: '8px' }}>
+              <span style={{ width: '14px', height: '14px', borderRadius: '2px', background: s.color, flexShrink: 0 }} />
+              <span className="pie-chart-legend-label" style={{ flex: 1, minWidth: 0 }}>{s.label}</span>
+              <span className="pie-chart-legend-value" style={{ fontWeight: '600', minWidth: '20px', textAlign: 'right' }}>{s.value}</span>
             </div>
           ))}
         </div>
@@ -255,6 +255,19 @@ export default function InventoryPage() {
     if (form.threshold == null || Number.isNaN(form.threshold)) errs.threshold = 'Minimum is required.';
     else if (form.threshold < 0) errs.threshold = 'Minimum cannot be negative.';
     else if (!Number.isInteger(Number(form.threshold))) errs.threshold = 'Minimum must be an integer.';
+    
+    // Validate expiry date - only allow today or future dates
+    if (form.expiryDate) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Reset time to start of day
+      const expiryDate = new Date(form.expiryDate);
+      expiryDate.setHours(0, 0, 0, 0); // Reset time to start of day
+      
+      if (expiryDate < today) {
+        errs.expiryDate = 'Expiry date must be today or a future date.';
+      }
+    }
+    
     setFieldErrors(errs);
     return Object.keys(errs).length === 0;
   }
@@ -623,8 +636,9 @@ export default function InventoryPage() {
               <span className="text-gray-600 mb-1">Expiry (optional)</span>
               <input
                 type="date"
-                className="border rounded-lg px-3 py-2"
+                className={`border rounded-lg px-3 py-2 ${fieldErrors.expiryDate ? 'border-rose-300' : ''}`}
                 value={form.expiryDate ? form.expiryDate.substring(0, 10) : ''}
+                min={new Date().toISOString().split('T')[0]}
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
@@ -632,9 +646,13 @@ export default function InventoryPage() {
                   }))
                 }
               />
-              <span className="text-xs text-slate-500 mt-1">
-                Leave empty if the item doesn&apos;t expire.
-              </span>
+              {fieldErrors.expiryDate ? (
+                <span className="text-rose-600 text-xs mt-1">{fieldErrors.expiryDate}</span>
+              ) : (
+                <span className="text-xs text-slate-500 mt-1">
+                  Leave empty if the item doesn&apos;t expire.
+                </span>
+              )}
             </label>
           </div>
 

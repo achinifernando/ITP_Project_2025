@@ -14,7 +14,8 @@ export default function RequestsPage() {
   const [editingRequest, setEditingRequest] = useState(null);
   const [formData, setFormData] = useState({
     supplier: '',
-    items: [{ name: '', category: '', quantity: 1, unit: 'pcs' }],
+    items: [{ name: '', category: '', quantity: '', unit: 'pcs' }],
+    newItems: [{ name: '', category: '', quantity: '', unit: 'pcs' }],
     notes: '',
     status: 'draft'
   });
@@ -53,7 +54,8 @@ export default function RequestsPage() {
     setEditingRequest(null);
     setFormData({
       supplier: '',
-      items: [{ name: '', category: '', quantity: 1, unit: 'pcs' }],
+      items: [{ name: '', category: '', quantity: '', unit: 'pcs' }],
+      newItems: [{ name: '', category: '', quantity: '', unit: 'pcs' }],
       notes: '',
       status: 'draft'
     });
@@ -61,10 +63,17 @@ export default function RequestsPage() {
   }
 
   function openEditModal(request) {
+    // Prevent editing confirmed requests
+    if (request.status === 'confirmed') {
+      alert('Cannot edit confirmed requests');
+      return;
+    }
+    
     setEditingRequest(request);
     setFormData({
       supplier: request.supplier?._id || request.supplier || '',
-      items: request.items?.length > 0 ? request.items : [{ name: '', category: '', quantity: 1, unit: 'pcs' }],
+      items: request.items?.length > 0 ? request.items : [],
+      newItems: [{ name: '', category: '', quantity: '', unit: 'pcs' }],
       notes: request.notes || '',
       status: request.status || 'draft'
     });
@@ -72,22 +81,37 @@ export default function RequestsPage() {
   }
 
   function addItem() {
-    setFormData(prev => ({
-      ...prev,
-      items: [...prev.items, { name: '', category: '', quantity: 1, unit: 'pcs' }]
-    }));
+    if (editingRequest) {
+      setFormData(prev => ({
+        ...prev,
+        newItems: [...prev.newItems, { name: '', category: '', quantity: '', unit: 'pcs' }]
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        items: [...prev.items, { name: '', category: '', quantity: '', unit: 'pcs' }]
+      }));
+    }
   }
 
   function removeItem(index) {
-    setFormData(prev => ({
-      ...prev,
-      items: prev.items.filter((_, i) => i !== index)
-    }));
+    if (editingRequest) {
+      setFormData(prev => ({
+        ...prev,
+        newItems: prev.newItems.filter((_, i) => i !== index)
+      }));
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        items: prev.items.filter((_, i) => i !== index)
+      }));
+    }
   }
 
-  function updateItem(index, field, value) {
+  function updateItem(index, field, value, isNewItem = false) {
     setFormData(prev => {
-      const updatedItems = prev.items.map((item, i) =>
+      const itemsToUpdate = isNewItem ? prev.newItems : prev.items;
+      const updatedItems = itemsToUpdate.map((item, i) =>
         i === index ? { ...item, [field]: value } : item
       );
       
@@ -103,7 +127,10 @@ export default function RequestsPage() {
         }
       }
       
-      return { ...prev, items: updatedItems };
+      return { 
+        ...prev, 
+        [isNewItem ? 'newItems' : 'items']: updatedItems 
+      };
     });
   }
 
@@ -116,17 +143,53 @@ export default function RequestsPage() {
       return;
     }
     
-    if (formData.items.length === 0 || !formData.items.some(item => item.name.trim())) {
+    const itemsToValidate = editingRequest ? formData.newItems : formData.items;
+    if (itemsToValidate.length === 0 || !itemsToValidate.some(item => item.name.trim())) {
       setError('Please add at least one item');
+      return;
+    }
+
+    // Validate that all items have valid quantities
+    const invalidItems = itemsToValidate.filter(item => 
+      item.name.trim() && (!item.quantity || isNaN(item.quantity) || parseInt(item.quantity) < 1)
+    );
+    if (invalidItems.length > 0) {
+      setError('Please enter valid quantities (minimum 1) for all items');
       return;
     }
 
     setLoading(true);
     try {
-      const payload = {
-        ...formData,
-        items: formData.items.filter(item => item.name.trim())
-      };
+      let payload;
+      
+      if (editingRequest) {
+        // When editing, combine existing items with new items
+        const validNewItems = formData.newItems
+          .filter(item => item.name.trim())
+          .map(item => ({
+            ...item,
+            quantity: parseInt(item.quantity) || 1
+          }));
+        payload = {
+          supplier: formData.supplier,
+          items: [...formData.items, ...validNewItems],
+          notes: formData.notes,
+          status: formData.status
+        };
+      } else {
+        // When creating, use items as usual
+        payload = {
+          supplier: formData.supplier,
+          items: formData.items
+            .filter(item => item.name.trim())
+            .map(item => ({
+              ...item,
+              quantity: parseInt(item.quantity) || 1
+            })),
+          notes: formData.notes,
+          status: formData.status
+        };
+      }
 
       let result;
       if (editingRequest) {
@@ -147,6 +210,13 @@ export default function RequestsPage() {
   }
 
   async function deleteRequest(id) {
+    // Find the request to check its status
+    const request = requests.find(r => r._id === id);
+    if (request && request.status === 'confirmed') {
+      alert('Cannot delete confirmed requests');
+      return;
+    }
+    
     if (!window.confirm('Are you sure you want to delete this request?')) return;
     
     setLoading(true);
@@ -163,7 +233,7 @@ export default function RequestsPage() {
   async function updateStatus(id, status) {
     setLoading(true);
     try {
-      await api.put(`/api/requests/${id}`, { status });
+      await api.patch(`/api/requests/${id}/status`, { status });
       await loadData();
     } catch (e) {
       setError(e.message || 'Failed to update status');
@@ -191,7 +261,7 @@ export default function RequestsPage() {
   }
 
   // Status badge component
-  function StatusBadge({ status }) {
+  function StatusBadge({ status, isConfirmed = false }) {
     const statusConfig = {
       draft: { color: '#6b7280', bgColor: '#f3f4f6', label: 'Draft' },
       sent: { color: '#2563eb', bgColor: '#dbeafe', label: 'Sent' },
@@ -380,24 +450,43 @@ export default function RequestsPage() {
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>
-                    <select
-                      value={request.status}
-                      onChange={(e) => updateStatus(request._id, e.target.value)}
-                      style={{
-                        padding: '4px 8px',
-                        borderRadius: '20px',
-                        border: '1px solid #d1d5db',
-                        fontSize: '12px',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      <option value="draft">Draft</option>
-                      <option value="sent">Sent</option>
-                      <option value="confirmed">Confirmed</option>
-                      <option value="received">Received</option>
-                      <option value="cancelled">Cancelled</option>
-                      <option value="closed">Closed</option>
-                    </select>
+                    {request.status === 'confirmed' ? (
+                      <span
+                        style={{
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          backgroundColor: '#10b981',
+                          color: 'white',
+                          display: 'inline-block',
+                          cursor: 'not-allowed',
+                          opacity: '0.8'
+                        }}
+                        title="Status confirmed - cannot be changed"
+                      >
+                        ✓ Confirmed
+                      </span>
+                    ) : (
+                      <select
+                        value={request.status}
+                        onChange={(e) => updateStatus(request._id, e.target.value)}
+                        style={{
+                          padding: '4px 8px',
+                          borderRadius: '20px',
+                          border: '1px solid #d1d5db',
+                          fontSize: '12px',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <option value="draft">Draft</option>
+                        <option value="sent">Sent</option>
+                        <option value="confirmed">Confirmed</option>
+                        <option value="received">Received</option>
+                        <option value="cancelled">Cancelled</option>
+                        <option value="closed">Closed</option>
+                      </select>
+                    )}
                   </td>
                   <td style={{ padding: '16px', fontSize: '14px', color: '#6b7280' }}>
                     {new Date(request.createdAt || request.updatedAt).toLocaleDateString()}
@@ -406,15 +495,29 @@ export default function RequestsPage() {
                     <div style={{ display: 'flex', gap: '12px' }}>
                       <button
                         onClick={() => openEditModal(request)}
-                        style={{ color: '#2563eb', background: 'none', border: 'none', cursor: 'pointer' }}
-                        title="Edit"
+                        disabled={request.status === 'confirmed'}
+                        style={{ 
+                          color: request.status === 'confirmed' ? '#9ca3af' : '#2563eb', 
+                          background: 'none', 
+                          border: 'none', 
+                          cursor: request.status === 'confirmed' ? 'not-allowed' : 'pointer',
+                          opacity: request.status === 'confirmed' ? 0.5 : 1
+                        }}
+                        title={request.status === 'confirmed' ? 'Cannot edit confirmed requests' : 'Edit'}
                       >
                         <Edit style={{ width: '16px', height: '16px' }} />
                       </button>
                       <button
                         onClick={() => deleteRequest(request._id)}
-                        style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer' }}
-                        title="Delete"
+                        disabled={request.status === 'confirmed'}
+                        style={{ 
+                          color: request.status === 'confirmed' ? '#9ca3af' : '#dc2626', 
+                          background: 'none', 
+                          border: 'none', 
+                          cursor: request.status === 'confirmed' ? 'not-allowed' : 'pointer',
+                          opacity: request.status === 'confirmed' ? 0.5 : 1
+                        }}
+                        title={request.status === 'confirmed' ? 'Cannot delete confirmed requests' : 'Delete'}
                       >
                         <Trash2 style={{ width: '16px', height: '16px' }} />
                       </button>
@@ -469,7 +572,9 @@ export default function RequestsPage() {
           {/* Items section */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Items</label>
+              <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                {editingRequest ? 'Existing Items (Read-only)' : 'Items'}
+              </label>
               <button
                 type="button"
                 onClick={addItem}
@@ -485,61 +590,195 @@ export default function RequestsPage() {
                 }}
               >
                 <Plus style={{ width: '16px', height: '16px' }} />
-                Add Item
+                {editingRequest ? 'Add New Item' : 'Add Item'}
               </button>
             </div>
             
+            {/* Items section - editable when creating, read-only when editing */}
             {formData.items.map((item, index) => (
-              <div key={index} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
-                <select
-                  value={item.name}
-                  onChange={(e) => updateItem(index, 'name', e.target.value)}
-                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
-                  required
-                >
-                  <option value="">Select item</option>
-                  {inventory.map(inv => (
-                    <option key={inv._id} value={inv.itemName}>{inv.itemName}</option>
-                  ))}
-                </select>
-                
-                <input
-                  type="text"
-                  placeholder="Category"
-                  value={item.category}
-                  onChange={(e) => updateItem(index, 'category', e.target.value)}
-                  style={{ width: '100px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
-                />
-                
-                <input
-                  type="number"
-                  placeholder="Qty"
-                  value={item.quantity}
-                  onChange={(e) => updateItem(index, 'quantity', parseInt(e.target.value) || 1)}
-                  style={{ width: '80px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
-                  min="1"
-                  required
-                />
-                
-                <input
-                  type="text"
-                  placeholder="Unit"
-                  value={item.unit}
-                  onChange={(e) => updateItem(index, 'unit', e.target.value)}
-                  style={{ width: '70px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
-                />
-                
-                {formData.items.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => removeItem(index)}
-                    style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
-                  >
-                    <X style={{ width: '16px', height: '16px' }} />
-                  </button>
+              <div key={`existing-${index}`} style={{ 
+                display: 'flex', 
+                gap: '8px', 
+                marginBottom: '8px', 
+                alignItems: 'center',
+                padding: '8px',
+                backgroundColor: editingRequest ? '#f9fafb' : 'transparent',
+                borderRadius: '8px',
+                border: editingRequest ? '1px solid #e5e7eb' : 'none'
+              }}>
+                {editingRequest ? (
+                  // Read-only inputs when editing
+                  <>
+                    <input
+                      value={item.name}
+                      readOnly
+                      style={{ 
+                        flex: 1, 
+                        padding: '8px 12px', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '8px',
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280'
+                      }}
+                      placeholder="Item name"
+                    />
+                    
+                    <input
+                      value={item.category}
+                      readOnly
+                      style={{ 
+                        width: '100px', 
+                        padding: '8px 12px', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '8px',
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280'
+                      }}
+                      placeholder="Category"
+                    />
+                    
+                    <input
+                      value={item.quantity}
+                      readOnly
+                      style={{ 
+                        width: '80px', 
+                        padding: '8px 12px', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '8px',
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280'
+                      }}
+                      placeholder="Qty"
+                    />
+                    
+                    <input
+                      value={item.unit}
+                      readOnly
+                      style={{ 
+                        width: '70px', 
+                        padding: '8px 12px', 
+                        border: '1px solid #d1d5db', 
+                        borderRadius: '8px',
+                        backgroundColor: '#f3f4f6',
+                        color: '#6b7280'
+                      }}
+                      placeholder="Unit"
+                    />
+                  </>
+                ) : (
+                  // Editable inputs when creating new request
+                  <>
+                    <select
+                      value={item.name}
+                      onChange={(e) => updateItem(index, 'name', e.target.value, false)}
+                      style={{ flex: 1, padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                      required
+                    >
+                      <option value="">Select item</option>
+                      {inventory.map(inv => (
+                        <option key={inv._id} value={inv.itemName}>{inv.itemName}</option>
+                      ))}
+                    </select>
+                    
+                    <input
+                      type="text"
+                      placeholder="Category"
+                      value={item.category}
+                      onChange={(e) => updateItem(index, 'category', e.target.value, false)}
+                      style={{ width: '100px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                    />
+                    
+                    <input
+                      type="number"
+                      placeholder="Qty"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(index, 'quantity', e.target.value, false)}
+                      style={{ width: '80px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                      min="1"
+                      required
+                    />
+                    
+                    <input
+                      type="text"
+                      placeholder="Unit"
+                      value={item.unit}
+                      onChange={(e) => updateItem(index, 'unit', e.target.value, false)}
+                      style={{ width: '70px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                    />
+                    
+                    {formData.items.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index)}
+                        style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
+                      >
+                        <X style={{ width: '16px', height: '16px' }} />
+                      </button>
+                    )}
+                  </>
                 )}
               </div>
             ))}
+
+            {/* New items section (only shown when editing) */}
+            {editingRequest && (
+              <div style={{ marginTop: '16px' }}>
+                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px', display: 'block' }}>
+                  New Items
+                </label>
+                {formData.newItems.map((item, index) => (
+                  <div key={`new-${index}`} style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center' }}>
+                    <select
+                      value={item.name}
+                      onChange={(e) => updateItem(index, 'name', e.target.value, true)}
+                      style={{ flex: 1, padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                      required
+                    >
+                      <option value="">Select item</option>
+                      {inventory.map(inv => (
+                        <option key={inv._id} value={inv.itemName}>{inv.itemName}</option>
+                      ))}
+                    </select>
+                    
+                    <input
+                      type="text"
+                      placeholder="Category"
+                      value={item.category}
+                      onChange={(e) => updateItem(index, 'category', e.target.value, true)}
+                      style={{ width: '100px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                    />
+                    
+                    <input
+                      type="number"
+                      placeholder="Qty"
+                      value={item.quantity}
+                      onChange={(e) => updateItem(index, 'quantity', e.target.value, true)}
+                      style={{ width: '80px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                      min="1"
+                      required
+                    />
+                    
+                    <input
+                      type="text"
+                      placeholder="Unit"
+                      value={item.unit}
+                      onChange={(e) => updateItem(index, 'unit', e.target.value, true)}
+                      style={{ width: '70px', padding: '8px 12px', border: '1px solid #d1d5db', borderRadius: '8px' }}
+                    />
+                    
+                    {formData.newItems.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeItem(index)}
+                        style={{ color: '#dc2626', background: 'none', border: 'none', cursor: 'pointer', padding: '8px' }}
+                      >
+                        <X style={{ width: '16px', height: '16px' }} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div>

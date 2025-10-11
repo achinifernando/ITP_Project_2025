@@ -100,7 +100,7 @@ const DispatchLayout = () => (
 const InventoryLayout = () => (
   <div>
     <nav className="bg-white border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center gap-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-8">
         {[
           ['/inventory', 'Inventory'],
           ['/inventory/suppliers', 'Suppliers'],
@@ -113,7 +113,7 @@ const InventoryLayout = () => (
             to={to}
             end={to === '/'}
             className={({ isActive }) =>
-              `text-sm font-medium ${isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`
+              `text-lg font-semibold ${isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`
             }
           >
             {label}
@@ -284,7 +284,7 @@ function App() {
               <>
                 <Header />
                 <CompanyManagerDashbord />
-                <Footer />
+                
               </>
             }
           />

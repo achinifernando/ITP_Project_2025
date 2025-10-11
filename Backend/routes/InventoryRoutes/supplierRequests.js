@@ -100,12 +100,20 @@ router.patch("/:id/status", protectUser, async (req, res) => {
 
   if (body.error) throw Object.assign(new Error(body.error.message), { status: 400 });
 
+  // Check if request exists and is not already confirmed
+  const existingDoc = await SupplierRequest.findById(req.params.id);
+  if (!existingDoc) throw Object.assign(new Error("Request not found"), { status: 404 });
+  
+  // Prevent status changes once confirmed
+  if (existingDoc.status === 'confirmed' && body.value.status !== 'confirmed') {
+    throw Object.assign(new Error("Cannot change status once confirmed"), { status: 400 });
+  }
+
   const doc = await SupplierRequest.findByIdAndUpdate(
     req.params.id,
     { status: body.value.status, updatedAt: Date.now() },
     { new: true }
   );
-  if (!doc) throw Object.assign(new Error("Request not found"), { status: 404 });
 
   res.json(doc);
 });
