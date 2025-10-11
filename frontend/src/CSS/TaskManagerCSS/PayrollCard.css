@@ -42,8 +42,63 @@
 
 .payroll-empty {
   text-align: center;
-  padding: 40px 20px;
-  color: #7f8c8d;
+  padding: 3rem 2rem;
+  color: #64748b;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border-radius: 12px;
+  border: 2px dashed #cbd5e1;
+}
+
+.payroll-empty .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.payroll-empty h4 {
+  font-size: 1.5rem;
+  color: #1e293b;
+  margin: 0 0 0.5rem 0;
+  font-weight: 700;
+}
+
+.payroll-empty p {
+  font-size: 1rem;
+  margin: 0 0 1.5rem 0;
+  color: #64748b;
+}
+
+.payroll-empty .empty-hint {
+  background: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+  text-align: left;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.payroll-empty .empty-hint p {
+  margin: 0 0 0.75rem 0;
+  color: #475569;
+  font-weight: 600;
+}
+
+.payroll-empty .empty-hint ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.payroll-empty .empty-hint li {
+  padding: 0.5rem 0;
+  color: #64748b;
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .payroll-current {

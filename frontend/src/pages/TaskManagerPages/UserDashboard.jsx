@@ -7,6 +7,7 @@ import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import InfoCard from "../../components/Cards/InfoCard";
 import TaskListTable from "../../components/layouts/TaskListTable";
+import "../../CSS/TaskManagerCSS/UserDashboard.css";
 import {
   BarChart,
   Bar,
@@ -115,7 +116,7 @@ const UserDashboard = () => {
 
   if (loading) {
     return (
-      <DashboardLayout activeMenu="Dashboard">
+      <DashboardLayout activeMenu="Dashboard" hideNavbar={true}>
         <div className="dashboard-loading">
           <div className="spinner"></div>
           <p>Loading dashboard data...</p>
@@ -125,7 +126,7 @@ const UserDashboard = () => {
   }
 
   return (
-    <DashboardLayout activeMenu="Dashboard">
+    <DashboardLayout activeMenu="Dashboard" hideNavbar={true}>
       <div className="dashboard-container">
         <h1 className="dashboard-title">Welcome! {user?.name || user?.email}!</h1>
         <p className="date-display">{currentDate}</p>
@@ -160,52 +161,6 @@ const UserDashboard = () => {
 
         {/* ✅ Charts Section */}
         <div className="charts-section">
-          <style>{`
-            .charts-grid {
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              gap: 30px;
-              margin-bottom: 30px;
-            }
-
-            .chart-container {
-              background: white;
-              padding: 20px;
-              border-radius: 12px;
-              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-              border: 1px solid #e1e5e9;
-              min-height: 350px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-            }
-
-            .chart-title {
-              font-size: 16px;
-              font-weight: 600;
-              color: #2c3e50;
-              margin: 0 0 20px 0;
-              text-align: center;
-            }
-
-            .no-data-message {
-              text-align: center;
-              color: #7f8c8d;
-              font-style: italic;
-              padding: 20px;
-            }
-
-            .full-width {
-              grid-column: 1 / -1;
-            }
-
-            @media (max-width: 768px) {
-              .charts-grid {
-                grid-template-columns: 1fr;
-                gap: 20px;
-              }
-            }
-          `}</style>
           <div className="charts-grid">
             {/* Pie Chart */}
             {chartData.taskDistribution.length > 0 && chartData.taskDistribution.some(item => item.value > 0) ? (

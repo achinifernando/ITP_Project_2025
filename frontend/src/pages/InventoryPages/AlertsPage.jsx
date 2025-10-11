@@ -228,7 +228,7 @@ export default function AlertsPage() {
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-sky-50 via-white to-sky-50">
       {/* Header */}
       <div className="border-b border-sky-100/70 bg-white/70 backdrop-blur sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div className="w-[95%] mx-auto px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-sky-100 text-sky-700">
               <AlertTriangle className="w-5 h-5" />
@@ -266,7 +266,7 @@ export default function AlertsPage() {
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="w-[95%] mx-auto px-6 py-8">
         {loading && !low && !exp ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="p-6 rounded-2xl bg-white border border-sky-100 shadow-sm">

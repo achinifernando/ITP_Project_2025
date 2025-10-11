@@ -4,14 +4,32 @@ import "../../CSS/TaskManagerCSS/PayrollCard.css";
 const PayrollCard = ({ payrollData }) => {
   const [showHistory, setShowHistory] = useState(false);
 
-  if (!payrollData || (!payrollData.salaryInfo && !payrollData.currentPayroll)) {
+  // Check if there's any meaningful data
+  const hasData = payrollData && (
+    payrollData.salaryInfo || 
+    payrollData.currentPayroll || 
+    (payrollData.currentMonthStats && Object.keys(payrollData.currentMonthStats).length > 0) ||
+    (payrollData.payrollHistory && payrollData.payrollHistory.length > 0)
+  );
+
+  if (!hasData) {
     return (
       <div className="payroll-card">
         <div className="payroll-header">
           <h3>💰 Salary Information</h3>
         </div>
         <div className="payroll-empty">
-          <p>No payroll data available. Please contact your administrator to set up your salary information.</p>
+          <div className="empty-icon">📋</div>
+          <h4>No Payroll Data Available</h4>
+          <p>Please contact your administrator to set up your salary information.</p>
+          <div className="empty-hint">
+            <p><strong>What you need:</strong></p>
+            <ul>
+              <li>✓ Salary information (hourly rate or basic salary)</li>
+              <li>✓ Attendance records</li>
+              <li>✓ Allowances and deductions (if applicable)</li>
+            </ul>
+          </div>
         </div>
       </div>
     );
@@ -19,7 +37,7 @@ const PayrollCard = ({ payrollData }) => {
 
   const {
     salaryInfo,
-    currentPayroll,
+    // currentPayroll, // Not currently used but available for future features
     payrollHistory,
     currentMonthStats,
     allowances,

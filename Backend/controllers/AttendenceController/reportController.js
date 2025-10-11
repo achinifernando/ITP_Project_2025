@@ -1,7 +1,8 @@
-const Task = require("../../models/AttendenceTaskModel/Task");
-const User = require("../../models/AttendenceTaskModel/User");
-const Attendance = require("../../models/AttendenceTaskModel/Attendance"); // Make sure to import Attendance model
-const excelJS = require("exceljs");
+import Task from "../../models/AttendenceTaskModel/Task.js";
+import User from "../../models/AttendenceTaskModel/User.js";
+import Attendance from "../../models/AttendenceTaskModel/Attendance.js";
+import excelJS from "exceljs";
+import PDFDocument from "pdfkit";
 
 // @desc Export all tasks as an Excel file
 // @route GET /api/reports/export/tasks
@@ -229,8 +230,88 @@ const exportAttendanceReport = async (req, res) => {
 
       await workbook.xlsx.write(res);
       res.end();
+    } else if (format === 'pdf') {
+      // Generate PDF
+      const doc = new PDFDocument({ margin: 50, size: 'A4', layout: 'landscape' });
+      const timestamp = new Date().toISOString().split('T')[0];
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=attendance-report-${timestamp}.pdf`);
+      
+      doc.pipe(res);
+
+      // Add title
+      doc.fontSize(20).font('Helvetica-Bold').text('Attendance Report', { align: 'center' });
+      doc.moveDown();
+      
+      // Add date range if provided
+      if (startDate && endDate) {
+        doc.fontSize(12).font('Helvetica').text(`Period: ${startDate} to ${endDate}`, { align: 'center' });
+      }
+      doc.fontSize(10).text(`Generated on: ${new Date().toLocaleDateString()}`, { align: 'center' });
+      doc.moveDown(2);
+
+      // Table headers
+      const tableTop = doc.y;
+      const colWidths = [80, 120, 150, 80, 70, 90, 90, 80];
+      const headers = ['Employee ID', 'Name', 'Email', 'Date', 'Status', 'Check-In', 'Check-Out', 'Hours'];
+      
+      let xPos = 50;
+      doc.fontSize(9).font('Helvetica-Bold');
+      headers.forEach((header, i) => {
+        doc.text(header, xPos, tableTop, { width: colWidths[i], align: 'left' });
+        xPos += colWidths[i];
+      });
+
+      // Draw line under headers
+      doc.moveTo(50, tableTop + 15).lineTo(800, tableTop + 15).stroke();
+      
+      // Add data rows
+      let yPos = tableTop + 25;
+      doc.font('Helvetica').fontSize(8);
+      
+      attendanceData.forEach((record, index) => {
+        if (yPos > 500) { // Add new page if needed
+          doc.addPage({ margin: 50, size: 'A4', layout: 'landscape' });
+          yPos = 50;
+        }
+
+        xPos = 50;
+        const rowData = [
+          record.employeeId?.employeeId || 'N/A',
+          record.employeeId?.name || 'N/A',
+          record.employeeId?.email || 'N/A',
+          record.date ? record.date.toISOString().split('T')[0] : 'N/A',
+          record.status || 'N/A',
+          record.timeIn ? new Date(record.timeIn).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+          record.timeOut ? new Date(record.timeOut).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }) : 'N/A',
+          record.hoursWorked ? record.hoursWorked.toString() : '0'
+        ];
+
+        rowData.forEach((data, i) => {
+          doc.text(data, xPos, yPos, { width: colWidths[i], align: 'left' });
+          xPos += colWidths[i];
+        });
+
+        yPos += 20;
+        
+        // Alternate row background (visual separator)
+        if (index % 2 === 0) {
+          doc.rect(50, yPos - 18, 750, 18).fillOpacity(0.05).fill('#000000').fillOpacity(1);
+        }
+      });
+
+      // Add footer
+      doc.fontSize(8).text(
+        `Total Records: ${attendanceData.length}`,
+        50,
+        doc.page.height - 50,
+        { align: 'center' }
+      );
+
+      doc.end();
     } else {
-      res.status(400).json({ message: 'Invalid format specified' });
+      res.status(400).json({ message: 'Invalid format specified. Use "excel" or "pdf"' });
     }
   } catch (error) {
     console.error('Export attendance error:', error);
@@ -310,10 +391,80 @@ const exportEmployeeReport = async (req, res) => {
       res.end();
       
     } else if (format === 'pdf') {
-      // PDF generation logic would go here
-      res.status(501).json({ message: 'PDF export not implemented yet' });
+      // Generate PDF
+      const doc = new PDFDocument({ margin: 50, size: 'A4', layout: 'landscape' });
+      const timestamp = new Date().toISOString().split('T')[0];
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename=employees-report-${timestamp}.pdf`);
+      
+      doc.pipe(res);
+
+      // Add title
+      doc.fontSize(20).font('Helvetica-Bold').text('Employee Report', { align: 'center' });
+      doc.moveDown();
+      doc.fontSize(10).font('Helvetica').text(`Generated on: ${new Date().toLocaleDateString()}`, { align: 'center' });
+      doc.moveDown(2);
+
+      // Table headers
+      const tableTop = doc.y;
+      const colWidths = [80, 120, 150, 80, 100, 150];
+      const headers = ['Employee ID', 'Name', 'Email', 'Role', 'Phone', 'Address'];
+      
+      let xPos = 50;
+      doc.fontSize(9).font('Helvetica-Bold');
+      headers.forEach((header, i) => {
+        doc.text(header, xPos, tableTop, { width: colWidths[i], align: 'left' });
+        xPos += colWidths[i];
+      });
+
+      // Draw line under headers
+      doc.moveTo(50, tableTop + 15).lineTo(780, tableTop + 15).stroke();
+      
+      // Add data rows
+      let yPos = tableTop + 25;
+      doc.font('Helvetica').fontSize(8);
+      
+      employees.forEach((employee, index) => {
+        if (yPos > 500) { // Add new page if needed
+          doc.addPage({ margin: 50, size: 'A4', layout: 'landscape' });
+          yPos = 50;
+        }
+
+        xPos = 50;
+        const rowData = [
+          employee.employeeId || 'N/A',
+          employee.name || 'N/A',
+          employee.email || 'N/A',
+          employee.role || 'N/A',
+          employee.contactNumber || 'N/A',
+          employee.address || 'N/A'
+        ];
+
+        rowData.forEach((data, i) => {
+          doc.text(data, xPos, yPos, { width: colWidths[i], align: 'left', ellipsis: true });
+          xPos += colWidths[i];
+        });
+
+        yPos += 20;
+        
+        // Alternate row background (visual separator)
+        if (index % 2 === 0) {
+          doc.rect(50, yPos - 18, 730, 18).fillOpacity(0.05).fill('#000000').fillOpacity(1);
+        }
+      });
+
+      // Add footer
+      doc.fontSize(8).text(
+        `Total Employees: ${employees.length}`,
+        50,
+        doc.page.height - 50,
+        { align: 'center' }
+      );
+
+      doc.end();
     } else {
-      res.status(400).json({ message: 'Invalid format specified' });
+      res.status(400).json({ message: 'Invalid format specified. Use "excel" or "pdf"' });
     }
 
   } catch (error) {
@@ -322,7 +473,7 @@ const exportEmployeeReport = async (req, res) => {
   }
 };
 
-module.exports = { 
+export { 
   exportTasksReport, 
   exportUsersReport, 
   exportAttendanceReport, 

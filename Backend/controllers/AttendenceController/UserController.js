@@ -149,4 +149,76 @@ const deleteUser = async (req, res) => {
   }
 };
 
-module.exports = { getUsers, getUsersById, deleteUser, createUser, updateUser };
+// Update user profile (user updates their own profile)
+const updateProfile = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { name, phone, address, dateOfBirth, emergencyContact } = req.body;
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Update allowed fields
+    user.name = name || user.name;
+    user.phone = phone || user.phone;
+    user.address = address || user.address;
+    user.dateOfBirth = dateOfBirth || user.dateOfBirth;
+    user.emergencyContact = emergencyContact || user.emergencyContact;
+
+    const updatedUser = await user.save();
+    
+    console.log(`✅ Profile updated for user: ${user.email}`);
+    
+    res.status(200).json({ 
+      message: "Profile updated successfully",
+      user: { ...updatedUser._doc, password: undefined }
+    });
+  } catch (error) {
+    console.error("❌ Error updating profile:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+// Reset password (user resets their own password)
+const resetPassword = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Current password and new password are required" });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    // Verify current password
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Current password is incorrect" });
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    user.password = hashedPassword;
+
+    await user.save();
+    
+    console.log(`✅ Password reset for user: ${user.email}`);
+    
+    res.status(200).json({ message: "Password updated successfully" });
+  } catch (error) {
+    console.error("❌ Error resetting password:", error);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
+module.exports = { 
+  getUsers, 
+  getUsersById, 
+  deleteUser, 
+  createUser, 
+  updateUser,
+  updateProfile,
+  resetPassword
+};

@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { Truck, Gear, CarFront, Tags } from "react-bootstrap-icons";
 import axiosInstance from "../../utils/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { UserContext } from "../../components/context/userContext";
 import {
   PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, XAxis, YAxis, CartesianGrid,
@@ -13,7 +14,14 @@ export default function DashboardHome() {
   const [orderCounts, setOrderCounts] = useState({ Pending: 0, Ongoing: 0, Completed: 0, Cancelled: 0 });
   const [orders, setOrders] = useState([]);
   const navigate = useNavigate();
+  const { user, clearUser } = useContext(UserContext);
   const ongoingOrders = orders.filter(o => o.status === "Ongoing");
+
+  const handleLogout = () => {
+    localStorage.clear();
+    clearUser();
+    navigate("/Companylogin");
+  };
 
 
   useEffect(() => {
@@ -81,6 +89,28 @@ export default function DashboardHome() {
 
   return (
     <div className="dashboard">
+      {/* Header with User Info and Logout */}
+      <div className="dashboard-top-bar">
+        <div className="user-info-section">
+          {user?.profileImageUrl && (
+            <img 
+              src={user.profileImageUrl} 
+              alt="Profile" 
+              className="user-avatar"
+              onError={(e) => { e.target.style.display = 'none'; }}
+            />
+          )}
+          <div className="user-details">
+            <p className="user-name">{user?.name}</p>
+            <p className="user-email">{user?.email}</p>
+          </div>
+        </div>
+        <button onClick={handleLogout} className="logout-btn">
+          <i className="fa-solid fa-arrow-right-from-bracket"></i>
+          Logout
+        </button>
+      </div>
+
       {/* Top Info Cards */}
       <div className="cards-grid">
         {cards.map((c, i) => (
@@ -200,6 +230,80 @@ export default function DashboardHome() {
           padding: 40px 20px;
           background: linear-gradient(145deg, #f0f4f8, #e2e8f0);
           min-height: 100vh;
+        }
+
+        .dashboard-top-bar {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          background: white;
+          padding: 15px 25px;
+          border-radius: 16px;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+          margin-bottom: 30px;
+        }
+
+        .user-info-section {
+          display: flex;
+          align-items: center;
+          gap: 15px;
+        }
+
+        .user-avatar {
+          width: 50px;
+          height: 50px;
+          border-radius: 50%;
+          border: 3px solid #3b82f6;
+          object-fit: cover;
+        }
+
+        .user-details {
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+        }
+
+        .user-name {
+          font-size: 1rem;
+          font-weight: 600;
+          color: #1e293b;
+          margin: 0;
+        }
+
+        .user-email {
+          font-size: 0.85rem;
+          color: #64748b;
+          margin: 0;
+        }
+
+        .logout-btn {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          padding: 10px 20px;
+          background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+          color: white;
+          border: none;
+          border-radius: 10px;
+          font-weight: 600;
+          font-size: 0.95rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .logout-btn:hover {
+          background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .logout-btn:active {
+          transform: translateY(0);
+        }
+
+        .logout-btn i {
+          font-size: 1.1rem;
         }
 
         .cards-grid {

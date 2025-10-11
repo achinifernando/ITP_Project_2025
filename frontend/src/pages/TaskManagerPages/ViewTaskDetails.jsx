@@ -30,7 +30,7 @@ const ViewTaskDetails = () => {
   }, [getTaskDetailsByID, taskId]);
 
   return (
-    <DashboardLayout activeMenu="Task Details">
+    <DashboardLayout activeMenu="Task Details" hideNavbar={true}>
       <div className="task-details-container">
         {loading ? (
           <p>Loading task details...</p>

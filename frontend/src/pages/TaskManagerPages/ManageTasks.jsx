@@ -2,10 +2,11 @@ import React, { useEffect, useState, useCallback } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
-import { API_PATHS } from "../../utils/apiPaths";
+import { API_PATHS, deleteTask } from "../../utils/apiPaths";
 import "../../CSS/TaskManagerCSS/ManageTasks.css";
 import TaskCard from "../../components/Cards/TaskCard";
 import SelectChecklist from "../../components/inputs/SelectCheckList";
+import Modal from "../../components/Modal";
 
 const ManageTasks = () => {
   const [allTasks, setAllTasks] = useState([]);
@@ -14,6 +15,9 @@ const ManageTasks = () => {
   const [filterStatus, setFilterStatus] = useState("All");
   const [openChecklistTaskId, setOpenChecklistTaskId] = useState(null);
   const [error, setError] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const navigate = useNavigate();
 
@@ -76,6 +80,38 @@ const ManageTasks = () => {
 
   const handleClick = (taskData) => {
     navigate(`/admin/create-task`, { state: { taskId: taskData._id } });
+  };
+
+  const handleEdit = (task) => {
+    navigate(`/admin/create-task`, { state: { taskId: task._id } });
+  };
+
+  const handleDeleteClick = (task) => {
+    setTaskToDelete(task);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!taskToDelete) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteTask(taskToDelete._id);
+      setDeleteModalOpen(false);
+      setTaskToDelete(null);
+      await getAllTasks();
+      alert('Task deleted successfully!');
+    } catch (error) {
+      console.error('Error deleting task:', error);
+      alert('Failed to delete task. Please try again.');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setTaskToDelete(null);
   };
 
   const handleDownloadReport = async () => {
@@ -157,6 +193,9 @@ const ManageTasks = () => {
                   onToggleChecklist={() => toggleChecklist(task._id)}
                   isChecklistOpen={openChecklistTaskId === task._id}
                   refreshTasks={refreshTasks}
+                  showActions={true}
+                  onEdit={handleEdit}
+                  onDelete={handleDeleteClick}
                 >
                   {openChecklistTaskId === task._id && (
                     <SelectChecklist
@@ -184,6 +223,26 @@ const ManageTasks = () => {
           </>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Modal
+        open={deleteModalOpen}
+        title="Delete Task"
+        onClose={handleDeleteCancel}
+        onSubmit={handleDeleteConfirm}
+        submitLabel={isDeleting ? "Deleting..." : "Delete"}
+      >
+        <div className="delete-confirmation">
+          <p>Are you sure you want to delete this task?</p>
+          {taskToDelete && (
+            <div className="task-info">
+              <strong>{taskToDelete.title}</strong>
+              {taskToDelete.orderID && <p>Order #: {taskToDelete.orderID}</p>}
+            </div>
+          )}
+          <p className="warning-text">This action cannot be undone.</p>
+        </div>
+      </Modal>
     </DashboardLayout>
   );
 };

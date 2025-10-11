@@ -6,6 +6,7 @@ import {
   Route,
   Navigate,
   NavLink,
+  useNavigate,
 } from "react-router-dom";
 import Header from "./components/Header";
 import LorryTypesPage from "./pages/ClientPortalPages/LorryTypesPage";
@@ -38,6 +39,7 @@ import MyTasks from "./pages/TaskManagerPages/MyTasks";
 import ViewTaskDetails from "./pages/TaskManagerPages/ViewTaskDetails";
 import ManageTemplates from "./pages/TaskManagerPages/ManageTemplates";
 import UserPayroll from "./pages/TaskManagerPages/UserPayroll";
+import UserProfile from "./pages/TaskManagerPages/UserProfile";
 import TeamMembers from "./pages/TaskManagerPages/TeamMembers";
 
 // Attendance Components
@@ -109,33 +111,72 @@ const DispatchLayout = () => (
   </div>
 );
 
-const InventoryLayout = () => (
-  <div>
-    <nav className="bg-white border-b">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-8">
-        {[
-          ['/inventory', 'Inventory'],
-          ['/inventory/suppliers', 'Suppliers'],
-          ['/inventory/requests', 'Requests'],
-          ['/inventory/alerts', 'Alerts'],
-          ['/inventory/reports', 'Reports'],
-        ].map(([to, label]) => (
-          <NavLink
-            key={to}
-            to={to}
-            end={to === '/'}
-            className={({ isActive }) =>
-              `text-lg font-semibold ${isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`
-            }
-          >
-            {label}
-          </NavLink>
-        ))}
-      </div>
-    </nav>
-    <Outlet />
-  </div>
-);
+const InventoryLayout = () => {
+  const { user, clearUser } = useContext(UserContext);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.clear();
+    clearUser();
+    navigate("/Companylogin");
+  };
+
+  return (
+    <div>
+      <nav className="bg-white border-b shadow-sm">
+        <div className="w-[95%] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-8">
+            {[
+              ['/inventory', 'Inventory'],
+              ['/inventory/suppliers', 'Suppliers'],
+              ['/inventory/requests', 'Requests'],
+              ['/inventory/alerts', 'Alerts'],
+              ['/inventory/reports', 'Reports'],
+            ].map(([to, label]) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === '/inventory'}
+                className={({ isActive }) =>
+                  `text-lg font-semibold transition-colors ${isActive ? 'text-blue-600' : 'text-gray-600 hover:text-gray-900'}`
+                }
+              >
+                {label}
+              </NavLink>
+            ))}
+          </div>
+          
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <div className="text-right">
+                <p className="text-sm font-semibold text-gray-800">{user?.name}</p>
+                <p className="text-xs text-gray-500">{user?.email}</p>
+              </div>
+              {user?.profileImageUrl && (
+                <img 
+                  src={user.profileImageUrl} 
+                  alt="Profile" 
+                  className="w-10 h-10 rounded-full border-2 border-blue-500"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+              )}
+            </div>
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors font-semibold"
+            >
+              <i className="fa-solid fa-arrow-right-from-bracket"></i>
+              Logout
+            </button>
+          </div>
+        </div>
+      </nav>
+      <Outlet />
+    </div>
+  );
+};
 
 // Company Management Layout
 const CompanyManagementLayout = () => (
@@ -284,9 +325,9 @@ function App() {
             path="/quotationgeneratorform/:requestID"
             element={
               <>
-                <Header />
+                
                 <QuotationForm />
-                <Footer />
+                
               </>
             }
           />
@@ -359,6 +400,7 @@ function App() {
             <Route path="/user/tasks" element={<MyTasks />} />
             <Route path="/user/task-details" element={<ViewTaskDetails />} />
             <Route path="/user/payroll" element={<UserPayroll />} />
+            <Route path="/user/profile" element={<UserProfile />} />
           </Route>
 
           {/* HR Manager Routes - Attendance System */}

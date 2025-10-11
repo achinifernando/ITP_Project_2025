@@ -41,7 +41,7 @@ const UserPayroll = () => {
 
   if (loading) {
     return (
-      <DashboardLayout activeMenu="Payroll">
+      <DashboardLayout activeMenu="Payroll" hideNavbar={true}>
         <div className="payroll-loading">
           <div className="spinner"></div>
           <p>Loading payroll data...</p>
@@ -51,7 +51,7 @@ const UserPayroll = () => {
   }
 
   return (
-    <DashboardLayout activeMenu="Payroll">
+    <DashboardLayout activeMenu="Payroll" hideNavbar={true}>
       <div className="user-payroll-container">
         <div className="payroll-page-header">
           <h1 className="payroll-page-title">💰 My Payroll</h1>

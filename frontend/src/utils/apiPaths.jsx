@@ -16,6 +16,11 @@ export const API_PATHS = {
     DELETE_USER: (userId) => `/api/users/${userId}`, // Delete a user
   },
 
+  USER: {
+    UPDATE_PROFILE: "/api/users/profile/update", // Update user's own profile
+    RESET_PASSWORD: "/api/users/profile/reset-password", // Reset user's own password
+  },
+
   TASKS: {
     GET_DASHBOARD_DATA: "/api/tasks/dashboard-data",
     GET_USER_DASHBOARD_DATA: "/api/tasks/user-dashboard-data",
@@ -134,4 +139,8 @@ export const api = {
 
 export const updateTaskStatus = (taskId, status) => {
   return api.patch(API_PATHS.TASKS.UPDATE_TASK_STATUS(taskId), { status });
+}
+
+export const deleteTask = (taskId) => {
+  return api.delete(API_PATHS.TASKS.DELETE_TASK(taskId));
 }

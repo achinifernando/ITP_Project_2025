@@ -85,7 +85,7 @@ const MyTasks = () => {
     : allTasks.filter(task => task.status === filterStatus);
 
   return (
-    <DashboardLayout activeMenu="My Tasks">
+    <DashboardLayout activeMenu="My Tasks" hideNavbar={true}>
       <div className="manage-tasks-container">
         <div className="tasks-header">
           <h2 className="tasks-title">My Tasks</h2>

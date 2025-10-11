@@ -233,6 +233,7 @@ const getTasks = async (req, res) => {
   try {
     // Defensive check: ensure req.user exists
     if (!req.user || !req.user.role || !req.user._id) {
+      console.error("❌ getTasks: Missing user context", { user: req.user });
       return res.status(401).json({ message: "Unauthorized: Missing user context" });
     }
 
@@ -240,11 +241,20 @@ const getTasks = async (req, res) => {
     // assignedTo is an array, so we need to use $in operator for non-admin users
     const query = isAdmin ? {} : { assignedTo: { $in: [req.user._id] } };
 
+    console.log("📋 getTasks Query:", {
+      userId: req.user._id,
+      userRole: req.user.role,
+      isAdmin,
+      query
+    });
+
     const tasks = await Task.find(query).populate("assignedTo", "name email");
+
+    console.log(`✅ Found ${tasks.length} tasks for user ${req.user.email || req.user._id}`);
 
     res.status(200).json(tasks);
   } catch (error) {
-    console.error("Error fetching tasks:", error);
+    console.error("❌ Error fetching tasks:", error);
     res.status(500).json({
       message: "Server error while retrieving tasks",
       error: error.message,
@@ -359,11 +369,26 @@ const updateTaskStatus = async (req, res) => {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ message: "Task not found" });
 
+    // Check permissions: Admin can update any task, members can only update their assigned tasks
+    const isAdmin = req.user.role === "admin";
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString()
+    );
+
+    if (!isAdmin && !isAssigned) {
+      return res.status(403).json({ 
+        message: "Forbidden: You can only update tasks assigned to you" 
+      });
+    }
+
     task.status = status;
     await task.save();
 
+    console.log(`✅ Task status updated by ${req.user.email || req.user._id}: ${task.title} → ${status}`);
+
     res.json({ message: "Task status updated", task });
   } catch (err) {
+    console.error("❌ Error updating task status:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
@@ -385,11 +410,26 @@ const updateTaskChecklist = async (req, res) => {
     const task = await Task.findById(req.params.id);
     if (!task) return res.status(404).json({ message: "Task not found" });
 
+    // Check permissions: Admin can update any task, members can only update their assigned tasks
+    const isAdmin = req.user.role === "admin";
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString()
+    );
+
+    if (!isAdmin && !isAssigned) {
+      return res.status(403).json({ 
+        message: "Forbidden: You can only update tasks assigned to you" 
+      });
+    }
+
     task.todoChecklist = todoChecklist;
     await task.save();
 
+    console.log(`✅ Checklist updated by ${req.user.email || req.user._id} for task: ${task.title}`);
+
     res.json({ message: "Checklist updated", checklist: task.todoChecklist });
   } catch (err) {
+    console.error("❌ Error updating checklist:", err);
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };

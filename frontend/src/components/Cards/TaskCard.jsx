@@ -1,6 +1,7 @@
 // components/Cards/TaskCard.js
 import React, { useState } from "react";
 import { updateTaskStatus } from "../../utils/apiPaths";
+import "../../CSS/TaskManagerCSS/TaskCard.css";
 
 const TaskCard = (props) => {
   const { 
@@ -10,7 +11,10 @@ const TaskCard = (props) => {
     isChecklistOpen, 
     refreshTasks,
     children,
-    showAssignedUsers = true
+    showAssignedUsers = true,
+    onEdit,
+    onDelete,
+    showActions = false
   } = props;
   
   const [isUpdating, setIsUpdating] = useState(false);
@@ -55,7 +59,11 @@ const TaskCard = (props) => {
   };
 
   return (
-    <div className="task-card">
+    <div 
+      className="task-card" 
+      data-priority={task.priority}
+      data-status={task.status}
+    >
       {/* Task Header */}
       <div className="task-header">
         <div className="task-title-section">
@@ -79,6 +87,31 @@ const TaskCard = (props) => {
             <option value="In Progress">In Progress</option>
             <option value="Completed">Completed</option>
           </select>
+          
+          {showActions && (
+            <div className="task-action-buttons">
+              <button 
+                className="edit-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit && onEdit(task);
+                }}
+                title="Edit Task"
+              >
+                ✏️
+              </button>
+              <button 
+                className="delete-btn" 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete && onDelete(task);
+                }}
+                title="Delete Task"
+              >
+                🗑️
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

@@ -7,6 +7,7 @@ const { protectUser, adminOnly, hrManagerOrAdmin } = require("../../middleware/a
 
 // Import controllers
 const { createUser, getUsers, getUsersById, updateUser, deleteUser } = require("../../controllers/AttendenceController/attendanceController");
+const { updateProfile, resetPassword } = require("../../controllers/AttendenceController/UserController");
 
 // =======================
 // User Management Routes
@@ -26,5 +27,11 @@ router.put("/:id", protectUser, updateUser);
 
 // Delete a user (Admin or HR Manager only)
 router.delete("/:id", protectUser, hrManagerOrAdmin, deleteUser);
+
+// Update user's own profile (authenticated user only)
+router.put("/profile/update", protectUser, updateProfile);
+
+// Reset user's own password (authenticated user only)
+router.put("/profile/reset-password", protectUser, resetPassword);
 
 module.exports = router;

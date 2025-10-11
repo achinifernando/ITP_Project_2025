@@ -52,7 +52,7 @@ export const SIDE_MENU_USER_DATA = [
     id: "02",
     label: "My Tasks",
     icon: <i className="fa-solid fa-clipboard-list"></i>,
-    path: "/user/task-details",
+    path: "/user/tasks",
   },
   {
     id: "03",
@@ -62,6 +62,12 @@ export const SIDE_MENU_USER_DATA = [
   },
   {
     id: "04",
+    label: "My Profile",
+    icon: <i className="fa-solid fa-user-circle"></i>,
+    path: "/user/profile",
+  },
+  {
+    id: "05",
     label: "Logout",
     icon: <i className="fa-solid fa-arrow-right-from-bracket"></i>,
     path: "logout",

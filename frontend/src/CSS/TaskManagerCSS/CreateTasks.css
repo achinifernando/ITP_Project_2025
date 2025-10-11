@@ -150,7 +150,7 @@
   transition: background-color 0.2s ease;
   margin-top: 2rem;
   position: relative;
-  z-index: 1;
+  z-index: auto;
 }
 
 .submit-button:hover {

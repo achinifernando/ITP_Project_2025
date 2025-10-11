@@ -398,7 +398,7 @@ export default function InventoryPage() {
 
   return (
     <div className="min-h-[calc(100vh-64px)] bg-gradient-to-b from-sky-50 via-white to-sky-50">
-      <div className="max-w-7xl mx-auto p-6">
+      <div className="w-[95%] mx-auto p-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Inventory Management System</h1>
         {loading && <div className="text-blue-600">Loading...</div>}
         {/* Analysis section */}

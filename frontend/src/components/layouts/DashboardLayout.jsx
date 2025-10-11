@@ -5,7 +5,7 @@ import "../../CSS/TaskManagerCSS/Dashboard.css"
 import NavBar from "../layouts/Navbar";
 import SideMenu from "../layouts/SideMenu";
 
-const DashboardLayout = ({ children, activeMenu, requiredRole }) => {
+const DashboardLayout = ({ children, activeMenu, requiredRole, hideNavbar = false }) => {
     const { user, loading } = useContext(UserContext);
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
@@ -42,11 +42,13 @@ const DashboardLayout = ({ children, activeMenu, requiredRole }) => {
 
     return (
         <div className="dashboard-layout">
-            <NavBar 
-                activeMenu={activeMenu} 
-                onMenuToggle={toggleSidebar}
-                user={user}
-            />
+            {!hideNavbar && (
+                <NavBar 
+                    activeMenu={activeMenu} 
+                    onMenuToggle={toggleSidebar}
+                    user={user}
+                />
+            )}
             
             <div className="dashboard-content">
                 <div className={`side-menu-container ${isSidebarOpen ? 'open' : ''}`}>
