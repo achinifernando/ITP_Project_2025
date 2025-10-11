@@ -36,6 +36,24 @@ const getTemplateById = async (req, res) => {
   }
 };
 
+// @desc Update a template
+const updateTemplate = async (req, res) => {
+  try {
+    const { name, items } = req.body;
+    const template = await ChecklistTemplate.findByIdAndUpdate(
+      req.params.id,
+      { name, items },
+      { new: true, runValidators: true }
+    );
+    
+    if (!template) return res.status(404).json({ message: "Template not found" });
+
+    res.status(200).json(template);
+  } catch (error) {
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+};
+
 // @desc Delete a template
 const deleteTemplate = async (req, res) => {
   try {
@@ -48,5 +66,5 @@ const deleteTemplate = async (req, res) => {
   }
 };
 
-module.exports = { createTemplate, getTemplates, getTemplateById, deleteTemplate };
+module.exports = { createTemplate, getTemplates, getTemplateById, updateTemplate, deleteTemplate };
 

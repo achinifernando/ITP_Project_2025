@@ -4,6 +4,7 @@ const router = express.Router();
 const {
   getDashboardData,
   getUserDashboardData,
+  getTeamMembersWithTasks,
   getTasks,
   getTaskById,
   createTask,
@@ -18,6 +19,7 @@ const {
 router.get("/taskChecklist/:id", protectUser, getTaskChecklist);
 router.get("/dashboard-data", protectUser, getDashboardData);
 router.get("/user-dashboard-data", protectUser, getUserDashboardData);
+router.get("/team-members-with-tasks", protectUser, getTeamMembersWithTasks);
 router.get("/", protectUser, getTasks);
 router.get("/:id", protectUser, getTaskById);
 router.post("/", protectUser, adminOnly, createTask);

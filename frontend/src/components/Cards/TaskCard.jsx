@@ -1,139 +1,184 @@
-import React from "react";
-import "../../CSS/TaskManagerCSS/TaskCard.css";
+// components/Cards/TaskCard.js
+import React, { useState } from "react";
+import { updateTaskStatus } from "../../utils/apiPaths";
 
-const TaskCard = ({ 
-  task, 
-  onClick, 
-  onToggleChecklist, 
-  isChecklistOpen, 
-  children,
-  refreshTasks 
-}) => {
-  const handleChecklistToggle = (e) => {
-    e.stopPropagation();
-    onToggleChecklist();
-  };
+const TaskCard = (props) => {
+  const { 
+    task, 
+    onClick, 
+    onToggleChecklist, 
+    isChecklistOpen, 
+    refreshTasks,
+    children,
+    showAssignedUsers = true
+  } = props;
+  
+  const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleCardClick = (e) => {
-    // Only navigate if the click wasn't on the checklist toggle button or assigned members
-    if (!e.target.closest('.checklist-toggle') && 
-        !e.target.closest('.checklist-container') &&
-        !e.target.closest('.members-list')) {
-      onClick();
+  const handleStatusUpdate = async (newStatus) => {
+    try {
+      setIsUpdating(true);
+      await updateTaskStatus(task._id, newStatus);
+      await refreshTasks();
+    } catch (error) {
+      console.error('Failed to update task status:', error);
+      alert('Failed to update task status. Please try again.');
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  // Function to get initials from name
-  const getInitials = (name) => {
-    return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2);
+  const getPriorityColor = (priority) => {
+    switch (priority) {
+      case 'High': return '#ff4757';
+      case 'Medium': return '#ffa502';
+      case 'Low': return '#2ed573';
+      default: return '#57606f';
+    }
   };
 
-  // Function to display assigned members
-  const renderAssignedMembers = () => {
-    if (!task.assignedTo || task.assignedTo.length === 0) {
-      return <div className="member-count">No one assigned</div>;
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Completed': return '#2ed573';
+      case 'In Progress': return '#1e90ff';
+      case 'Pending': return '#ffa502';
+      default: return '#57606f';
     }
+  };
 
-    // If assignedTo is an array of objects with name property
-    if (typeof task.assignedTo[0] === 'object') {
-      return (
-        <div className="members-list">
-          {task.assignedTo.slice(0, 3).map((member, index) => (
-            <div key={index} className="member-item">
-              <div className="member-avatar">
-                {getInitials(member.name || 'U')}
-              </div>
-              {member.name}
-            </div>
-          ))}
-          {task.assignedTo.length > 3 && (
-            <div className="member-count">
-              +{task.assignedTo.length - 3} more
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // If assignedTo is an array of strings (names)
-    return (
-      <div className="members-list">
-        {task.assignedTo.slice(0, 3).map((name, index) => (
-          <div key={index} className="member-item">
-            <div className="member-avatar">
-              {getInitials(name || 'U')}
-            </div>
-            {name}
-          </div>
-        ))}
-        {task.assignedTo.length > 3 && (
-          <div className="member-count">
-            +{task.assignedTo.length - 3} more
-          </div>
-        )}
-      </div>
-    );
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
   };
 
   return (
-    <div className="task-card" onClick={handleCardClick}>
+    <div className="task-card">
+      {/* Task Header */}
       <div className="task-header">
-        <h3 className="task-title">{task.title}</h3>
-        <span className={`status ${task.status.toLowerCase().replace(" ", "-")}`}>
-          {task.status}
-        </span>
+        <div className="task-title-section">
+          <h3 className="task-title" onClick={onClick}>
+            {task.title}
+          </h3>
+          {task.orderID && (
+            <span className="order-id">Order #: {task.orderID}</span>
+          )}
+        </div>
+        
+        <div className="task-actions">
+          <select 
+            value={task.status} 
+            onChange={(e) => handleStatusUpdate(e.target.value)}
+            disabled={isUpdating}
+            className="status-select"
+            style={{ backgroundColor: getStatusColor(task.status) }}
+          >
+            <option value="Pending">Pending</option>
+            <option value="In Progress">In Progress</option>
+            <option value="Completed">Completed</option>
+          </select>
+        </div>
       </div>
 
-      <p className="task-desc">{task.description}</p>
+      {/* Task Description */}
+      {task.description && (
+        <p className="task-description">{task.description}</p>
+      )}
 
-      <div className="task-info">
-        <span className={`priority ${task.priority.toLowerCase()}`}>
-          {task.priority}
-        </span>
-        <span className="due-date">
-          Due: {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "—"}
-        </span>
-      </div>
+      {/* Task Metadata */}
+      <div className="task-meta">
+        <div className="meta-item">
+          <span className="meta-label">Priority:</span>
+          <span 
+            className="priority-badge"
+            style={{ backgroundColor: getPriorityColor(task.priority) }}
+          >
+            {task.priority}
+          </span>
+        </div>
 
-      {/* Assigned Members Section */}
-      <div className="assigned-members">
-        <div className="assigned-label">Assigned to</div>
-        {renderAssignedMembers()}
-      </div>
+        <div className="meta-item">
+          <span className="meta-label">Due Date:</span>
+          <span className="due-date">
+            {formatDate(task.dueDate)}
+          </span>
+        </div>
 
-      {/* Progress Bar (if applicable) */}
-      {(task.completedTodoCount !== undefined && task.totalChecklistCount !== undefined) && (
-        <div className="progress-container">
-          <div className="progress-label">
-            <span>Checklist Progress</span>
-            <span>{task.completedTodoCount}/{task.totalChecklistCount}</span>
+        {task.bodyType && (
+          <div className="meta-item">
+            <span className="meta-label">Body Type:</span>
+            <span className="body-type">{task.bodyType}</span>
           </div>
-          <div className="progress-bar">
-            <div 
-              className="progress-fill" 
-              style={{ 
-                width: `${task.totalChecklistCount > 0 
-                  ? (task.completedTodoCount / task.totalChecklistCount) * 100 
-                  : 0}%` 
-              }}
-            ></div>
+        )}
+      </div>
+
+      {/* Assigned Users */}
+      {showAssignedUsers && task.assignedTo && (
+        <div className="assigned-users">
+          <span className="meta-label">Assigned To:</span>
+          <div className="users-list">
+            {Array.isArray(task.assignedTo) ? (
+              task.assignedTo.map((user, index) => (
+                <span key={user._id || index} className="user-tag">
+                  {user.name || user.email}
+                </span>
+              ))
+            ) : (
+              <span className="user-tag">
+                {task.assignedTo.name || task.assignedTo.email || 'Unassigned'}
+              </span>
+            )}
           </div>
         </div>
       )}
 
-      <button 
-        className="checklist-toggle" 
-        onClick={handleChecklistToggle}
-      >
-        {isChecklistOpen ? "Hide Checklist" : "View Checklist"}
-      </button>
+      {/* Checklist Summary */}
+      <div className="checklist-summary">
+        <div className="checklist-header">
+          <span className="meta-label">Checklist:</span>
+          <button 
+            onClick={onToggleChecklist}
+            className="checklist-toggle-btn"
+          >
+            {isChecklistOpen ? 'Hide' : 'Show'} Checklist
+            <span className="checklist-stats">
+              ({task.todoChecklist ? task.todoChecklist.filter(item => item.completed).length : 0}
+              /{task.todoChecklist ? task.todoChecklist.length : 0})
+            </span>
+          </button>
+        </div>
 
-      {isChecklistOpen && children}
+        {/* Progress Bar */}
+        {task.todoChecklist && task.todoChecklist.length > 0 && (
+          <div className="progress-bar">
+            <div 
+              className="progress-fill"
+              style={{
+                width: `${(task.todoChecklist.filter(item => item.completed).length / task.todoChecklist.length) * 100}%`
+              }}
+            ></div>
+          </div>
+        )}
+      </div>
+
+      {/* Created/Updated Info */}
+      <div className="task-footer">
+        <span className="task-id">ID: {task._id?.substring(0, 8)}...</span>
+        {task.createdAt && (
+          <span className="created-date">
+            Created: {formatDate(task.createdAt)}
+          </span>
+        )}
+      </div>
+
+      {/* Expandable Checklist Area */}
+      {isChecklistOpen && (
+        <div className="checklist-expanded">
+          {children}
+        </div>
+      )}
     </div>
   );
 };

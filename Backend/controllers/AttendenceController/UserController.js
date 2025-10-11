@@ -2,7 +2,6 @@
 const User = require("../../models/AttendenceTaskModel/User");
 const Task = require("../../models/AttendenceTaskModel/Task");
 const bcrypt = require("bcryptjs");
-
 // Get all users (Admin or HR Manager only)
 const getUsers = async (req, res) => {
   try {
@@ -10,23 +9,23 @@ const getUsers = async (req, res) => {
 
     const usersWithTasks = await Promise.all(
       users.map(async (user) => {
-        // Get task counts
+        // Get task counts - assignedTo is an array, so we need to use $in operator
         const pendingTasks = await Task.countDocuments({
-          assignedTo: user._id,
+          assignedTo: { $in: [user._id] },
           status: "Pending",
         });
         const inProgressTasks = await Task.countDocuments({
-          assignedTo: user._id,
+          assignedTo: { $in: [user._id] },
           status: "In Progress",
         });
         const completedTasks = await Task.countDocuments({
-          assignedTo: user._id,
+          assignedTo: { $in: [user._id] },
           status: "Completed",
         });
 
-        // Get actual task details
-        const tasks = await Task.find({ assignedTo: user._id })
-          .select("title status dueDate")
+        // Get actual task details - assignedTo is an array, so we need to use $in operator
+        const tasks = await Task.find({ assignedTo: { $in: [user._id] } })
+          .select("title status dueDate priority")
           .sort({ createdAt: -1 })
           .limit(20); // Limit to prevent excessive data
 

@@ -19,6 +19,7 @@ export const API_PATHS = {
   TASKS: {
     GET_DASHBOARD_DATA: "/api/tasks/dashboard-data",
     GET_USER_DASHBOARD_DATA: "/api/tasks/user-dashboard-data",
+    GET_TEAM_MEMBERS_WITH_TASKS: "/api/tasks/team-members-with-tasks",
     GET_ALL_TASKS: "/api/tasks",
     GET_TASK_BY_ID: (taskId) => `/api/tasks/${taskId}`,
     CREATE_TASK: "/api/tasks",
@@ -62,7 +63,10 @@ export const API_PATHS = {
     CREATE_LEAVE: "/api/leaves",
     UPDATE_LEAVE_STATUS: (id) => `/api/leaves/${id}/status`,
   },
-
+  PAYROLL: {
+    GET_MY_PAYROLL: "/admin-payrolls/my-payroll",
+    GENERATE_PAYROLL: "/admin-payrolls/generate",
+  },
 };
 
 // Fixed the API_BASE reference to use BASE_URL
@@ -127,3 +131,7 @@ export const api = {
       credentials: 'include'
     }).then(handle),
 };
+
+export const updateTaskStatus = (taskId, status) => {
+  return api.patch(API_PATHS.TASKS.UPDATE_TASK_STATUS(taskId), { status });
+}

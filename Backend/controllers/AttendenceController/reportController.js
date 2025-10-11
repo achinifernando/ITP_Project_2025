@@ -1,6 +1,6 @@
-const Task = require("../models/Task");
-const User = require("../models/User");
-const Attendance = require("../models/Attendance"); // Make sure to import Attendance model
+const Task = require("../../models/AttendenceTaskModel/Task");
+const User = require("../../models/AttendenceTaskModel/User");
+const Attendance = require("../../models/AttendenceTaskModel/Attendance"); // Make sure to import Attendance model
 const excelJS = require("exceljs");
 
 // @desc Export all tasks as an Excel file
@@ -197,7 +197,7 @@ const exportAttendanceReport = async (req, res) => {
       // Add rows
       attendanceData.forEach(record => {
         worksheet.addRow({
-          employeeId: employee.employeeId || 'N/A',
+          employeeId: record.employeeId?.employeeId || 'N/A',
           name: record.employeeId?.name || 'N/A',
           email: record.employeeId?.email || 'N/A',
           date: record.date ? record.date.toISOString().split('T')[0] : 'N/A',

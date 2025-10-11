@@ -2,6 +2,7 @@ const Employee = require("../../models/AttendenceTaskModel/User");
 const Attendance = require("../../models/AttendenceTaskModel/Attendance");
 const Otp = require("../../models/AttendenceTaskModel/otp");
 const nodemailer = require("nodemailer");
+const bcrypt = require("bcryptjs");
 
 // Create a new user
 const createUser = async (req, res) => {
@@ -11,18 +12,97 @@ const createUser = async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: "User already exists" });
     }
+    
+    // Generate employee ID
+    // Find all employees with employeeId and extract the numeric part
+    const employeesWithId = await Employee.find({ 
+      employeeId: { $exists: true, $ne: null, $ne: '' } 
+    });
+    
+    let employeeId;
+    if (employeesWithId.length > 0) {
+      // Extract all numeric parts from existing IDs
+      const existingNumbers = employeesWithId
+        .map(emp => {
+          const match = emp.employeeId.match(/\d+/); // Extract numbers from ID
+          return match ? parseInt(match[0]) : 0;
+        })
+        .filter(num => !isNaN(num));
+      
+      // Get the highest number
+      const maxNumber = Math.max(...existingNumbers, 0);
+      const nextNumber = maxNumber + 1;
+      
+      // Get the prefix from the first existing ID (e.g., 'EMP' from 'EMP001')
+      const firstId = employeesWithId[0].employeeId;
+      const prefix = firstId.replace(/\d+/g, ''); // Remove all numbers to get prefix
+      const digitCount = (firstId.match(/\d+/) || [''])[0].length; // Get digit count
+      
+      // Generate new ID with same format
+      employeeId = `${prefix}${String(nextNumber).padStart(digitCount, '0')}`;
+    } else {
+      // Default format if no existing IDs (you can customize this)
+      employeeId = 'EMP0001';
+    }
+    
+    // Store plain password for email (before hashing)
+    const plainPassword = password;
+    
+    // Hash password before saving
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
+    
     const user = new Employee({
+      employeeId,
       name,
       email,
-      password,
+      password: hashedPassword,
       contactNumber,
       address,
       role,
     });
     await user.save();
+    console.log(`User created successfully: ${employeeId} - ${email}`);
+    
+    // Send welcome email with login credentials (non-blocking)
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const emailSubject = "Welcome to the Company - Your Login Credentials";
+        const emailText = `
+Dear ${name},
+
+Welcome to our company! Your employee account has been successfully created.
+
+Here are your login credentials:
+
+Employee ID: ${employeeId}
+Username (Email): ${email}
+Temporary Password: ${plainPassword}
+
+Please login to the system using these credentials at: ${process.env.FRONTEND_URL || 'http://localhost:3000'}/login
+
+For security reasons, we strongly recommend that you change your password after your first login.
+
+If you have any questions or need assistance, please contact the HR department.
+
+Best regards,
+HR Department
+        `;
+        
+        await sendEmail(email, emailSubject, emailText);
+        console.log(`Welcome email sent to ${email}`);
+      } catch (emailError) {
+        console.error("Error sending welcome email:", emailError.message);
+        // Don't fail the user creation if email fails
+      }
+    } else {
+      console.log("Email credentials not configured. Skipping email notification.");
+    }
+    
     res.status(201).json(user);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("Error creating user:", err);
+    res.status(500).json({ message: err.message, error: err.toString() });
   }
 };
 
@@ -306,12 +386,55 @@ const getEmployeeAttendance = async (req, res) => {
   }
 };
 
+// Get attendance trends for the last N days
+const getAttendanceTrends = async (req, res) => {
+  try {
+    const { days = 7 } = req.query;
+    const totalEmployees = await Employee.countDocuments();
+    
+    const trends = [];
+    const today = new Date();
+    
+    for (let i = parseInt(days) - 1; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(date.getDate() - i);
+      date.setHours(0, 0, 0, 0);
+      
+      const nextDay = new Date(date);
+      nextDay.setDate(nextDay.getDate() + 1);
+      
+      const presentCount = await Attendance.countDocuments({
+        date: { $gte: date, $lt: nextDay }
+      });
+      
+      const lateCount = await Attendance.countDocuments({
+        date: { $gte: date, $lt: nextDay },
+        status: 'late'
+      });
+      
+      const absentCount = totalEmployees - presentCount;
+      
+      trends.push({
+        date: date.toISOString().split('T')[0],
+        present: presentCount,
+        absent: absentCount,
+        late: lateCount
+      });
+    }
+    
+    res.json(trends);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   sendOtp,
   verifyOtp,
   getTodayAttendanceSummary,
   getAllAttendance,
   getEmployeeAttendance,
+  getAttendanceTrends,
   createUser,
   getUsers,
   getUsersById,

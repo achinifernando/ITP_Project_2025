@@ -123,8 +123,8 @@ app.use("/dispatch-reports", dispatchReportsRoute);
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/tasks", taskRoute);
-app.use("/api/task-reports", reportRoutes);
-app.use("/api/templates", checklistRoute);
+app.use("/api/reports", reportRoutes);
+app.use("/checklist-templates", checklistRoute);
 app.use("/api/attendance", attendanceRoutes);
 app.use("/api/leaves", leaveRoute);
 
